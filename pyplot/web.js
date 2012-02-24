@@ -269,6 +269,7 @@ $(function() {
 										result.empty();
 										$('<img>').attr('src', data.png).appendTo(result);
 										p=$('<p>').appendTo(result);
+										p.append('Download als ');
 										$('<a>').attr('href', data.pdf).text('PDF').appendTo(p);
 										p.append(', ')
 										$('<a>').attr('href', data.svg).text('SVG').appendTo(p);
