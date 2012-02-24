@@ -33,6 +33,10 @@ from progressbar import ProgressBar, Bar, Percentage, ETA
 import math
 from utils import set_attrs
 
+__version__ = '$Rev$'.replace('$', '').replace('Rev:', '').strip()
+__date__ = '$Date$'.replace('$', '').replace('Date:', '').strip()
+
+
 def filescaniter(filename, validator = None):
     'returns iterator yielding tuples with data from each line'
     datafile = open(filename)
@@ -664,7 +668,7 @@ if __name__ == '__main__':
                                '. The program tries to autodetect the file format and sorts the input files by time automatically. ' +
                                'Times are stored as double as seconds since reference time t0.')
 
-    parser.add_argument('--version', action = 'version', version = '%(prog)s $Rev$ $Date$')
+    parser.add_argument('--version', action = 'version', '%(prog)s {} from {}'.format(__version__, __date__))
     parser.add_argument('-o', '--out', metavar = 'file', default = 'out.h5', help = 'HDF5 output file (default: out.h5)')
     parser.add_argument('-f', '--force', action = 'store_true', help = 'overwrite existing file')
 #    parser.add_argument('-a', '--append', action = 'store_true', help = 'append new data to existing file')

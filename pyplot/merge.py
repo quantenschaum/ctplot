@@ -26,8 +26,8 @@ from utils import set_attrs, seconds2datetime
 import dateutil.parser as dp
 import sys, json, os
 
-__version__ = '$Rev$'.replace('$', '')
-__date__ = '$Date$'
+__version__ = '$Rev$'.replace('$', '').replace('Rev:', '').strip()
+__date__ = '$Date$'.replace('$', '').replace('Date:', '').strip()
 
 def _interpolate(t, w0, w1, idx):
     'interpolate w0 and w1 at t, using tw=w[idx]'
@@ -215,8 +215,7 @@ def main():
     parser = ap.ArgumentParser(description = 'merge two tables in a HDF5 file',
                                epilog = '')
 
-    parser.add_argument('--version', action = 'version', version = '%(prog)s {} from {}'.format(__version__, __date__),
-                        epilog = '')
+    parser.add_argument('--version', action = 'version', version = '%(prog)s {} from {}'.format(__version__, __date__))
     parser.add_argument('-m', '--merge', metavar = 'column', default = 'time', help = 'column to merge on (default: time)')
     parser.add_argument('-x', '--maxint', metavar = 'seconds', type = float, default = 4 * 3600, help = 'max. interval length in secondary table (default: 4h)')
     parser.add_argument('-o', '--out', metavar = 'file', help = 'HDF5 output file (default: write to file_1)')
