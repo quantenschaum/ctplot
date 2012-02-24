@@ -1,6 +1,6 @@
-#!/opt/python/bin/python
-# -*- coding: utf-8 -*-
 #!c:\Program Files (x86)\Python27\python.exe
+# -*- coding: utf-8 -*-
+#!/opt/python/bin/python
 #!/usr/bin/python
 #    pyplot - python based data plotting tools
 #    created for DESY Zeuthen
@@ -34,7 +34,7 @@ from functools import wraps
 h5dir = 'data'
 cachedir = 'cache'
 plotdir = 'plots'
-usecache = 1
+usecache = 0
 
 ###############################################################################
 

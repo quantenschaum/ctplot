@@ -21,7 +21,7 @@ $Id$
 
 /** ajax default settings */
 $.ajaxSetup({
-	url : 'web.py',
+	url : 'webplot.py',
 	dataType : 'json'
 });
 
@@ -59,8 +59,9 @@ function sourcesBox() {
 				file = k.substr(0, coi);
 				tab = k.substr(coi + 1, k.length);
 				opt = $('<option>').text(k.replace(/.*\/(.*)\.h5:(.*)/, '$1: '+v[0])).val(k);
-				if(isExpertmode() || !opt.text().startsWith('x'))
-					opt.appendTo(ddbox);
+				if(opt.text().startsWith('x'))
+					opt.addClass('expert')
+				opt.appendTo(ddbox);
 			});
 		}
 	});
@@ -124,10 +125,6 @@ function addhandlers(plot) {
 	plot.find(':input[name^="m"]').change(function() {
 		ms = '.t-' + $(this).val();
 		opt = $(this).parents('.plot').find('.opt');
-		if (!isExpertmode()) {
-			opt.filter('.expert').hide();
-			opt = opt.not('.expert');
-		}
 		opt.not(ms).hide('slow').find(':input').attr('disabled', true);
 		opt.filter(ms).show('slow').find(':input').attr('disabled', false);
 	}).change();
@@ -178,10 +175,6 @@ $(function() {
 						nav = $('nav:not(.fixed)');
 						if (nav.size() > 0)
 							navoffset = nav.offset();
-						// $('#debug').text(
-						// JSON.stringify(navoffset) + ', ' + scroll
-						// + ', '
-						// + JSON.stringify($('nav').offset()));
 						if (scroll > navoffset.top) {
 							$('nav').addClass('fixed').next().css('margin-top',
 									$('nav').height());
@@ -210,8 +203,7 @@ $(function() {
 		$('#content > div').css('min-height', $(this).height());
 	}).resize();
 
-	// add source dropdown box to plot template, filled with available hdf5 data
-	// files
+	// add source dropdown box to plot template, filled with available hdf5 data files
 	sourcesBox().prependTo('.plot');
 	// detach the plot template (to be added by pressing 'add plot' button)
 	plot = $('.plot').detach();
@@ -226,6 +218,17 @@ $(function() {
 	}).click(); // add the first plot now
 
 	inithelp();
+	
+	// add handler to expertmode checkbox
+	$(':input[name="expertmode"]').click(function(){
+		if ($(this).is(':checked')) {
+			$('.expert').removeClass('hidden');
+		} else {
+			$('.expert').addClass('hidden');
+		}	
+	});
+	$(':input[name="expertmode"]:checked').click();
+	$('.expert').addClass('hidden');
 
 	// hand submission of plot request and reception of the plot
 	$('form')
@@ -242,8 +245,11 @@ $(function() {
 										':input:enabled:not(:button):not(:reset):not(:submit)[name][value]')
 								.each(
 										function() {
-											settings[$(this).attr('name')] = $(
-													this).val();
+											if ($(this).is(':checkbox'))
+												v=$(this).is(':checked');
+											else
+												v=$(this).val();
+											settings[$(this).attr('name')] = v;
 
 										});
 
@@ -279,7 +285,7 @@ $(function() {
 										
 										// plot url
 										result.append('<br>Diesen Plot auf einer Webseite einbinden:<br>');
-										ploturl=$(location).attr('href').replace(/[#?].*/,'')+'web.py?'+query.replace(/a=plot/,'a=png');
+										ploturl=$(location).attr('href').replace(/[#?].*/,'')+'webplot.py?'+query.replace(/a=plot/,'a=png');
 										result.append($('<textarea id="ploturl">').text('<img src="'+ploturl+'" />'));
 										
 										
