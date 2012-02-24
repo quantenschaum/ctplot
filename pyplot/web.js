@@ -61,7 +61,6 @@ function sourcesBox() {
 				opt = $('<option>').text(k.replace(/.*\/(.*)\.h5:(.*)/, '$1: '+v[0])).val(k);
 				if(isExpertmode() || !opt.text().startsWith('x'))
 					opt.appendTo(ddbox);
-				$('#debug').append(k).append(v[0]).append('<br>');
 			});
 		}
 	});
@@ -270,10 +269,22 @@ $(function() {
 										$('<img>').attr('src', data.png).appendTo(result);
 										p=$('<p>').appendTo(result);
 										p.append('Download als ');
-										$('<a>').attr('href', data.pdf).text('PDF').appendTo(p);
+										$('<a>').attr('href', data.pdf).attr('target','_blank').text('PDF').appendTo(p);
 										p.append(', ')
-										$('<a>').attr('href', data.svg).text('SVG').appendTo(p);
-										result.append($('<p>').text('plot settings: '+JSON.stringify(settings)));
+										$('<a>').attr('href', data.svg).attr('target','_blank').text('SVG').appendTo(p);
+										
+										// plot settings
+										result.append('<br>Einstellungen dieses Plots:<br>');
+										result.append($('<textarea id="plotsettings">').text(JSON.stringify(settings)));
+										
+										// plot url
+										result.append('<br>Diesen Plot auf einer Webseite einbinden:<br>');
+										ploturl=$(location).attr('href').replace(/[#?].*/,'')+'web.py?'+query.replace(/a=plot/,'a=png');
+										result.append($('<textarea id="ploturl">').text('<img src="'+ploturl+'" />'));
+										
+										
+										// scroll to plot section
+										$('nav a[href="#output"]').click();
 									},
 									error : function(xhr, text, error) {
 										$('#result').empty();
@@ -286,6 +297,8 @@ $(function() {
 														+ '"</p>'
 														+ '<p style="color: red;">responseText:</p>'
 														+ xhr['responseText']);
+										// scroll to plot section
+										$('nav a[href="#output"]').click();
 									}
 								});
 

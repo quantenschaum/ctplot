@@ -140,7 +140,7 @@ legend {
 	font-weight: bold;
 }
 
-input[type="text"],select {
+input[type="text"],select,textarea {
 	font-family: "Droid Sans Mono", monospace;
 	font-size: 90%;
 	border: 1px solid #aaa;
@@ -154,6 +154,12 @@ input[type="text"],select {
 	-webkit-box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	box-sizing: border-box;
+}
+
+textarea {
+	height: 6em;
+	width: 40em;
+	padding: 0;
 }
 
 select {

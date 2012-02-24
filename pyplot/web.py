@@ -1,6 +1,6 @@
-#!c:\Program Files (x86)\Python27\python.exe
-# -*- coding: utf-8 -*-
 #!/opt/python/bin/python
+# -*- coding: utf-8 -*-
+#!c:\Program Files (x86)\Python27\python.exe
 #!/usr/bin/python
 #    pyplot - python based data plotting tools
 #    created for DESY Zeuthen
@@ -21,11 +21,6 @@
 #
 #    $Id$
 #
-'''
-Created on 27.10.2011
-@author: al
-webinterface to plotting tools
-'''
 import matplotlib
 matplotlib.use('Agg')
 
@@ -39,7 +34,7 @@ from functools import wraps
 h5dir = 'data'
 cachedir = 'cache'
 plotdir = 'plots'
-usecache = False
+usecache = 1
 
 ###############################################################################
 
@@ -88,26 +83,43 @@ def make_plot(settings):
     return json.dumps(p.save(name))
 
 
+contenttypes = {'png': 'image/png'  , 'svg': 'image/svg+xml'  , 'pdf':'application/pdf'   }
 
 
 if __name__ == '__main__':
-    print "Content-Type: text/plain;charset=utf-8"
-    print
 
 
     fields = cgi.FieldStorage()
     action = fields.getfirst('a')
 
-    if action == 'plot':
+    if action in ['plot', 'png', 'svg', 'pdf']:
         settings = {}
 
         for k in fields.keys():
-            print >> sys.stderr, k, '=' , fields.getfirst(k)
-            settings[k] = fields.getfirst(k)
+            if k == 'a': continue
+            v = fields.getfirst(k).strip()
+            print >> sys.stderr, k, '=' , v
+            settings[k] = v
 
-        print make_plot(settings)
+        imgs = make_plot(settings)
+
+        if action == 'plot':
+            print "Content-Type: text/plain;charset=utf-8"
+            print
+            print imgs
+
+        elif action in ['png', 'svg', 'pdf']:
+            ct = action
+            imgfile = json.loads(imgs)[ct]
+            print 'Content-Type: ' + contenttypes[ct]
+            print
+            with open(imgfile) as img:
+                for l in img:
+                    sys.stdout.write(l)
 
     elif action == 'list':
+        print "Content-Type: text/plain;charset=utf-8"
+        print
         print tables()
 
     else:

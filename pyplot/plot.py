@@ -44,13 +44,14 @@ def available_tables(d = os.path.dirname(__file__) + '/data'):
     tabs = OrderedDict()
 
     for f in files:
-        h5 = tables.openFile(f, 'r')
-
-        for n in h5.walkNodes(classname = 'Table'):
-            tab = f + ':' + n._v_pathname
-            tabs[tab] = TableSpecs(n._v_title, n.colnames, json.loads(n.attrs.units), int(n.nrows))
-
-        h5.close()
+        try:
+            h5 = tables.openFile(f, 'r')
+            for n in h5.walkNodes(classname = 'Table'):
+                tab = f + ':' + n._v_pathname
+                tabs[tab] = TableSpecs(n._v_title, n.colnames, json.loads(n.attrs.units), int(n.nrows))
+            h5.close()
+        except:
+            pass
 
     return tabs
 
@@ -279,7 +280,7 @@ class Plot():
             # compile the expressions
             exprs = dict([(compile_function(e), d) for e, d in exprs.iteritems()])
 
-            def average(data):
+            def average():
                 assert 0 < shift <= 1
                 av = dict.fromkeys(table.colnames, 0)
                 it = table.colnames.index('time') # index of time column
@@ -288,7 +289,7 @@ class Plot():
                 wd = [] # window data
                 if condition:
                     cc = compile_function(condition)
-                for row in data:
+                for row in table.iterrows():
                     if not condition or cc(row):
                         if row[it] < tb: # add row if in window
                             wd.append(row[:])
@@ -321,11 +322,10 @@ class Plot():
                         yield row
 
 
-            # iterator over table rows, apply filter if present
-            tableiter = table.iterrows()
-
             if window:
-                tableiter = average(tableiter)
+                tableiter = average()
+            else:
+                tableiter = table.iterrows()
 
             if s in filters:
                 tableiter = prefilter(tableiter, filters[s])
@@ -433,9 +433,9 @@ class Plot():
 
 
     def alabel(self, a):
-        l = getattr(self, a + 'l')
+        l = unicode(getattr(self, a + 'l'))
         if l: return l
-        l = ''
+        l = u''
         for x, u in zip(getattr(self, a), getattr(self, a + 'unit')):
             if x and x not in l: l += u', {} [{}]'.format(x, u)
         return l[2:]
