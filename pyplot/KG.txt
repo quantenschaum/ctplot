@@ -1,0 +1,139 @@
+KG  STAT    ST  Stationsnummer  CODE    STATIONSLISTE       9(5)    3   00001-99999 nan  
+KG  JA  JA  Jahr                9(4)    8   1800-2100     nan
+KG  MO  MO  Monat               9(2)    12  1-12      nan
+KG  TA  TA  Tag                 9(2)    14  1-31      nan
+KG  NULL   NULL     numerisches Leerfeld (0)                9(4)    16  0 nan    
+KG  P0  P1  Luftdruck in Stationshoehe  0.1 hpa     06:00 UTC   9(5)    20  0-11000 -9999
+KG  Q   Q   Qualitaetsbyte  CODE    TAB_Q       9(1)    25  0-8 9
+KG  P0  P2  Luftdruck in Stationshoehe  0.1 hpa     12:00 UTC   9(5)    26  0-11000 -9999
+KG  Q   Q   Qualitaetsbyte  CODE    TAB_Q       9(1)    31  0-8 9
+KG  P0  P3  Luftdruck in Stationshoehe  0.1 hpa     18:00 UTC   9(5)    32  0-11000 -9999
+KG  Q   Q   Qualitaetsbyte  CODE    TAB_Q       9(1)    37  0-8 9
+KG  PM  PM  Tagesmittel des Luftdruckes in Stationshoehe    0.1 hpa     arithm.Mittel aus 4 oder 8 Terminwerten     9(5)    38  0-11000 -9999
+KG  Q   Q   Qualitaetsbyte  CODE    TAB_Q       9(1)    43  0-8 9
+KG  TXK TXK Tagesmaximum der Temperatur der Luft in 2m Hoehe    0.1 °C      18:00 V. - 18:00 UTC    9(4)    44  -1000-1000  -999
+KG  Q   Q   Qualitaetsbyte  CODE    TAB_Q       9(1)    48  0-8 9
+KG  TNK TNK Tagesminimum der Temperatur der Luft in 2m Hoehe    0.1 °C      18:00 V. - 18:00 UTC    9(4)    49  -1000-1000  -999
+KG  Q   Q   Qualitaetsbyte  CODE    TAB_Q       9(1)    53  0-8 9
+KG  TRK TRK Tagesschwankung der Temperatur der Luft in 2m Hoehe     0.1 °C      TXK-TNK     9(3)    54  500 -99
+KG  Q   Q   Qualitaetsbyte  CODE    TAB_Q       9(1)    57  0-8 9
+KG  TGK TGK Tagesminimum der Temperatur der Luft am Erdboden    0.1 °C      18:00 V. - 18:00 UTC    9(4)    58  -1000-1000  -999
+KG  STG S   Schnee ueber dem TG-Thermometer     CODE    S: ja, Blank: nein  00:00 - 24:00 UTC   X(1)    62  Blank,S 9
+KG  Q   Q   Qualitaetsbyte  CODE    TAB_Q       9(1)    63  0-8 9
+KG  TT  T1  Temperatur der Luft in 2m Hoehe     0.1 °C      06:00 UTC   9(4)    64  -1000-1000  -999
+KG  Q   Q   Qualitaetsbyte  CODE    TAB_Q       9(1)    68  0-8 9
+KG  TT  T2  Temperatur der Luft in 2m Hoehe     0.1 °C      12:00 UTC   9(4)    69  -1000-1000  -999
+KG  Q   Q   Qualitaetsbyte  CODE    TAB_Q       9(1)    73  0-8 9
+KG  TT  T3  Temperatur der Luft in 2m Hoehe     0.1 °C      18:00 UTC   9(4)    74  -1000-1000  -999
+KG  Q   Q   Qualitaetsbyte  CODE    TAB_Q       9(1)    78  0-8 9
+KG  TMK TMK Tagesmittel der Temperatur der Luft in 2m Hoehe     0.1 °C      arithm.Mittel aus 4 oder 8 Terminwerten     9(4)    79  -1000-1000  -999
+KG  Q   Q   Qualitaetsbyte  CODE    TAB_Q       9(1)    83  0-8 9
+KG  TF  TF1 Feuchttemperatur    0.1 °C      06:00 UTC   9(4)    84  -1000-1000  -999
+KG  ETF ETF1    Eisansatz bei der Messung der Feuchttemperatur  CODE    E:ja, sonst blank   06:00 UTC   x(1)    88  Blank,E 9
+KG  Q   Q   Qualitaetsbyte  CODE    TAB_Q       9(1)    89  0-8 9
+KG  TF  TF2 Feuchttemperatur    0.1 °C      12:00 UTC   9(4)    90  -1000-1000  -999
+KG  ETF ETF2    Eisansatz bei der Messung der Feuchttemperatur  CODE    E:ja, sonst blank   12:00 UTC   x(1)    94  Blank,E 9
+KG  Q   Q   Qualitaetsbyte  CODE    TAB_Q       9(1)    95  0-8 9
+KG  TF  TF3 Feuchttemperatur    0.1 °C      18:00 UTC   9(4)    96  -1000-1000  -999
+KG  ETF ETF3    Eisansatz bei der Messung der Feuchttemperatur  CODE    E:ja, sonst blank   18:00 UTC   x(1)    100 Blank,E 9
+KG  Q   Q   Qualitaetsbyte  CODE    TAB_Q       9(1)    101 0-8 9
+KG  VP  VP1 Dampfdruck  0.1 hpa     06:00 UTC   9(3)    102 0-999   -99
+KG  Q   Q   Qualitaetsbyte  CODE    TAB_Q       9(1)    105 0-8 9
+KG  VP  VP2 Dampfdruck  0.1 hpa     12:00 UTC   9(3)    106 0-999   -99
+KG  Q   Q   Qualitaetsbyte  CODE    TAB_Q       9(1)    109 0-8 9
+KG  VP  VP3 Dampfdruck  0.1 hpa     18:00 UTC   9(3)    110 0-999   -99
+KG  Q   Q   Qualitaetsbyte  CODE    TAB_Q       9(1)    113 0-8 9
+KG  VPM VPM Tagesmittel des Dampfdrucks     0.1 hpa     arithm.Mittel aus 4 oder 8 Terminwerten     9(3)    114 0-999   -99
+KG  Q   Q   Qualitaetsbyte  CODE    TAB_Q       9(1)    117 0-8 9
+KG  UP  UP1 relative Feuchte (aus Feuchttemperatur)     %       06:00 UTC   9(3)    118 0-100   -99
+KG  Q   Q   Qualitaetsbyte  CODE    TAB_Q       9(1)    121 0-8 9
+KG  UP  UP2 relative Feuchte (aus Feuchttemperatur)     %       12:00 UTC   9(3)    122 0-100   -99
+KG  Q   Q   Qualitaetsbyte  CODE    TAB_Q       9(1)    125 0-8 9
+KG  UP  UP3 relative Feuchte (aus Feuchttemperatur)     %       18:00 UTC   9(3)    126 0-100   -99
+KG  Q   Q   Qualitaetsbyte  CODE    TAB_Q       9(1)    129 0-8 9
+KG  UPM UPM Tagesmittel der relativen Feuchte   %       arithm.Mittel aus 4 oder 8 Terminwerten     9(3)    130 0-110   -99
+KG  Q   Q   Qualitaetsbyte  CODE    TAB_Q       9(1)    133 0-8 9
+KG  UR  UR1 relative Feuchte (aus Registrierung)    %       06:00 UTC   9(3)    134 0-110   -99
+KG  Q   Q   Qualitaetsbyte  CODE    TAB_Q       9(1)    137 0-8 9
+KG  UR  UR2 relative Feuchte (aus Registrierung)    %       12:00 UTC   9(3)    138 0-110   -99
+KG  Q   Q   Qualitaetsbyte  CODE    TAB_Q       9(1)    141 0-8 9
+KG  UR  UR3 relative Feuchte (aus Registrierung)    %       18:00 UTC   9(3)    142 0-110   -99
+KG  Q   Q   Qualitaetsbyte  CODE    TAB_Q       9(1)    145 0-8 9
+KG  DK  D1  Windrichtung (in 32-teiliger Windrose)  CODE        06:00 UTC   9(2)    146 0-32    -9
+KG  FK  FK1 Windstaerke     Bft     06:00 UTC   9(2)    148 0-12    -9
+KG  Q   Q   Qualitaetsbyte  CODE    TAB_Q       9(1)    150 0-8 9
+KG  DK  D2  Windrichtung (in 32-teiliger Windrose)  CODE        12:00 UTC   9(2)    151 0-32    -9
+KG  FK  FK2 Windstaerke     Bft     12:00 UTC   9(2)    153 0-12    -9
+KG  Q   Q   Qualitaetsbyte  CODE    TAB_Q       9(1)    155 0-8 9
+KG  DK  D3  Windrichtung (in 32-teiliger Windrose)  CODE        18:00 UTC   9(2)    156 0-32    -9
+KG  FK  FK3 Windstaerke     Bft     18:00 UTC   9(2)    158 0-12    -9
+KG  Q   Q   Qualitaetsbyte  CODE    TAB_Q       9(1)    160 0-8 9
+KG  FMK FMK Tagesmittel der Windstaerke     0.1 Bft     arithm.Mittel aus 4 oder 8 Terminwerten     9(3)    161 0-12    -99
+KG  Q   Q   Qualitaetsbyte  CODE    TAB_Q       9(1)    164 0-8 9
+KG  N   N1  Bedeckungsgrad mit allen Wolken     Achtel      06:00 UTC   9(2)    165 0-8 -9
+KG  Q   Q   Qualitaetsbyte  CODE    TAB_Q       9(1)    167 0-8 9
+KG  CD  C1  Wolkendichte    CODE    TAB_CD  06:00 UTC   9(2)    168 0-9 -9
+KG  Q   Q   Qualitaetsbyte  CODE    TAB_Q       9(1)    170 0-8 9
+KG  WK  W1  Wettererscheinungen in Klimameldung     CODE    TAB_WK  06:00 UTC   9(2)    171 0-99    -9
+KG  Q   Q   Qualitaetsbyte  CODE    TAB_Q       9(1)    173 0-8 9
+KG  N   N2  Bedeckungsgrad mit allen Wolken     Achtel      12:00 UTC   9(2)    174 0-8 -9
+KG  Q   Q   Qualitaetsbyte  CODE    TAB_Q       9(1)    176 0-8 9
+KG  CD  C2  Wolkendichte    CODE    TAB_CD  12:00 UTC   9(2)    177 0-9 -9
+KG  Q   Q   Qualitaetsbyte  CODE    TAB_Q       9(1)    179 0-8 9
+KG  WK  W2  Wettererscheinungen in Klimameldung     CODE    TAB_WK  12:00 UTC   9(2)    180 0-99    -9
+KG  Q   Q   Qualitaetsbyte  CODE    TAB_Q       9(1)    182 0-8 9
+KG  N   N3  Bedeckungsgrad mit allen Wolken     Achtel      18:00 UTC   9(2)    183 0-8 -9
+KG  Q   Q   Qualitaetsbyte  CODE    TAB_Q       9(1)    185 0-8 9
+KG  CD  C3  Wolkendichte    CODE    TAB_CD  18:00 UTC   9(2)    186 0-9 -9
+KG  Q   Q   Qualitaetsbyte  CODE    TAB_Q       9(1)    188 0-8 9
+KG  WK  W3  Wettererscheinungen in Klimameldung     CODE    TAB_WK  18:00 UTC   9(2)    189 0-99    -9
+KG  Q   Q   Qualitaetsbyte  CODE    TAB_Q       9(1)    191 0-8 9
+KG  NM  NM  Tagesmittel des Bedeckungsgrades    0.1 Achtel      arithm.Mittel aus 4 oder 8 Terminwerten     9(3)    192 0-100   -99
+KG  Q   Q   Qualitaetsbyte  CODE    TAB_Q       9(1)    195 0-8 9
+KG  SDK SDK Tagessumme der Sonnenscheindauer    0.1 Std     00:00 - 24:00 UTC   9(3)    196 0-240   -99
+KG  SDJ SDJ Kennung, ob Sonne geschienen hat    CODE        00:00 - 24:00 UTC   9(1)    199 0,1 9
+KG  Q   Q   Qualitaetsbyte  CODE    TAB_Q       9(1)    200 0-8 9
+KG  VK  V1  Sichtweite  CODE    TAB_VK  06:00 UTC   9(2)    201 0-9 -9
+KG  Q   Q   Qualitaetsbyte  CODE    TAB_Q       9(1)    203 0-8 9
+KG  VK  V2  Sichtweite  CODE    TAB_VK  12:00 UTC   9(2)    204 0-9 -9
+KG  Q   Q   Qualitaetsbyte  CODE    TAB_Q       9(1)    206 0-8 9
+KG  VK  V3  Sichtweite  CODE    TAB_VK  18:00 UTC   9(2)    207 0-9 -9
+KG  Q   Q   Qualitaetsbyte  CODE    TAB_Q       9(1)    209 0-8 9
+KG  E   E1  Erdbodenzustand     CODE    TAB_E   06:00 UTC   9(2)    210 0-99    -9
+KG  Q   Q   Qualitaetsbyte  CODE    TAB_Q       9(1)    212 0-8 9
+KG  E   E2  Erdbodenzustand     CODE    TAB_EK  12:00 UTC   9(2)    213 0-99    -9
+KG  Q   Q   Qualitaetsbyte  CODE    TAB_Q       9(1)    215 0-8 9
+KG  E   E3  Erdbodenzustand     CODE    TAB_EK  18:00 UTC   9(2)    216 0-99    -9
+KG  Q   Q   Qualitaetsbyte  CODE    TAB_Q       9(1)    218 0-8 9
+KG  VAK VAK Kennung fuer Art des gefallenen Niederschlags   CODE    TAB_VAK 00:00 - 24:00 UTC   9(2)    219 0-99    -9
+KG  Q   Q   Qualitaetsbyte  CODE    TAB_Q       9(1)    221 0-8 9
+KG  VBK VBK Kennung fuer Art des abgesetzten Niederschlags  CODE    TAB_VBK 00:00 - 24:00 UTC   9(2)    222 0-99    -9
+KG  Q   Q   Qualitaetsbyte  CODE    TAB_Q       9(1)    224 0-8 9
+KG  VCK VCK Kennung fuer besondere Wettererscheinungen  CODE    TAB_VCK 00:00 - 24:00 UTC   9(2)    225 0-99    -9
+KG  Q   Q   Qualitaetsbyte  CODE    TAB_Q       9(1)    227 0-8 9
+KG  RK  R1  Niederschlagshoehe zwischen den Klimaterminen   0.1 mm      18:00 V. - 06:00 UTC    9(4)    228 0-5000  -999
+KG  RKF RF1 Kennung fuer die Art des Niederschlags  CODE    TAB_RF  18:00 V. - 06:00 UTC    9(1)    232 0,1,6,7,8   9
+KG  Q   Q   Qualitaetsbyte  CODE    TAB_Q       9(1)    233 0-8 9
+KG  RK  R2  Niederschlagshoehe zwischen den Klimaterminen   0.1 mm      06:00 - 12:00 UTC   9(4)    234 0-5000  -999
+KG  RKF RF2 Kennung fuer die Art des Niederschlags  CODE    TAB_RF  06:00 - 12:00 UTC   9(1)    238 0,1,6,7,8   9
+KG  Q   Q   Qualitaetsbyte  CODE    TAB_Q       9(1)    239 0-8 9
+KG  RK  R3  Niederschlagshoehe zwischen den Klimaterminen   0.1 mm      12:00 - 18:00 UTC   9(4)    240 0-5000  -999
+KG  RKF RF3 Kennung fuer die Art des Niederschlags  CODE    TAB_RF  12:00 - 18:00 UTC   9(1)    244 0,1,6,7,8   9
+KG  Q   Q   Qualitaetsbyte  CODE    TAB_Q       9(1)    245 0-8 9
+KG  RSK RSK Tagessumme des Niederschlags (24Std.)   0.1 mm      06:00 -06:00 FT UTC     9(4)    246 0-5000  -999
+KG  RSKF    RSKF    Kennung fuer die Art des Niederschlags (24Std.)     CODE    TAB_RF  06:00 -06:00 FT UTC     9(1)    250 0,1,6,7,8   9
+KG  Q   Q   Qualitaetsbyte  CODE    TAB_Q       9(1)    251 0-8 9
+KG  SHK SHK Schneehoehe     cm      06:00 UTC   9(3)    252 0-999   -99
+KG  SA  SA  Art der Schneedecke     CODE    TAB_SA  06:00 UTC   X(1)    255 0,1,R,D,F   9
+KG  Q   Q   Qualitaetsbyte  CODE    TAB_Q   00:00 - 24:00 UTC   9(1)    256 0-8 9
+KG  NSH NSH Neuschneehoehe  cm      12:00 - 18:00 UTC   9(3)    257 0-999   -99
+KG  NSHJ    NSHJ    Kennung ob Neuschnee gefallen ist   CODE        12:00 - 18:00 UTC   9(1)    260 1:ja,0:nein    9
+KG  Q   Q   Qualitaetsbyte  CODE    TAB_Q       9(1)    261 0-8 9
+KG  FXK FXK Tagesmaximum der Windgeschwindigkeit    0.1 m/s     21:00 V. -21:00 UTC     9(3)    262 0-999   -99
+KG  Q   Q   Qualitaetsbyte  CODE    TAB_Q       9(1)    265 0-8 9
+KG  ASH ASH Hoehe des ausgestochenen Schnees    cm      06:00 UTC   9(4)    266 0-9999  -999
+KG  Q   Q   Qualitaetsbyte  CODE    TAB_Q       9(1)    270 0-8 9
+KG  WAAS    WAAS    Wasseraequivalent des ausgestochenen Schnees (ASH)  0.1 mm      06:00 UTC   9(5)    271 0-9999  -9999
+KG  Q   Q   Qualitaetsbyte  CODE    TAB_Q       9(1)    276 0-8 9
+KG  WASH    WASH    Wasseraequivalent der Gesamtschneedecke (SH)    0.1 mm      06:00 UTC   9(5)    277 0-99999 -9999
+KG  Q   Q   Qualitaetsbyte  CODE    TAB_Q       9(1)    282 0-8 9
