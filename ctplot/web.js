@@ -236,6 +236,12 @@ $(function() {
 	$('form')
 			.submit(
 					function() {
+						try { // abort previous request
+							xhr.abort();
+						} catch (e) {
+							// if there was no previous request, ignore errors
+						}
+
 						// the form (all input fields) as url query string
 						query = $('form').serialize();
 
@@ -267,16 +273,8 @@ $(function() {
 						// scroll to plot section
 						$('nav a[href="#output"]').click();
 						
-						$('#error').empty();
-						
-						// abort previous request
-						try {
-							xhr.abort();
-						} catch (e) {
-							// if there was no previous request, ignore errors
-						}
-						
 						// perform ajax request to get the plot (created on server)
+						$('#error').empty();
 						xhr = $.ajax({
 									data : query,
 									success : function(data) {

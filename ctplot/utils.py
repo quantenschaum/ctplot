@@ -181,7 +181,7 @@ def getStatCpu():
 
 def getCpuUsage():
     c1 = getStatCpu()
-    time.sleep(0.5)
+    time.sleep(1)
     c2 = getStatCpu()
     t = sum(c2) - sum(c1)
     d = map(lambda x: float(x[1] - x[0]) / t, zip(c1, c2))
