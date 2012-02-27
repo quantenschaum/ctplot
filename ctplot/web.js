@@ -161,6 +161,8 @@ function inithelp() {
 	});
 }
 
+var xhr;
+
 /** on page load... */
 $(function() {
 	$.localScroll({
@@ -265,10 +267,17 @@ $(function() {
 						// scroll to plot section
 						$('nav a[href="#output"]').click();
 						
-						// perform ajax request to get the plot (created on
-						// server)
 						$('#error').empty();
-						$.ajax({
+						
+						// abort previous request
+						try {
+							xhr.abort();
+						} catch (e) {
+							// if there was no previous request, ignore errors
+						}
+						
+						// perform ajax request to get the plot (created on server)
+						xhr = $.ajax({
 									data : query,
 									success : function(data) {
 										result.empty();

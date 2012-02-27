@@ -19,16 +19,19 @@
 #
 #    $Id$
 #
-import os, sys, re, json, tables, ticks, time
+import os, sys, re, json, tables, ticks, time, logging
 from collections import OrderedDict, namedtuple
 import numpy as np
 import numpy.ma as ma
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-from utils import get_args_from, isseq, set_defaults, number_mathformat, hashargs
+from utils import get_args_from, isseq, set_defaults, number_mathformat, hashargs, \
+    noop
 from itertools import product
 from safeeval import safeeval
 from config import *
+
+log = logging.getLogger('plot')
 
 # override eval by safe version
 eval = safeeval()
@@ -132,7 +135,7 @@ def adjust_limits(xy, data, limits = None, marl = 0.05, maru = 0.05):
 
 class Plot(object):
     def __init__(self, **kwargs):
-        print >> sys.stderr, json.dumps(kwargs)
+        log.debug(json.dumps(kwargs))
 
         # configure plot according too kwargs
         # all options are strings
@@ -179,9 +182,6 @@ class Plot(object):
 
         self.lines = 10 * [None]
 
-#        for k in sorted(self.__dict__.keys()):
-#            print >> sys.stderr, '*', k, self.__dict__[k]
-
         self.progress = 0 # reaching from 0 to 1
 
 
@@ -196,7 +196,7 @@ class Plot(object):
 
 
     def _get(self, var, default = None, dtype = lambda x:x):
-        val = self.__dict__.get(var)
+        val = getattr(self, var)
         if val is None:
             return default
         else:
@@ -224,12 +224,11 @@ class Plot(object):
 
                 if '(None)' in joined_cuts[s]: del joined_cuts[s]
 
-#        print >> sys.stderr, expr_data
 
         # loop over tables and fill data lists in expr_data
         units = {}
         self._get_data(expr_data, joined_cuts, units)
-        print >> sys.stderr, units
+        log.debug(units)
 
 
         # assing data arrays to x/y/z/c-data fields
@@ -237,23 +236,23 @@ class Plot(object):
             setattr(self, v + 'data', [(expr_data[self.sr[i]][x] if x and self.sr[i] else None) for i, x in enumerate(getattr(self, v))])
             setattr(self, v + 'unit', [(units[self.sr[i]][x] if x and self.sr[i] else None) for i, x in enumerate(getattr(self, v))])
 
-        print >> sys.stderr, 'source', self.s
-        print >> sys.stderr, 'srcavg', self.sr
+        log.debug('source={}'.format(self.s))
+        log.debug('srcavg={}'.format(self.sr))
         for v in 'xyzc':
-            print >> sys.stderr, ' ' + v + 'data', [len(x) if x is not None else None for x in getattr(self, v + 'data')]
-            print >> sys.stderr, ' ' + v + 'unit', [x for x in getattr(self, v + 'unit')]
+            log.debug(' {}data {}'.format(x, [len(x) if x is not None else None for x in getattr(self, v + 'data')]))
+            log.debug(' {}unit {}'.format(x, [x for x in getattr(self, v + 'unit')]))
 
 
 
 
 
     def _get_data(self, expr_data, filters, units = {}):
-        # compile and evaluate expressions for each source
-        progr_factor = 1.0 / len(expr_data)
+        # evaluate expressions for each source
         for s, exprs in expr_data.iteritems():
-            print >> sys.stderr, 'processing source', s
-            print >> sys.stderr, '      expressions', exprs.keys()
-            print >> sys.stderr, '           filter', filters[s] if s in filters else None
+            log.debug('processing source {}'.format(s))
+            log.debug('      expressions {}'.format(exprs.keys()))
+            log.debug('           filter {}'.format(filters[s] if s in filters else None))
+            progr_prev = self.progress
 
             # source s has form 'filename:/path/to/table'
             # open HDF5 table
@@ -264,7 +263,8 @@ class Plot(object):
                 window = float(eval(ss[2])) if ss[2] != 'None' else None
                 shift = float(ss[3]) if ss[3] != 'None' else 1
                 condition = ss[4] if ss[4] != 'None' else None
-    #            print 'wsc', window, shift, condition
+
+                progr_factor = 1.0 / table.nrows / len(expr_data)
 
                 table_units = tuple(json.loads(table.attrs.units))
 
@@ -277,10 +277,6 @@ class Plot(object):
                 units[s] = dict([(e, unit(e)) for e in exprs.keys()])
 
 
-
-                # restricted eval, allowing only safe operations
-
-
                 def compile_function(x):
                     fields = set(table.colnames)
                     fields.add('rate')
@@ -288,8 +284,8 @@ class Plot(object):
                     for v in fields: # map T_a --> row['T_a'], etc.
                         x = re.sub('(?<!\\w)' + re.escape(v) + '(?!\\w)',
                                     'row["' + v + '"]', x)
-    #                print >> sys.stderr, 'expression: ', x
                     return eval('lambda row: ' + x)
+
 
                 # compile the expressions
                 exprs = dict([(compile_function(e), d) for e, d in exprs.iteritems()])
@@ -302,13 +298,10 @@ class Plot(object):
                         if not usecache: raise
                         with tables.openFile(cachefile) as cacheh5:
                             cachetable = cacheh5.getNode('/data')
-                            print >> sys.stderr, 'average from ', cachefile
-                            nrows = cachetable.nrows
-                            progr_prev = self.progress
-                            progr = 0
+                            log.debug('average from {}'.format(cachefile))
+                            progr_factor = 1.0 / cachetable.nrows / len(expr_data)
                             for row in cachetable.iterrows():
-                                progr = float(row.nrow) / nrows
-                                self.progress = progr_prev + progr * progr_factor
+                                self.progress = progr_prev + row.nrow * progr_factor
                                 yield row
 
                     except: # if data not available/in use/corrupt...
@@ -332,11 +325,8 @@ class Plot(object):
                             coldesc['count'] = tables.IntCol(pos = len(coldesc))
                             cachetable = cacheh5.createTable('/', 'data', coldesc, 'cached data')
                             cachetable.attrs.source = s
-                            nrows = table.nrows
-                            progr_prev = self.progress
-                            progr = 0
                             cacherow = cachetable.row
-                            print >> sys.stderr, 'caching average', cachefile
+                            log.debug('caching average {}'.format(cachefile))
 
                             assert 0 < shift <= 1
                             it = table.colnames.index('time') # index of time column
@@ -345,6 +335,8 @@ class Plot(object):
                             wd = [] # window data
                             if condition:
                                 cc = compile_function(condition)
+
+                            progr_factor = 1.0 / table.nrows / len(expr_data)
 
                             for row in table.iterrows():
                                 if not condition or cc(row):
@@ -361,8 +353,7 @@ class Plot(object):
                                             cacherow['time'] = (ta + tb) * 0.5
                                             cacherow['count'] = n
                                             cacherow['rate'] = n / window
-                                            progr = float(row.nrow) / nrows
-                                            self.progress = progr_prev + progr * progr_factor
+                                            self.progress = progr_prev + row.nrow * progr_factor
                                             yield cacherow
                                             cacherow.append()
 
@@ -371,8 +362,12 @@ class Plot(object):
                                         if row[it] >= tb:
                                             ta = row[it] # shift window
                                             tb = ta + window
+                                        if shift == 1:
+                                            wd = []
+                                        else: # remove data left outside window
+                                            while wd[0][it] < ta:
+                                                del wd[0]
                                         wd.append(row[:])
-                                        wd = filter(lambda x:ta <= x[it] < tb, wd) # remove data left outside window
 
 
 
@@ -383,8 +378,12 @@ class Plot(object):
                             yield row
 
 
+                def updateProgress(row, fac):
+                    self.progress = progr_prev + row.nrow * fac
+
                 if window:
                     tableiter = average()
+                    updateProgress = noop # progress update is done inside average()
                 else:
                     tableiter = table.iterrows()
 
@@ -394,6 +393,7 @@ class Plot(object):
                 for row in tableiter:
                     for expr, data in exprs.iteritems():
                         data.append(expr(row))
+                    if row.nrow % 10000 == 0: updateProgress(row, progr_factor)
 
                 # convert data lists to numpy arrays
                 d = expr_data[s]
@@ -412,9 +412,9 @@ class Plot(object):
         plt.rc('font', **{'family':'sans-serif', 'sans-serif':['Dejavu Sans'], 'size':self.f})
         plt.rc('axes', grid = True)
         plt.rc('lines', markeredgewidth = 0)
+        w = self._get('w', 10, float)
+        plt.gcf().set_size_inches((w, w / np.sqrt(2)), forward = True);
         ticks.set_extended_locator(1)
-        w = self.w = self._get(self.w, 10, float)
-        plt.gcf().set_size_inches((w, w / np.sqrt(2)));
         f = 0.09
         plt.gca().set_position([f, f, 1 - 2 * f, 1 - 2 * f])
 
@@ -450,6 +450,8 @@ class Plot(object):
                 names.append(self.llabel(i))
         if len(lines) > 0 and 'map' not in self.m :
             plt.legend(tuple(lines), tuple(names), loc = self.l)
+
+        plt.tight_layout(pad = 0.5, h_pad = 0, w_pad = 0)
 
 
 
@@ -524,9 +526,6 @@ class Plot(object):
                     raise RuntimeError('unknow mode ' + m)
         self._configure_post()
 
-        print >> sys.stderr, self.n
-        print >> sys.stderr, self.lines
-
 
     def show(self):
         if not any(self.lines):
@@ -550,7 +549,7 @@ class Plot(object):
 
 
     def _xy(self, i):
-        print >> sys.stderr, 'xy plot of', i, [getattr(self, v)[i] for v in 'sxyzc']
+        log.debug('xy plot of {}'.format([getattr(self, v)[i] for v in 'sxyzc']))
         kwargs = self.opts(i)
         x, y, z = self.data(i)
 
@@ -575,7 +574,7 @@ class Plot(object):
 
     def _hist1d(self, i):
         self.plotted_lines = []
-        print >> sys.stderr, '1D histogram of', i, [getattr(self, v)[i] for v in 'sxyzc']
+        log.debug('1D histogram of {}'.format([getattr(self, v)[i] for v in 'sxyzc']))
         kwargs = self.opts(i)
         x, y, z = self.data(i)
 
@@ -630,7 +629,7 @@ class Plot(object):
 
 
     def _hist2d(self, i):
-        print >> sys.stderr, '2D histogram of', i, [getattr(self, v)[i] for v in 'sxyzc']
+        log.debug('2D histogram of {}'.format([getattr(self, v)[i] for v in 'sxyzc']))
         kwargs = self.opts(i)
         x, y, z = self.data(i)
         o = get_args_from(kwargs, style = 'color', density = False, log = False, cbfrac = 0.04, cblabel = 'bincontent', levels = 10)
@@ -700,7 +699,7 @@ class Plot(object):
 
 
     def _profile(self, i):
-        print >> sys.stderr, 'profile of', i, [getattr(self, v)[i] for v in 'sxyzc']
+        log.debug('profile of {}'.format([getattr(self, v)[i] for v in 'sxyzc']))
         kwargs = self.opts(i)
         x, y, z = self.data(i)
         o = get_args_from(kwargs, xerr = 0, yerr = 0)
@@ -726,7 +725,7 @@ class Plot(object):
 
     def _map(self, i):
         import maps
-        print >> sys.stderr, 'map of', i, [getattr(self, v)[i] for v in 'sxyzc']
+        log.debug('map of {}'.format([getattr(self, v)[i] for v in 'sxyzc']))
         kwargs = self.opts(i)
         x, y, z = self.data(i)
         o = get_args_from(kwargs, margin = 0.05, width = 10e6, height = None, boundarylat = 50, projection = 'cyl',
@@ -751,20 +750,23 @@ class Plot(object):
 
 
 if __name__ == '__main__':
+    logging.basicConfig(level = logging.DEBUG)
 
-
-
-    p = Plot(
-             m0 = 'p', x0 = 'time', y0 = '60*rate', o0yerr = '1', rw0 = '24*3600', x0b = '100', c0 = '', s0 = 'data/ct-2011.h5:/merged/CT_events',
-             m1 = 'p', x1 = 'time', y1 = '60*rate', o1yerr = '1', rw1 = '3600', x1b = '100', c1 = '', s1 = 'data/ct-2011.h5:/merged/CT_events'
+    p = Plot(w = '10',
+             m0 = 'xy', x0 = 'time', y0 = 'T_a', ko0yerr = '1', rw0 = '3600', x0b = '20', c0 = '', s0 = 'data/ct-2009.h5:/merged/CT_events',
+             m1 = 'xy', x1 = 'time', y1 = 'T_a', ko1yerr = '1', rw1 = '3600', x1b = '20', c1 = '', s1 = 'data/ct-2010.h5:/merged/CT_events',
+             m2 = 'xy', x2 = 'time', y2 = 'T_a', ko2yerr = '1', rw2 = '3600', x2b = '20', c2 = '', s2 = 'data/ct-2011.h5:/merged/CT_events'
              )
 
     import threading
-    def prog():
+    from progressbar import ProgressBar, Bar, Percentage, ETA
+    def progressUpdate():
+        pb = ProgressBar(maxval = 1, widgets = [Bar(), ' ', Percentage(), ' ', ETA()], fd = sys.stdout)
         while p.progress < 1:
-            print '{:.2f}'.format(p.progress)
-            time.sleep(2)
-    t = threading.Thread(target = prog)
+            pb.update(p.progress)
+            time.sleep(1)
+        pb.finish()
+    t = threading.Thread(target = progressUpdate)
     t.daemon = True
     t.start()
 

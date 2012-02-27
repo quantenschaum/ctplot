@@ -18,15 +18,13 @@
 #
 #    $Id$
 #
+import pytz, json, time, re
 import dateutil.parser as dp
 import datetime as dt
-import pytz
-import json
 from datetime import timedelta
 import safeeval
 from math import  floor, log10
 import numpy as np
-import re
 
 class AttrDict(dict):
     __getattr__ = dict.__getitem__
@@ -167,3 +165,30 @@ def number_mathformat(value, precision = 4):
 
 def hashargs(*args, **kwargs):
     return hash(json.dumps((args, kwargs), separators = (',', ':'), sort_keys = True))
+
+
+def noop(*args, **kwargs):
+    pass
+
+
+def getStatCpu():
+    with open('/proc/stat') as stat:
+        for line in stat:
+            line = line.strip()
+            if line.startswith('cpu'):
+                cpu = map(int, line.split()[1:])
+                return cpu
+
+def getCpuUsage():
+    c1 = getStatCpu()
+    time.sleep(0.5)
+    c2 = getStatCpu()
+    t = sum(c2) - sum(c1)
+    d = map(lambda x: float(x[1] - x[0]) / t, zip(c1, c2))
+    return dict(zip(['user', 'nice', 'system', 'idle', 'iowait', 'irq', 'softirq'], d))
+
+
+def getCpuLoad():
+    usage = getCpuUsage()
+    del usage['idle']
+    return sum(usage.values())

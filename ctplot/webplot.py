@@ -24,13 +24,13 @@
 import matplotlib
 matplotlib.use('Agg')
 
-import json, os, cgitb, cgi, sys
+import json, os, cgitb, cgi, sys, subprocess, time
 from plot import Plot, available_tables
 from functools import wraps
-from utils import hashargs
+from utils import hashargs, getCpuLoad
 from config import *
+from threading import Thread
 
-cgitb.enable()
 
 
 def cached(func):
@@ -45,7 +45,6 @@ def cached(func):
                 f = open(filename)
                 v = f.read()
                 f .close()
-    #            print 'from', filename
                 return json.loads(v)
 
             except IOError:
@@ -54,6 +53,7 @@ def cached(func):
                 f.write(json.dumps(v))
                 f .close()
                 return v
+
         else:
             return func(*args, **kwargs)
 
@@ -66,50 +66,67 @@ def tables():
 
 @cached
 def make_plot(settings):
+    # wait until cpu usage is <80%
+    if os.name == 'posix':
+        while getCpuLoad() > .8:
+            time.sleep(1)
+
     p = Plot(**settings)
     h = hashargs(settings)
     name = 'plot-%d' % (h,)
     name = os.path.join(plotdir, name).replace('\\', '/')
-    return json.dumps(p.save(name))
+    return p.save(name)
 
 
 contenttypes = {'png': 'image/png'  , 'svg': 'image/svg+xml'  , 'pdf':'application/pdf'   }
 
 
+def countInstances(process):
+    if os.name == 'nt':
+        ps = ['tasklist']
+    elif os.name == 'psix':
+        ps = ['ps', '-fe']
+    else:
+        raise RuntimeError('no tasklist command for {} defined'.format(os.name))
+    p = subprocess.Popen(ps, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
+    count = 0
+    for line in p.stdout:
+        if process in line:
+            print line.strip()
+            count += 1
+    return count
+
+
 if __name__ == '__main__':
 
-
+    cgitb.enable()
     fields = cgi.FieldStorage()
     action = fields.getfirst('a')
 
-    if action in ['plot', 'png', 'svg', 'pdf']:
+    if action in ['plot', 'png', 'svg', 'pdf', 'job']:
+
         settings = {}
-
         for k in fields.keys():
-            if k == 'a': continue
-            v = fields.getfirst(k).strip()
-            print >> sys.stderr, k, '=' , v
-            settings[k] = v
+            if k[0] in 'xyzcmsorntwfgl':
+                settings[k] = fields.getfirst(k).strip()
+#            else: print >> sys.stderr, 'discarded', k, '=', fields.getfirst(k).strip()
 
-        imgs = make_plot(settings)
+        images = make_plot(settings)
 
         if action == 'plot':
-            print "Content-Type: text/plain;charset=utf-8"
-            print
-            print imgs
+            print "Content-Type: text/plain;charset=utf-8\n"
+            print json.dumps(images)
 
         elif action in ['png', 'svg', 'pdf']:
             ct = action
-            imgfile = json.loads(imgs)[ct]
-            print 'Content-Type: ' + contenttypes[ct]
-            print
+            imgfile = images[ct]
+            print 'Content-Type: {}\n'.format(contenttypes[ct])
             with open(imgfile) as img:
                 for l in img:
                     sys.stdout.write(l)
 
     elif action == 'list':
-        print "Content-Type: text/plain;charset=utf-8"
-        print
+        print "Content-Type: text/plain;charset=utf-8\n"
         print tables()
 
     else:
