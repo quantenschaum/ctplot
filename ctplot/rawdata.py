@@ -635,23 +635,22 @@ def raw_to_h5(filenames, out = "out.h5", handlers = available_handlers,
 
     # create HDF5 file
     filters = t.Filters(complevel = 1, complib = 'zlib')
-    h5 = t.openFile(out, 'w', 'datafile created with raw_to_h5', filters = filters)
-    h5.root._v_attrs.creationdate = dt.datetime.now(pytz.utc).isoformat()
-    raw = h5.createGroup(h5.root, 'raw', 'raw data')
+    with t.openFile(out, 'w', 'datafile created with raw_to_h5', filters = filters) as h5:
+        h5.root._v_attrs.creationdate = dt.datetime.now(pytz.utc).isoformat()
+        raw = h5.createGroup(h5.root, 'raw', 'raw data')
 
-    # create and fill raw data tables
-    for handler, files in files_dict.iteritems():
-        handler = handler() # instanciate the LineHandler
-        title = handler.table_title
-        if show_progress:
-            print 'creating table: %s (%s)' % (handler.table_name, title)
-        table = h5.createTable(raw, handler.table_name, handler.col_descriptor,
-                               title, expectedrows = 10000 * len(files))
-        set_attrs(table, t0, handler.col_units)
-        read_files(files, table.row, handler)
-        table.flush()
+        # create and fill raw data tables
+        for handler, files in files_dict.iteritems():
+            handler = handler() # instanciate the LineHandler
+            title = handler.table_title
+            if show_progress:
+                print 'creating table: %s (%s)' % (handler.table_name, title)
+            table = h5.createTable(raw, handler.table_name, handler.col_descriptor,
+                                   title, expectedrows = 10000 * len(files))
+            set_attrs(table, t0, handler.col_units)
+            read_files(files, table.row, handler)
+            table.flush()
 
-    h5.close()
     if show_progress:
         pb.finish()
 

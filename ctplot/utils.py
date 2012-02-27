@@ -165,3 +165,5 @@ def number_mathformat(value, precision = 4):
     return '$\mathdefault{' + s + '}$'
 
 
+def hashargs(*args, **kwargs):
+    return hash(json.dumps((args, kwargs), separators = (',', ':'), sort_keys = True))

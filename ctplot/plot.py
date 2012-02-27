@@ -19,15 +19,16 @@
 #
 #    $Id$
 #
-import os, sys, re, json, tables, ticks
+import os, sys, re, json, tables, ticks, time
 from collections import OrderedDict, namedtuple
 import numpy as np
 import numpy.ma as ma
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-from utils import get_args_from, isseq, set_defaults, number_mathformat
+from utils import get_args_from, isseq, set_defaults, number_mathformat, hashargs
 from itertools import product
 from safeeval import safeeval
+from config import *
 
 # override eval by safe version
 eval = safeeval()
@@ -129,23 +130,30 @@ def adjust_limits(xy, data, limits = None, marl = 0.05, maru = 0.05):
     lim(min(mi, min(data) - marl * span), max(ma, max(data) + maru * span))
 
 
-class Plot():
+class Plot(object):
     def __init__(self, **kwargs):
         print >> sys.stderr, json.dumps(kwargs)
 
         # configure plot according too kwargs
+        # all options are strings
         for N in xrange(10):
             n = str(N)
 
             # x, y, z, cut, mode, source, name
+            # x = expression plotted on x-axis
+            # y = expression plotted on y-axis
+            # z = expression plotted on z-axis (as color of line/markers)
+            # c = cut expression, discard data point for which this is False (if given)
+            # s = HDF5 sourcefile and table
+            # n = name of the plot, used in legend 
             for v in 'xyzcmsn':
                 self._append(v, _get(kwargs, v + n))
 
-            # window, shift, condition
+            # window, shift, condition for the rate calculation
             for v in 'wsc':
                 self._append('r' + v, _get(kwargs, 'r' + v + n))
 
-            # bins
+            # x- and y-binnings for histograms/profile
             for v, w in product('xy', 'b'):
                 self._append(v + w, _get(kwargs, v + n + w))
 
@@ -174,6 +182,9 @@ class Plot():
 #        for k in sorted(self.__dict__.keys()):
 #            print >> sys.stderr, '*', k, self.__dict__[k]
 
+        self.progress = 0 # reaching from 0 to 1
+
+
 
 
     def _append(self, varname, value):
@@ -184,12 +195,12 @@ class Plot():
             setattr(self, varname, [value])
 
 
-    def _get(self, var, default = None):
+    def _get(self, var, default = None, dtype = lambda x:x):
         val = self.__dict__.get(var)
         if val is None:
             return default
         else:
-            return val
+            return dtype(val)
 
 
     def _prepare_data(self):
@@ -234,8 +245,11 @@ class Plot():
 
 
 
+
+
     def _get_data(self, expr_data, filters, units = {}):
         # compile and evaluate expressions for each source
+        progr_factor = 1.0 / len(expr_data)
         for s, exprs in expr_data.iteritems():
             print >> sys.stderr, 'processing source', s
             print >> sys.stderr, '      expressions', exprs.keys()
@@ -244,113 +258,162 @@ class Plot():
             # source s has form 'filename:/path/to/table'
             # open HDF5 table
             ss = s.strip().split(':')
-            h5 = tables.openFile(ss[0], 'r')
-            table = h5.getNode(ss[1])
+            with tables.openFile(ss[0], 'r') as h5:
+                table = h5.getNode(ss[1])
 
-            window = float(eval(ss[2])) if ss[2] != 'None' else None
-            shift = float(ss[3]) if ss[3] != 'None' else 1
-            condition = ss[4] if ss[4] != 'None' else None
-#            print 'wsc', window, shift, condition
+                window = float(eval(ss[2])) if ss[2] != 'None' else None
+                shift = float(ss[3]) if ss[3] != 'None' else 1
+                condition = ss[4] if ss[4] != 'None' else None
+    #            print 'wsc', window, shift, condition
 
-            table_units = tuple(json.loads(table.attrs.units))
+                table_units = tuple(json.loads(table.attrs.units))
 
-            def unit(var):
-                try:
-                    return table_units[table.colnames.index(var.strip())]
-                except:
-                    return '?'
+                def unit(var):
+                    try:
+                        return table_units[table.colnames.index(var.strip())]
+                    except:
+                        return '?'
 
-            units[s] = dict([(e, unit(e)) for e in exprs.keys()])
-
-
-
-            # restricted eval, allowing only safe operations
+                units[s] = dict([(e, unit(e)) for e in exprs.keys()])
 
 
-            def compile_function(x):
-                fields = set(table.colnames)
-                fields.add('rate')
-                fields.add('count')
-                for v in fields: # map T_a --> row['T_a'], etc.
-                    x = re.sub('(?<!\\w)' + re.escape(v) + '(?!\\w)',
-                                'row["' + v + '"]', x)
-#                print >> sys.stderr, 'expression: ', x
-                return eval('lambda row: ' + x)
 
-            # compile the expressions
-            exprs = dict([(compile_function(e), d) for e, d in exprs.iteritems()])
-
-            def average():
-                assert 0 < shift <= 1
-                av = dict.fromkeys(table.colnames, 0)
-                it = table.colnames.index('time') # index of time column
-                ta = table[0][it] # window left edge
-                tb = ta + window # window right edge
-                wd = [] # window data
-                if condition:
-                    cc = compile_function(condition)
-                for row in table.iterrows():
-                    if not condition or cc(row):
-                        if row[it] < tb: # add row if in window
-                            wd.append(row[:])
-                        else: # calculate av and shift window
-                            n = len(wd)
-                            if n > 0:
-                                for i, c in enumerate(table.colnames):
-                                    a = 0
-                                    for d in wd:
-                                        a += d[i]
-                                    av[c] = a / float(n)
-                                av['time'] = (ta + tb) * 0.5
-                                av['count'] = n
-                                av['rate'] = n / window
-                                yield av
-
-                            ta += shift * window # shift window
-                            tb = ta + window
-                            if row[it] >= tb:
-                                ta = row[it] # shift window
-                                tb = ta + window
-                            wd.append(row[:])
-                            wd = filter(lambda x:ta <= x[it] < tb, wd) # remove data left outside window
+                # restricted eval, allowing only safe operations
 
 
-            def prefilter(data, filterexpr):
-                filterexpr = compile_function(filterexpr)
-                for row in data:
-                    if filterexpr(row):
-                        yield row
+                def compile_function(x):
+                    fields = set(table.colnames)
+                    fields.add('rate')
+                    fields.add('count')
+                    for v in fields: # map T_a --> row['T_a'], etc.
+                        x = re.sub('(?<!\\w)' + re.escape(v) + '(?!\\w)',
+                                    'row["' + v + '"]', x)
+    #                print >> sys.stderr, 'expression: ', x
+                    return eval('lambda row: ' + x)
+
+                # compile the expressions
+                exprs = dict([(compile_function(e), d) for e, d in exprs.iteritems()])
+
+                def average():
+                    # look if there is data for this source in the cache
+                    cachefile = os.path.join(cachedir, 'avg{}.h5'.format(hashargs(s)))
+
+                    try: # use data from cache
+                        if not usecache: raise
+                        with tables.openFile(cachefile) as cacheh5:
+                            cachetable = cacheh5.getNode('/data')
+                            print >> sys.stderr, 'average from ', cachefile
+                            nrows = cachetable.nrows
+                            progr_prev = self.progress
+                            progr = 0
+                            for row in cachetable.iterrows():
+                                progr = float(row.nrow) / nrows
+                                self.progress = progr_prev + progr * progr_factor
+                                yield row
+
+                    except: # if data not available/in use/corrupt...
+                        try:
+                            cacheh5 = tables.openFile(cachefile, 'w')
+                        except:
+                            try: os.remove(cachefile) # if it can be deleted, it was not in use and probably corrupt
+                            except: pass
+                            raise RuntimeError('cache for {} in use or corrupt, try again in a few seconds'.format(s))
+
+                        with cacheh5:
+                            # use tables col descriptor and append fields rate and count
+                            coldesc = OrderedDict() # keep the order 
+                            for k in table.colnames:
+                                d = table.coldescrs[k]
+                                if isinstance(d, tables.BoolCol): # make bool to float for averaging
+                                    coldesc[k] = tables.FloatCol(pos = len(coldesc))
+                                else:
+                                    coldesc[k] = d
+                            coldesc['rate'] = tables.FloatCol(pos = len(coldesc))
+                            coldesc['count'] = tables.IntCol(pos = len(coldesc))
+                            cachetable = cacheh5.createTable('/', 'data', coldesc, 'cached data')
+                            cachetable.attrs.source = s
+                            nrows = table.nrows
+                            progr_prev = self.progress
+                            progr = 0
+                            cacherow = cachetable.row
+                            print >> sys.stderr, 'caching average', cachefile
+
+                            assert 0 < shift <= 1
+                            it = table.colnames.index('time') # index of time column
+                            ta = table[0][it] # window left edge
+                            tb = ta + window # window right edge
+                            wd = [] # window data
+                            if condition:
+                                cc = compile_function(condition)
+
+                            for row in table.iterrows():
+                                if not condition or cc(row):
+                                    if row[it] < tb: # add row if in window
+                                        wd.append(row[:])
+                                    else: # calculate av and shift window
+                                        n = len(wd)
+                                        if n > 0:
+                                            for i, c in enumerate(table.colnames):
+                                                a = 0
+                                                for d in wd:
+                                                    a += d[i]
+                                                cacherow[c] = a / float(n)
+                                            cacherow['time'] = (ta + tb) * 0.5
+                                            cacherow['count'] = n
+                                            cacherow['rate'] = n / window
+                                            progr = float(row.nrow) / nrows
+                                            self.progress = progr_prev + progr * progr_factor
+                                            yield cacherow
+                                            cacherow.append()
+
+                                        ta += shift * window # shift window
+                                        tb = ta + window
+                                        if row[it] >= tb:
+                                            ta = row[it] # shift window
+                                            tb = ta + window
+                                        wd.append(row[:])
+                                        wd = filter(lambda x:ta <= x[it] < tb, wd) # remove data left outside window
 
 
-            if window:
-                tableiter = average()
-            else:
-                tableiter = table.iterrows()
 
-            if s in filters:
-                tableiter = prefilter(tableiter, filters[s])
+                def prefilter(data, filterexpr):
+                    filterexpr = compile_function(filterexpr)
+                    for row in data:
+                        if filterexpr(row):
+                            yield row
 
-            for row in tableiter:
-                for expr, data in exprs.iteritems():
-                    data.append(expr(row))
 
-            h5.close()
+                if window:
+                    tableiter = average()
+                else:
+                    tableiter = table.iterrows()
 
-            # convert data lists to numpy arrays
-            d = expr_data[s]
-            for k in d.keys():
-                d[k] = np.array(d[k])
+                if s in filters:
+                    tableiter = prefilter(tableiter, filters[s])
+
+                for row in tableiter:
+                    for expr, data in exprs.iteritems():
+                        data.append(expr(row))
+
+                # convert data lists to numpy arrays
+                d = expr_data[s]
+                for k in d.keys():
+                    d[k] = np.array(d[k])
+
+        # done with getting data
+        self.progress = 1
+
 
 
 
     def _configure_pre(self):
         # configure plotlib
-        self.f = float(self._get('f', 10))
+        self.f = self._get('f', 10, float)
         plt.rc('font', **{'family':'sans-serif', 'sans-serif':['Dejavu Sans'], 'size':self.f})
         plt.rc('axes', grid = True)
         plt.rc('lines', markeredgewidth = 0)
         ticks.set_extended_locator(1)
-        w = self.w = float(self._get(self.w, 10))
+        w = self.w = self._get(self.w, 10, float)
         plt.gcf().set_size_inches((w, w / np.sqrt(2)));
         f = 0.09
         plt.gca().set_position([f, f, 1 - 2 * f, 1 - 2 * f])
@@ -433,7 +496,7 @@ class Plot():
 
 
     def alabel(self, a):
-        l = unicode(getattr(self, a + 'l'))
+        l = getattr(self, a + 'l')
         if l: return l
         l = u''
         for x, u in zip(getattr(self, a), getattr(self, a + 'unit')):
@@ -692,9 +755,18 @@ if __name__ == '__main__':
 
 
     p = Plot(
-    #         m0 = 'map', x0 = 'lon', y0 = 'lat', z0 = 'time', x0b = '40', y0b = '40', c0 = '', s0 = 'data/polarstern.h5:/raw/polarstern_events',
-             m1 = 'p', x1 = 'time', y1 = 'rate', o1yerr = '1', rw1 = '4000*2', x1b = '100', c1 = '', s1 = 'data/ct-2011.h5:/merged/CT_events'
+             m0 = 'p', x0 = 'time', y0 = '60*rate', o0yerr = '1', rw0 = '24*3600', x0b = '100', c0 = '', s0 = 'data/ct-2011.h5:/merged/CT_events',
+             m1 = 'p', x1 = 'time', y1 = '60*rate', o1yerr = '1', rw1 = '3600', x1b = '100', c1 = '', s1 = 'data/ct-2011.h5:/merged/CT_events'
              )
+
+    import threading
+    def prog():
+        while p.progress < 1:
+            print '{:.2f}'.format(p.progress)
+            time.sleep(2)
+    t = threading.Thread(target = prog)
+    t.daemon = True
+    t.start()
 
     #p.save()
     p.show()

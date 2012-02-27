@@ -1,6 +1,6 @@
-#!c:\Program Files (x86)\Python27\python.exe
-# -*- coding: utf-8 -*-
 #!/opt/python/bin/python
+# -*- coding: utf-8 -*-
+#!c:\Program Files (x86)\Python27\python.exe
 #!/usr/bin/python
 #    pyplot - python based data plotting tools
 #    created for DESY Zeuthen
@@ -27,21 +27,11 @@ matplotlib.use('Agg')
 import json, os, cgitb, cgi, sys
 from plot import Plot, available_tables
 from functools import wraps
-
-
-# configuration ###############################################################
-
-h5dir = 'data'
-cachedir = 'cache'
-plotdir = 'plots'
-usecache = 0
-
-###############################################################################
+from utils import hashargs
+from config import *
 
 cgitb.enable()
 
-def hashargs(*args, **kwargs):
-    return hash(json.dumps((args, kwargs), separators = (',', ':'), sort_keys = True))
 
 def cached(func):
     'write return values of func into cache (disk) and read them from cache for same arguments'
@@ -49,7 +39,7 @@ def cached(func):
     def cached_func(*args, **kwargs):
         if usecache:
             h = hashargs(*args, **kwargs)
-            filename = '%s-%d.cache' % (func.__name__, h)
+            filename = '%s%d.cache' % (func.__name__, h)
             filename = os.path.join(cachedir, filename)
             try:
                 f = open(filename)
