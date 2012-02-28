@@ -1,6 +1,6 @@
-#!/opt/python/bin/python
-# -*- coding: utf-8 -*-
 #!c:\Program Files (x86)\Python27\python.exe
+# -*- coding: utf-8 -*-
+#!/opt/python/bin/python
 #!/usr/bin/python
 #    pyplot - python based data plotting tools
 #    created for DESY Zeuthen
@@ -26,55 +26,26 @@ matplotlib.use('Agg')
 
 import json, os, cgitb, cgi, sys, subprocess, time
 from plot import Plot, available_tables
-from functools import wraps
 from utils import hashargs, getCpuLoad
 from config import *
 from threading import Thread
 
+cgitb.enable(context = 1, format = 'html')
 
 
-def cached(func):
-    'write return values of func into cache (disk) and read them from cache for same arguments'
-    @wraps(func)
-    def cached_func(*args, **kwargs):
-        if usecache:
-            h = hashargs(*args, **kwargs)
-            filename = '%s%d.cache' % (func.__name__, h)
-            filename = os.path.join(cachedir, filename)
-            try:
-                f = open(filename)
-                v = f.read()
-                f .close()
-                return json.loads(v)
 
-            except IOError:
-                f = open(filename, 'w')
-                v = func(*args, **kwargs)
-                f.write(json.dumps(v))
-                f .close()
-                return v
 
-        else:
-            return func(*args, **kwargs)
-
-    return cached_func
-
-@cached
-def tables():
-    tabs = available_tables(h5dir)
-    return json.dumps(tabs)
-
-@cached
 def make_plot(settings):
     # wait until cpu usage is <80%
     if os.name == 'posix':
-        while getCpuLoad() > .8:
-            time.sleep(1)
+        for i in xrange(1000):
+            if getCpuLoad() < .8: break
+
+    name = os.path.join(plotdir, 'plot{}'.format(hashargs(settings))).replace('\\', '/')
+    if usecache and os.path.isfile(name + '.png'):
+        return dict([(e, name + '.' + e) for e in ['png', 'svg', 'pdf']])
 
     p = Plot(**settings)
-    h = hashargs(settings)
-    name = 'plot-%d' % (h,)
-    name = os.path.join(plotdir, name).replace('\\', '/')
     return p.save(name)
 
 
@@ -98,12 +69,10 @@ def countInstances(process):
 
 
 if __name__ == '__main__':
-
-    cgitb.enable()
     fields = cgi.FieldStorage()
     action = fields.getfirst('a')
 
-    if action in ['plot', 'png', 'svg', 'pdf', 'job']:
+    if action in ['plot', 'png', 'svg', 'pdf']:
 
         settings = {}
         for k in fields.keys():
@@ -127,7 +96,7 @@ if __name__ == '__main__':
 
     elif action == 'list':
         print "Content-Type: text/plain;charset=utf-8\n"
-        print tables()
+        print json.dumps(available_tables(h5dir))
 
     else:
         raise ValueError('unknown action ' + action)

@@ -204,7 +204,7 @@ label .help {
 	box-sizing: border-box;
 }
 
-.global label input {
+.global label input, .global label select {
 	width: 100%;
 	margin-top: .1em;
 }
@@ -259,6 +259,7 @@ label .help {
 #result img {
 	display: block;
 	margin: 1em auto;
+	max-width: 95%
 }
 
 @media all and (max-width: 30em) {

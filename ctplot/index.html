@@ -66,35 +66,22 @@ $Id$
 	</header>
 	<nav>
 		<ul>
+			<li><a href="#explaination">Anleitung</a></li>
 			<li><a href="#settings">Einstellungen</a></li>
             <li><a href="#output">Plot</a></li>
             <!-- 
-			<li><a href="#explaination">Anleitung</a></li>
 			<li><a href="#datasets">Datensätze</a></li>
             <li><a href="#saved">gespeicherte Plots</a></li>
              -->
 		</ul>
 	</nav>
 <div id="content">
-<!-- 
 <div id="explaination">
 		<h1>Anleitung</h1>
-		<p>Pellentesque habitant morbi tristique senectus et netus et
-			malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat
-			vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit
-			amet quam egestas semper. Aenean ultricies mi vitae est. Mauris
-			placerat eleifend leo.</p>
-		<p>Pellentesque habitant morbi tristique senectus et netus et
-			malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat
-			vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit
-			amet quam egestas semper. Aenean ultricies mi vitae est. Mauris
-			placerat eleifend leo.</p>
-		<p>Pellentesque habitant morbi tristique senectus et netus et
-			malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat
-			vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit
-			amet quam egestas semper. Aenean ultricies mi vitae est. Mauris
-			placerat eleifend leo.</p>
-	</div>
+			<p style="color: red;">Zur Zeit befindet sich dieses Auswertungstool im Testbetrieb.</p>
+			<p>Für weitere Info siehe im Wiki: <a href="https://znwiki3.ifh.de/KosmischeTeilchen/Software%3A%20Webinterface">https://znwiki3.ifh.de/KosmischeTeilchen/Software: Webinterface</a></p>
+		</div>
+<!-- 
 
 
 <div id="datasets">
@@ -112,17 +99,81 @@ $Id$
     <label data-help="Titel des Plots, wird über dem Plot als Überschift angezeigt">Titel<input type="text" name="t" /></label>
     <label data-help="Breite des Plots in inch">Breite<input type="text" name="w" /></label>
     <label data-help="Schriftgröße in ???">Schriftgröße<input type="text" name="f" /></label>
+  
+    <!-- X -->
     <label data-help="Wertebereich der x-Achse, anzugeben in der Form (von, bis), Beipsiel: (-12.3, 102.8)">x-Range<input type="text" name="xr" /></label>
-    <label data-help="Wertebereich der y-Achse, anzugeben in der Form (von, bis), Beipsiel: (-12.3, 102.8)">y-Range<input type="text" name="yr" /></label>
-    <label data-help="Wertebereich der z-Achse (Farb-Achse), anzugeben in der Form (von, bis), Beipsiel: (-12.3, 102.8)">z-Range<input type="text" name="zr" /></label>
-    <label data-help="Skalierung der x-Achse, mögliche Werte sind: lin, log, sym-log">x-Scale<input type="text" name="xs" /></label>
-    <label data-help="Skalierung der y-Achse, mögliche Werte sind: lin, log, sym-log">y-Scale<input type="text" name="ys" /></label>
-    <label data-help="Skalierung der z-Achse (Farb-Achse), mögliche Werte sind: lin, log, sym-log">z-Scale<input type="text" name="zs" /></label>
+    <label data-help="Skalierung der x-Achse">x-Scale
+        <select name="xs">
+            <option value="linear">linear</option>
+            <option value="log">logarithmisch</option>
+            <option value="symlog">symmetrisch-logarithmisch</option>
+        </select>
+    </label>
     <label data-help="Beschriftung der x-Achse">x-Label<input type="text" name="xl" /></label>
+
+    <!-- X2 -->
+    <label data-help="Wertebereich der x2-Achse, anzugeben in der Form (von, bis), Beipsiel: (-12.3, 102.8)" class="twinx expert">x2-Range<input type="text" name="xrtw" /></label>
+    <label data-help="Skalierung der x2-Achse" class="twinx expert">x2-Scale
+        <select name="xstw">
+            <option value="linear">linear</option>
+            <option value="log">logarithmisch</option>
+            <option value="symlog">symmetrisch-logarithmisch</option>
+        </select>
+    </label>
+    <label data-help="Beschriftung der x2-Achse" class="twinx expert">x2-Label<input type="text" name="xltw" /></label>
+ 
+    <!-- Y -->
+    <label data-help="Wertebereich der y-Achse, anzugeben in der Form (von, bis), Beipsiel: (-12.3, 102.8)">y-Range<input type="text" name="yr" /></label>
+    <label data-help="Skalierung der y-Achse">y-Scale        
+        <select name="ys">
+            <option value="linear">linear</option>
+            <option value="log">logarithmisch</option>
+            <option value="symlog">symmetrisch-logarithmisch</option>
+        </select>
+    </label>
     <label data-help="Beschriftung der y-Achse">y-Label<input type="text" name="yl" /></label>
-    <label data-help="Beschriftung der z-Achse (Farb-Achse)">z-Label<input type="text" name="zl" /></label>
+
+    <!-- Y2 -->
+    <label data-help="Wertebereich der y2-Achse, anzugeben in der Form (von, bis), Beipsiel: (-12.3, 102.8)" class="twiny expert">y2-Range<input type="text" name="yrtw" /></label>
+    <label data-help="Skalierung der y2-Achse" class="twiny expert">y2-Scale        
+        <select name="ystw">
+            <option value="linear">linear</option>
+            <option value="log">logarithmisch</option>
+            <option value="symlog">symmetrisch-logarithmisch</option>
+        </select>
+    </label>
+    <label data-help="Beschriftung der y2-Achse" class="twiny expert">y2-Label<input type="text" name="yltw" /></label>
+
+    <!-- Z -->
+    <label data-help="Wertebereich der z-Achse (Farb-Achse), anzugeben in der Form (von, bis), Beipsiel: (-12.3, 102.8)">z-Range<input type="text" name="zr" /></label>
+    <label data-help="Skalierung der z-Achse (Farb-Achse)">z-Scale
+        <select name="zs">
+            <option value="linear">linear</option>
+            <option value="log">logarithmisch</option>
+            <option value="symlog">symmetrisch-logarithmisch</option>
+        </select>
+    </label>
+    <label data-help="Beschriftung der z-Achse (Farbe)">z-Label<input type="text" name="zl" /></label>
+   
+
+   
     <label data-help="wenn aktiviert werden zusätzliche Eingabefelder angezeigt (für fortgeschrittene Benutzer)">
             Expertenmodus<input type="checkbox" name="expertmode" checked="checked" /></label>
+    <label data-help="">Legende
+        <select name="l">
+            <option value="">automatisch</option>
+            <option value="none">keine Legende</option>
+            <option value="upper left">oben links</option>
+            <option value="upper center">oben mitte</option>
+            <option value="upper right">oben rechts</option>
+            <option value="center left">mitte links</option>
+            <option value="center">mitte</option>
+            <option value="center right">mitte rechts</option>
+            <option value="lower left">unten links</option>
+            <option value="lower center">unten mitte</option>
+            <option value="lower right">unten rechts</option>
+        </select>
+    </label>
 </fieldset>
 <div id="plots">
     <div id="varsbox">verfügbare Variablen: <span id="vars">a, b, c, &hellip;</span></div>
@@ -142,7 +193,7 @@ $Id$
         <h2>Ratenberechnung</h2>
         <label data-help="">Fenster (Ratenberechnung)<input type="text" name="rw*" /></label> 
         <label data-help="" class="expert">Schub<input type="text" name="rs*" /></label> 
-        <label data-help="" class="expert">Bedingung<input type="text" name="rc*" /></label>
+        <label data-help="" class="expert">Gewicht<input type="text" name="rc*" /></label>
         
         <h2>Achsen und Daten</h2>
         <label data-help="Wert, der auf der x-Achse dargestellt werden soll. Hier kann ein Variablenname eingegeben werden (z.B. time) oder eine Formel, die Variablen umrechnet oder miteinander verknüpft (z.B. T_a-T_i oder log(p))">
@@ -154,6 +205,14 @@ $Id$
         <label data-help="" class="opt t-xy t-h2 t-p t-map">y<input type="text" name="y*" /></label> 
         <label data-help="" class="opt t-h2">y-Bins<input type="text" name="y*b" /></label> 
         <label data-help="" class="opt t-h1 t-p">y-Fehlerbalken<input type="checkbox" name="o*yerr" /></label>
+
+        <label data-help="" class="opt t-xy t-h1 t-p expert">zweite Achse
+            <select name="tw*">
+                <option value=""></option>
+                <option value="x">x-Achse</option>
+                <option value="y">y-Achse</option>
+            </select>
+        </label> 
         
         <label data-help="" class="opt t-xy t-map">z (Farbe)<input type="text" name="z*" /></label> 
 	    

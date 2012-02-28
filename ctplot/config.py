@@ -23,4 +23,4 @@
 h5dir = 'data'
 cachedir = 'cache'
 plotdir = 'plots'
-usecache = 1
+usecache = 0

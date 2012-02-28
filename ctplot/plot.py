@@ -21,6 +21,7 @@
 #
 import os, sys, re, json, tables, ticks, time, logging
 from collections import OrderedDict, namedtuple
+from itertools import chain
 import numpy as np
 import numpy.ma as ma
 import matplotlib as mpl
@@ -60,12 +61,12 @@ def available_tables(d = os.path.dirname(__file__) + '/data'):
     return tabs
 
 
-def _get(d, k):
+def _get(d, k, default = None):
     v = d.get(k)
     if v:
         return v.strip() if isinstance(v, str) else v
     else:
-        return
+        return default
 
 def get_binning(bins, data):
     if np.isscalar(bins):
@@ -132,6 +133,10 @@ def adjust_limits(xy, data, limits = None, marl = 0.05, maru = 0.05):
     span = maxd - mind
     lim(min(mi, min(data) - marl * span), max(ma, max(data) + maru * span))
 
+def sproduct(a, b):
+    for x, y in product(a, b):
+        yield '{}{}'.format(x, y)
+
 
 class Plot(object):
     def __init__(self, **kwargs):
@@ -152,9 +157,13 @@ class Plot(object):
             for v in 'xyzcmsn':
                 self._append(v, _get(kwargs, v + n))
 
+            # twin axes
+            self._append('tw', _get(kwargs, 'tw' + n))
+
             # window, shift, condition for the rate calculation
-            for v in 'wsc':
-                self._append('r' + v, _get(kwargs, 'r' + v + n))
+            self._append('rw', _get(kwargs, 'rw' + n))
+            self._append('rs', _get(kwargs, 'rs' + n, '1'))
+            self._append('rc', _get(kwargs, 'rc' + n, '1'))
 
             # x- and y-binnings for histograms/profile
             for v, w in product('xy', 'b'):
@@ -169,8 +178,11 @@ class Plot(object):
                     getattr(self, a)[N] = v.strip()
 
         # range, scale, label
-        for v, w in product('xyz', 'rsl'):
-            setattr(self, v + w, _get(kwargs, v + w))
+        for v in sproduct('xyz', 'rsl'):
+            setattr(self, v , _get(kwargs, v))
+        for v in sproduct('xyz', 'rsl'):
+            setattr(self, v + 'tw', _get(kwargs, v + 'tw'))
+
 
         # title, fontsize, width, grid, legend
         for v in 'tfwgl':
@@ -183,6 +195,8 @@ class Plot(object):
         self.lines = 10 * [None]
 
         self.progress = 0 # reaching from 0 to 1
+
+        self.axes = OrderedDict()
 
 
 
@@ -262,7 +276,7 @@ class Plot(object):
 
                 window = float(eval(ss[2])) if ss[2] != 'None' else None
                 shift = float(ss[3]) if ss[3] != 'None' else 1
-                condition = ss[4] if ss[4] != 'None' else None
+                weight = ss[4] if ss[4] != 'None' else None
 
                 progr_factor = 1.0 / table.nrows / len(expr_data)
 
@@ -281,10 +295,11 @@ class Plot(object):
                     fields = set(table.colnames)
                     fields.add('rate')
                     fields.add('count')
+                    fields.add('weight')
                     for v in fields: # map T_a --> row['T_a'], etc.
                         x = re.sub('(?<!\\w)' + re.escape(v) + '(?!\\w)',
                                     'row["' + v + '"]', x)
-                    return eval('lambda row: ' + x)
+                    return eval('lambda row: ({})'.format(x))
 
 
                 # compile the expressions
@@ -321,8 +336,9 @@ class Plot(object):
                                     coldesc[k] = tables.FloatCol(pos = len(coldesc))
                                 else:
                                     coldesc[k] = d
-                            coldesc['rate'] = tables.FloatCol(pos = len(coldesc))
                             coldesc['count'] = tables.IntCol(pos = len(coldesc))
+                            coldesc['weight'] = tables.FloatCol(pos = len(coldesc))
+                            coldesc['rate'] = tables.FloatCol(pos = len(coldesc))
                             cachetable = cacheh5.createTable('/', 'data', coldesc, 'cached data')
                             cachetable.attrs.source = s
                             cacherow = cachetable.row
@@ -333,41 +349,43 @@ class Plot(object):
                             ta = table[0][it] # window left edge
                             tb = ta + window # window right edge
                             wd = [] # window data
-                            if condition:
-                                cc = compile_function(condition)
+                            cols = table.colnames
+                            wdlen = len(cols) + 1
+                            fweight = compile_function(weight)
+
+                            def append(r):
+                                wd.append(np.fromiter(chain(r[:], [fweight(r)]), dtype = np.float, count = wdlen))
 
                             progr_factor = 1.0 / table.nrows / len(expr_data)
 
                             for row in table.iterrows():
-                                if not condition or cc(row):
-                                    if row[it] < tb: # add row if in window
-                                        wd.append(row[:])
-                                    else: # calculate av and shift window
-                                        n = len(wd)
-                                        if n > 0:
-                                            for i, c in enumerate(table.colnames):
-                                                a = 0
-                                                for d in wd:
-                                                    a += d[i]
-                                                cacherow[c] = a / float(n)
-                                            cacherow['time'] = (ta + tb) * 0.5
-                                            cacherow['count'] = n
-                                            cacherow['rate'] = n / window
-                                            self.progress = progr_prev + row.nrow * progr_factor
-                                            yield cacherow
-                                            cacherow.append()
+                                if row[it] < tb: # add row if in window
+                                    append(row)
+                                else: # calculate av and shift window
+                                    n = len(wd)
+                                    if n > 0:
+                                        wdsum = reduce(lambda a, b: a + b, wd)
+                                        for i, c in enumerate(cols):
+                                            cacherow[c] = wdsum[i] / n
+                                        cacherow['time'] = (ta + tb) * 0.5 # overwrite with interval center
+                                        cacherow['count'] = n
+                                        cacherow['weight'] = wdsum[-1] / n
+                                        cacherow['rate'] = wdsum[-1] / window
+                                        self.progress = progr_prev + row.nrow * progr_factor
+                                        yield cacherow
+                                        cacherow.append()
 
-                                        ta += shift * window # shift window
+                                    ta += shift * window # shift window
+                                    tb = ta + window
+                                    if row[it] >= tb:
+                                        ta = row[it] # shift window
                                         tb = ta + window
-                                        if row[it] >= tb:
-                                            ta = row[it] # shift window
-                                            tb = ta + window
-                                        if shift == 1:
-                                            wd = []
-                                        else: # remove data left outside window
-                                            while wd[0][it] < ta:
-                                                del wd[0]
-                                        wd.append(row[:])
+
+                                    if shift == 1: # windows must be empty 
+                                        wd = []
+                                    else: # remove data outside new window
+                                        wd = filter(lambda x: ta <= x[it] < tb, wd)
+                                    append(row)
 
 
 
@@ -410,13 +428,25 @@ class Plot(object):
         # configure plotlib
         self.f = self._get('f', 10, float)
         plt.rc('font', **{'family':'sans-serif', 'sans-serif':['Dejavu Sans'], 'size':self.f})
-        plt.rc('axes', grid = True)
+        #plt.rc('axes', grid = True)
         plt.rc('lines', markeredgewidth = 0)
         w = self._get('w', 10, float)
         plt.gcf().set_size_inches((w, w / np.sqrt(2)), forward = True);
-        ticks.set_extended_locator(1)
         f = 0.09
         plt.gca().set_position([f, f, 1 - 2 * f, 1 - 2 * f])
+        ticks.set_extended_locator(1.5)
+        self.axes['m'] = plt.gca()
+
+
+    def _configure_post(self):
+        plt.axes(self.axes['m']) # activate main axes
+
+        # title
+        if self.t: plt.title(self.t, fontsize = 1.4 * self.f)
+
+        # labels
+        plt.xlabel(self.alabel('x'))
+        plt.ylabel(self.alabel('y'))
 
         #set scales        
         if self.xs:
@@ -425,33 +455,33 @@ class Plot(object):
         if self.ys:
             plt.gca().set_yscale(self.ys)
 
-
-    def _configure_post(self):
-        # title
-        if self.t: plt.title(self.t, fontsize = 1.4 * self.f)
-
-        # labels
-        plt.xlabel(self.alabel('x'))
-        plt.ylabel(self.alabel('y'))
-
         # ranges
         if self.xr: plt.xlim(eval(self.xr))
         if self.yr: plt.ylim(eval(self.yr))
 
         # grid
-        if self.g: plt.grid(eval(self.g))
+        for v, ax in self.axes.iteritems():
+            if v == 'm':
+                plt.grid(which = 'major', axis = 'both', linestyle = '-', color = 'k', alpha = 0.4)
+                plt.grid(which = 'minor', axis = 'both', linestyle = ':', color = 'k', alpha = 0.4)
+            elif v in 'xy':
+                plt.axes(ax)
+                plt.grid(which = 'major', axis = v, linestyle = '--', color = 'k', alpha = 0.4)
+                plt.grid(which = 'minor', axis = v, linestyle = '-.', color = 'k', alpha = 0.4)
 
         # legend
-        self.l = int(self.l) if self.l else 0
-        lines, names = [], []
-        for i, l in enumerate(self.lines):
-            if l:
-                lines.append(l)
-                names.append(self.llabel(i))
-        if len(lines) > 0 and 'map' not in self.m :
-            plt.legend(tuple(lines), tuple(names), loc = self.l)
+        plt.axes(self.axes.values()[-1]) # activate last added axes
+        if self.l != 'none' and len(filter(bool, self.lines)) > 1:
+            lines, names = [], []
+            for i, l in enumerate(self.lines):
+                if l:
+                    lines.append(l)
+                    names.append(self.llabel(i))
+            if len(lines) > 0 and 'map' not in self.m :
+                plt.legend(tuple(lines), tuple(names), loc = self.l or 'best')
 
-        plt.tight_layout(pad = 0.5, h_pad = 0, w_pad = 0)
+
+#        plt.tight_layout(pad = 0.5, h_pad = 0, w_pad = 0)
 
 
 
@@ -493,7 +523,7 @@ class Plot(object):
         l = ''
         for v in 'xyzc':
             w = getattr(self, v)[i]
-            if w: l += ':' + w
+            if w: l += u':{}'.format(w)
         return l[1:]
 
 
@@ -511,7 +541,8 @@ class Plot(object):
         self._prepare_data()
         self._configure_pre()
         for i, m in enumerate(self.m):
-            if m:
+            if m and self.s[i]:
+                self.selectAxes(i)
                 if m == 'xy':
                     self._xy(i)
                 elif m == 'h1':
@@ -545,6 +576,19 @@ class Plot(object):
 
         return dict(zip(extensions, names))
 
+
+    __twin = {'x':plt.twiny, 'y':plt.twinx}
+
+    def selectAxes(self, i):
+        plt.axes(self.axes['m']) # activate main axes
+        v = self.tw[i]
+        if v and v in 'xy':
+            if v in self.axes:
+                plt.axes(self.axes[v]) # activate twin x/y axes
+            else:
+                self.axes[v] = self.__twin[v]() # create twin x/y axes
+                ticks.set_extended_locator(1.5) # add tick locator
+            return
 
 
 

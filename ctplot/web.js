@@ -17,13 +17,15 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>. 
 
 $Id$
-*/
+ */
 
 /** ajax default settings */
 $.ajaxSetup({
 	url : 'webplot.py',
 	dataType : 'json'
 });
+
+var speed='fast';
 
 /** add .startsWith() function to string */
 if (typeof String.prototype.startsWith != 'function') {
@@ -38,7 +40,7 @@ function supportsSvg() {
 			"http://www.w3.org/TR/SVG11/feature#Shape", "1.0")
 }
 
-var tables_and_vars=null;
+var tables_and_vars = null;
 
 /** get available HDF5 from server */
 function sourcesBox() {
@@ -51,18 +53,21 @@ function sourcesBox() {
 		success : function(data) {
 			f = '';
 			ddbox = $('<select>').attr('name', 's*');
-			$('<option>').text('').val('').appendTo(
-					ddbox);
-			tables_and_vars=data;
+			$('<option>').text('').val('').appendTo(ddbox);
+			tables_and_vars = data;
 			$.each(data, function(k, v) { // radiobutton for each
 				coi = k.indexOf(':');
 				file = k.substr(0, coi);
 				tab = k.substr(coi + 1, k.length);
-				opt = $('<option>').text(k.replace(/.*\/(.*)\.h5:(.*)/, '$1: '+v[0])).val(k);
-				if(opt.text().startsWith('x'))
+				opt = $('<option>').text(
+						k.replace(/.*\/(.*)\.h5:(.*)/, '$1: ' + v[0])).val(k);
+				if (opt.text().startsWith('x'))
 					opt.addClass('expert')
 				opt.appendTo(ddbox);
 			});
+		},
+		error : function(xhr, text, error) {
+			alert(xhr['responseText']);
 		}
 	});
 	return $('<label>').append('Datensatz').append(ddbox);
@@ -90,31 +95,35 @@ function isExpertmode() {
 /** add interactive handlers */
 function addhandlers(plot) {
 	// display available vars on certain input fields
-	plot.find(':input[name^="x"],:input[name^="y"],:input[name^="z"],:input[name^="c"]')
-		.focusin(function(){
-			p=$(this).parents('.plot');
-			k=p.find('select[name^="s"]').val();
-			$.each(tables_and_vars, function(kk,vv){
-				if(kk==k){
-					vars = $('#vars').empty();
-					for (i = 0; i < vv[1].length; ++i) {
-						if (i > 0)
-							vars.append(', ');
-						vars.append('' + vv[1][i]);
-						if (vv[2][i].length > 0)
-							vars.append(' [' + vv[2][i] + ']');
-					}
-					if (p.find(':input[name^="rw"]').val().replace(/\s+/, '') != '')
-						vars.append(', rate, count');
-					$('#varsbox').show();
-					return false;
-				}
+	plot
+			.find(
+					':input[name^="x"],:input[name^="y"],:input[name^="z"],:input[name^="c"]')
+			.focusin(
+					function() {
+						p = $(this).parents('.plot');
+						k = p.find('select[name^="s"]').val();
+						$.each(tables_and_vars, function(kk, vv) {
+							if (kk == k) {
+								vars = $('#vars').empty();
+								for (i = 0; i < vv[1].length; ++i) {
+									if (i > 0)
+										vars.append(', ');
+									vars.append('' + vv[1][i]);
+									if (vv[2][i].length > 0)
+										vars.append(' [' + vv[2][i] + ']');
+								}
+								if (p.find(':input[name^="rw"]').val().replace(
+										/\s+/, '') != '')
+									vars.append(', rate, count');
+								$('#varsbox').show();
+								return false;
+							}
+						});
+					}).focusout(function() {
+				$('#varsbox').hide();
 			});
-		}).focusout(function(){
-			$('#varsbox').hide();
-		});
 	$('#varsbox').hide();
-	
+
 	// delete plot button
 	plot.find(':button[name="delplot"]').click(function() {
 		$(this).parents('.plot').remove();
@@ -125,8 +134,8 @@ function addhandlers(plot) {
 	plot.find(':input[name^="m"]').change(function() {
 		ms = '.t-' + $(this).val();
 		opt = $(this).parents('.plot').find('.opt');
-		opt.not(ms).hide('slow').find(':input').attr('disabled', true);
-		opt.filter(ms).show('slow').find(':input').attr('disabled', false);
+		opt.not(ms).hide(speed).find(':input').attr('disabled', true);
+		opt.filter(ms).show(speed).find(':input').attr('disabled', false);
 	}).change();
 
 	// rate window field
@@ -137,12 +146,33 @@ function addhandlers(plot) {
 				// if window empty:
 				if ($(this).val().replace(/\s+/, '') == '') {
 					r.attr('disabled', true);
-					r.parent().hide('slow');
+					r.parent().hide(speed);
 				} else if (isExpertmode()) {
 					r.attr('disabled', false);
-					r.parent().show('slow');
+					r.parent().show(speed);
 				}
 			}).keyup();
+
+	// twin axes dropdown box
+	plot.find(':input[name^="tw"]').change(function() {
+		hide_x = hide_y = true;
+		$(':input[name^="tw"]').each(function() {
+			if ($(this).val() == 'x')
+				hide_x = false;
+			if ($(this).val() == 'y')
+				hide_y = false;
+		});
+
+		if (hide_x)
+			$('.twinx').hide(speed);
+		else
+			$('.twinx').show(speed);
+
+		if (hide_y)
+			$('.twiny').hide(speed);
+		else
+			$('.twiny').show(speed);
+	}).change();
 
 	return plot;
 }
@@ -162,6 +192,128 @@ function inithelp() {
 }
 
 var xhr;
+
+function initFormSubmit() {
+	// hand submission of plot request and reception of the plot
+	$('form')
+			.submit(
+					function() {
+						try { // abort previous request
+							xhr.abort();
+						} catch (e) {
+							// if there was no previous request, ignore errors
+						}
+
+						// the form (all input fields) as url query string
+						query = $('form').serialize();
+
+						// store current plot settings (all input fields) into
+						// settings object
+						settings = new Object();
+						$(this)
+								.find(
+										':input:enabled:not(:button):not(:reset):not(:submit)[name][value]')
+								.each(function() {
+									if ($(this).is(':checkbox'))
+										v = $(this).is(':checked');
+									else
+										v = $(this).val();
+									settings[$(this).attr('name')] = v;
+
+								});
+
+						result = $('#result');
+						// print status information
+						result
+								.empty()
+								.append(
+										'<p>Plot wird erstellt, bitte warten&hellip;</p><img src="img/bar90.gif">')
+						// .append('<p>' + query + '</p>')
+						;
+
+						// scroll to plot section
+						$('nav a[href="#output"]').click();
+
+						// perform ajax request to get the plot (created on
+						// server)
+						$('#error').empty();
+						xhr = $
+								.ajax({
+									data : query,
+									success : function(data) {
+										result.empty();
+										$('<img>').attr(
+												'src',
+												data.png + '?'
+														+ new Date().getTime()) // add
+										// query
+										// string
+										// to
+										// prevent
+										// browser
+										// from
+										// showing
+										// cached
+										// image
+										.attr('alt', query).appendTo(result);
+										p = $('<p>').appendTo(result);
+										p.append('Download als ');
+										$('<a>').attr('href', data.pdf).attr(
+												'target', '_blank').text('PDF')
+												.appendTo(p);
+										p.append(', ')
+										$('<a>').attr('href', data.svg).attr(
+												'target', '_blank').text('SVG')
+												.appendTo(p);
+
+										// plot settings
+										result
+												.append('<br>Einstellungen dieses Plots:<br>');
+										result
+												.append($(
+														'<textarea id="plotsettings">')
+														.text(
+																JSON
+																		.stringify(settings)));
+
+										// plot url
+										result
+												.append('<br>Diesen Plot auf einer Webseite einbinden:<br>');
+										ploturl = $(location).attr('href')
+												.replace(/[#?].*/, '')
+												+ 'webplot.py?'
+												+ query.replace(/a=plot/,
+														'a=png');
+										result.append($(
+												'<textarea id="ploturl">')
+												.text(
+														'<img src="' + ploturl
+																+ '" />'));
+
+										// scroll to plot section
+										$('nav a[href="#output"]').click();
+									},
+									error : function(xhr, text, error) {
+										$('#result').empty();
+										$('#error')
+												.html(
+														'<p>plot error, check input values!</p>'
+																+ '<p>"'
+																+ text
+																+ '"</p><p>"'
+																+ error
+																+ '"</p>'
+																+ '<p style="color: red;">responseText:</p>'
+																+ xhr['responseText']);
+										// scroll to plot section
+										$('nav a[href="#output"]').click();
+									}
+								});
+
+						return false;
+					});
+
+}
 
 /** on page load... */
 $(function() {
@@ -205,7 +357,8 @@ $(function() {
 		$('#content > div').css('min-height', $(this).height());
 	}).resize();
 
-	// add source dropdown box to plot template, filled with available hdf5 data files
+	// add source dropdown box to plot template, filled with available hdf5 data
+	// files
 	sourcesBox().prependTo('.plot');
 	// detach the plot template (to be added by pressing 'add plot' button)
 	plot = $('.plot').detach();
@@ -220,101 +373,18 @@ $(function() {
 	}).click(); // add the first plot now
 
 	inithelp();
-	
+
 	// add handler to expertmode checkbox
-	$(':input[name="expertmode"]').click(function(){
+	$(':input[name="expertmode"]').click(function() {
 		if ($(this).is(':checked')) {
 			$('.expert').removeClass('hidden');
 		} else {
 			$('.expert').addClass('hidden');
-		}	
+		}
 	});
 	$(':input[name="expertmode"]:checked').click();
 	$('.expert').addClass('hidden');
 
-	// hand submission of plot request and reception of the plot
-	$('form')
-			.submit(
-					function() {
-						try { // abort previous request
-							xhr.abort();
-						} catch (e) {
-							// if there was no previous request, ignore errors
-						}
+	initFormSubmit();
 
-						// the form (all input fields) as url query string
-						query = $('form').serialize();
-
-						// store current plot settings (all input fields) into
-						// settings object
-						settings = new Object();
-						$(this)
-								.find(
-										':input:enabled:not(:button):not(:reset):not(:submit)[name][value]')
-								.each(
-										function() {
-											if ($(this).is(':checkbox'))
-												v=$(this).is(':checked');
-											else
-												v=$(this).val();
-											settings[$(this).attr('name')] = v;
-
-										});
-
-						result = $('#result');
-						// print status information
-						result
-								.empty()
-								.append(
-										'<p>Plot wird erstellt, bitte warten&hellip;</p><img src="img/bar90.gif">')
-								// .append('<p>' + query + '</p>')
-								;
-
-						// scroll to plot section
-						$('nav a[href="#output"]').click();
-						
-						// perform ajax request to get the plot (created on server)
-						$('#error').empty();
-						xhr = $.ajax({
-									data : query,
-									success : function(data) {
-										result.empty();
-										$('<img>').attr('src', data.png).appendTo(result);
-										p=$('<p>').appendTo(result);
-										p.append('Download als ');
-										$('<a>').attr('href', data.pdf).attr('target','_blank').text('PDF').appendTo(p);
-										p.append(', ')
-										$('<a>').attr('href', data.svg).attr('target','_blank').text('SVG').appendTo(p);
-										
-										// plot settings
-										result.append('<br>Einstellungen dieses Plots:<br>');
-										result.append($('<textarea id="plotsettings">').text(JSON.stringify(settings)));
-										
-										// plot url
-										result.append('<br>Diesen Plot auf einer Webseite einbinden:<br>');
-										ploturl=$(location).attr('href').replace(/[#?].*/,'')+'webplot.py?'+query.replace(/a=plot/,'a=png');
-										result.append($('<textarea id="ploturl">').text('<img src="'+ploturl+'" />'));
-										
-										
-										// scroll to plot section
-										$('nav a[href="#output"]').click();
-									},
-									error : function(xhr, text, error) {
-										$('#result').empty();
-										$('#error')
-												.html('<p>plot error, check input values!</p>'
-														+ '<p>"'
-														+ text
-														+ '"</p><p>"'
-														+ error
-														+ '"</p>'
-														+ '<p style="color: red;">responseText:</p>'
-														+ xhr['responseText']);
-										// scroll to plot section
-										$('nav a[href="#output"]').click();
-									}
-								});
-
-						return false;
-					});
 })
