@@ -435,39 +435,32 @@ class Plot(object):
         f = 0.09
         plt.gca().set_position([f, f, 1 - 2 * f, 1 - 2 * f])
         ticks.set_extended_locator(1.5)
-        self.axes['m'] = plt.gca()
+        self.axes[''] = plt.gca()
 
 
     def _configure_post(self):
-        plt.axes(self.axes['m']) # activate main axes
+        plt.axes(self.axes['']) # activate main axes
 
         # title
         if self.t: plt.title(self.t, fontsize = 1.4 * self.f)
-
-        # labels
-        plt.xlabel(self.alabel('x'))
-        plt.ylabel(self.alabel('y'))
-
-        #set scales        
-        if self.xs:
-            plt.gca().set_xscale(self.xs)
-
-        if self.ys:
-            plt.gca().set_yscale(self.ys)
 
         # ranges
         if self.xr: plt.xlim(eval(self.xr))
         if self.yr: plt.ylim(eval(self.yr))
 
-        # grid
+        # settings for main and twin axes
         for v, ax in self.axes.iteritems():
-            if v == 'm':
-                plt.grid(which = 'major', axis = 'both', linestyle = '-', color = 'k', alpha = 0.4)
-                plt.grid(which = 'minor', axis = 'both', linestyle = ':', color = 'k', alpha = 0.4)
-            elif v in 'xy':
-                plt.axes(ax)
-                plt.grid(which = 'major', axis = v, linestyle = '--', color = 'k', alpha = 0.4)
-                plt.grid(which = 'minor', axis = v, linestyle = '-.', color = 'k', alpha = 0.4)
+            plt.axes(ax)
+            # grid
+            plt.grid(which = 'major', axis = v or 'both', linestyle = '--' if v else '-', color = 'k', alpha = 0.4)
+            plt.grid(which = 'minor', axis = v or 'both', linestyle = '-.' if v else ':', color = 'k', alpha = 0.4)
+            # labels
+            plt.xlabel(self.alabel('x', v))
+            plt.ylabel(self.alabel('y', v))
+            #set scales
+            for a in 'xy':
+                s = getattr(self, a + 's' + ('tw' if a == v else ''))
+                if s: getattr(plt, '{}scale'.format(a))(s)
 
         # legend
         plt.axes(self.axes.values()[-1]) # activate last added axes
@@ -527,14 +520,20 @@ class Plot(object):
         return l[1:]
 
 
-    def alabel(self, a):
-        l = getattr(self, a + 'l')
-        if l: return l
-        l = u''
-        for x, u in zip(getattr(self, a), getattr(self, a + 'unit')):
-            if x and x not in l: l += u', {} [{}]'.format(x, u)
-        return l[2:]
+    def alabel(self, a, t = ''):
+        l = getattr(self, a + ('ltw' if t == a else 'l'))
+        if l:
+            return l
 
+        l = u''
+        exprs = getattr(self, a)
+        units = getattr(self, a + 'unit')
+        for i, x in enumerate(exprs):
+            if t and self.tw[i] != a: continue
+            if not t and self.tw[i] == a: continue
+            if x and x not in l: l += u', {} [{}]'.format(x, units[i])
+
+        return l[2:]
 
 
     def plot(self):
@@ -580,7 +579,7 @@ class Plot(object):
     __twin = {'x':plt.twiny, 'y':plt.twinx}
 
     def selectAxes(self, i):
-        plt.axes(self.axes['m']) # activate main axes
+        plt.axes(self.axes['']) # activate main axes
         v = self.tw[i]
         if v and v in 'xy':
             if v in self.axes:
@@ -796,10 +795,10 @@ class Plot(object):
 if __name__ == '__main__':
     logging.basicConfig(level = logging.DEBUG)
 
-    p = Plot(w = '10',
-             m0 = 'xy', x0 = 'time', y0 = 'T_a', ko0yerr = '1', rw0 = '3600', x0b = '20', c0 = '', s0 = 'data/ct-2009.h5:/merged/CT_events',
-             m1 = 'xy', x1 = 'time', y1 = 'T_a', ko1yerr = '1', rw1 = '3600', x1b = '20', c1 = '', s1 = 'data/ct-2010.h5:/merged/CT_events',
-             m2 = 'xy', x2 = 'time', y2 = 'T_a', ko2yerr = '1', rw2 = '3600', x2b = '20', c2 = '', s2 = 'data/ct-2011.h5:/merged/CT_events'
+    p = Plot(w = '15', l = 'lower right',
+             m0 = 'xy', tw0 = 'y', x0 = 'time', y0 = 'p', o0color = 'b', rw0 = '', x0b = '20', c0 = 'time>2.5e8', s0 = 'data/wetter.h5:/raw/zeuthen_weather',
+             m1 = 'xy', tw1 = 'x', x1 = 'time', y1 = 'T_a', o1color = 'r', rw1 = '', x1b = '20', c1 = 'time>2.5e8', s1 = 'data/wetter.h5:/raw/zeuthen_weather',
+             m2 = 'xy', tw2 = '', x2 = 'time', y2 = 'H_a', o2color = 'g', rw2 = '', x2b = '20', c2 = 'time>2.5e8', s2 = 'data/wetter.h5:/raw/zeuthen_weather'
              )
 
     import threading

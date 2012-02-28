@@ -180,7 +180,7 @@ class WeatherHandler(LineHandler):
     description = 'Zeuthen weather data [example: 2011-01-01 07:00:00+01:00 16.6 1.5 0.0 33 90 0.7 22.5 NNE -1.0 1.5 0.0 1006.9]'
     table_name = 'zeuthen_weather'
     table_title = 'Zeuthen weather data'
-    cols_and_units = OrderedDict([('time', 's'), ('T_i', 'C°'), ('T_a', 'C°'), ('T_dew', 'C°'),
+    cols_and_units = OrderedDict([('time', 's'), ('T_i', '°C'), ('T_a', '°C'), ('T_dew', '°C'),
                                   ('H_i', '%'), ('H_a', '%'), ('v_wind', 'm/s'), ('d_wind', '°'),
                                   ('gust', '?'), ('chill', '?'), ('rain', 'mm'), ('p', 'hPa'), ('clouds', '?')])
 
