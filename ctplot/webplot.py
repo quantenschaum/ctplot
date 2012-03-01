@@ -77,7 +77,7 @@ if __name__ == '__main__':
         settings = {}
         for k in fields.keys():
             if k[0] in 'xyzcmsorntwfgl':
-                settings[k] = fields.getfirst(k).strip()
+                settings[k] = fields.getfirst(k).strip().decode('utf8', errors = 'ignore')
 #            else: print >> sys.stderr, 'discarded', k, '=', fields.getfirst(k).strip()
 
         images = make_plot(settings)
@@ -98,6 +98,23 @@ if __name__ == '__main__':
         print "Content-Type: text/plain;charset=utf-8\n"
         print json.dumps(available_tables(h5dir))
 
+    elif action == 'save':
+        id = fields.getfirst('id').strip()
+        data = fields.getfirst('data').strip()
+        with open(os.path.join(sessiondir, 'data{}'.format(id)), 'w') as f:
+            f.write(data)
+        print "Content-Type: text/plain;charset=utf-8\n"
+        print 'saved {}'.format(id)
+
+    elif action == 'load':
+        id = fields.getfirst('id').strip()
+        print "Content-Type: text/plain;charset=utf-8\n"
+        try:
+            with open(os.path.join(sessiondir, 'data{}'.format(id))) as f:
+                for l in f: print l.strip()
+        except:
+            print 'no data for {}'.format(id)
+
     else:
-        raise ValueError('unknown action ' + action)
+        raise ValueError('unknown action {}'.format(action))
 

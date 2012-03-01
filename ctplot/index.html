@@ -27,11 +27,9 @@ $Id$
 <script src="jquery.js"></script>
 <script src="jquery.scrollTo.js"></script>
 <script src="jquery.localscroll.js"></script>
-<!-- script src="jquery-ui.js"></script -->
+<script src="jquery.cookie.js"></script>
 <script src="json2.js"></script>
 <script src="web.js"></script>
-<link rel="stylesheet" type="text/css"
-	href="css/redmond/jquery-ui-1.8.16.custom.css" />
 <link rel="stylesheet" type="text/css" href="style.css" />
 <script type="text/javascript">
 	var $buoop = {}
@@ -67,12 +65,10 @@ $Id$
 	<nav>
 		<ul>
 			<li><a href="#explaination">Anleitung</a></li>
+			<li><a href="#datasets">Datensätze</a></li>
 			<li><a href="#settings">Einstellungen</a></li>
             <li><a href="#output">Plot</a></li>
-            <!-- 
-			<li><a href="#datasets">Datensätze</a></li>
             <li><a href="#saved">gespeicherte Plots</a></li>
-             -->
 		</ul>
 	</nav>
 <div id="content">
@@ -81,13 +77,13 @@ $Id$
 			<p style="color: red;">Zur Zeit befindet sich dieses Auswertungstool im Testbetrieb.</p>
 			<p>Für weitere Info siehe im Wiki: <a href="https://znwiki3.ifh.de/KosmischeTeilchen/Software%3A%20Webinterface">https://znwiki3.ifh.de/KosmischeTeilchen/Software: Webinterface</a></p>
 		</div>
-<!-- 
+
 
 
 <div id="datasets">
 <h1>Datensätze</h1>
 </div>
- -->
+
 
 
 
@@ -163,7 +159,7 @@ $Id$
 
    
     <label data-help="wenn aktiviert werden zusätzliche Eingabefelder angezeigt (für fortgeschrittene Benutzer)">
-            Expertenmodus<input type="checkbox" name="expertmode" checked="checked" /></label>
+            Expertenmodus<input type="checkbox" name="expertmode" /></label>
     <label data-help="">Legende
         <select name="l">
             <option value="">automatisch</option>
@@ -327,11 +323,18 @@ $Id$
 </div>
 
 
-<!-- 
 <div id="saved">
 <h1>gespeicherte Plots</h1>
+<div id="loadsettings">
+    Zum Laden von gespeicherten Settings, die Settings in dieses Feld kopieren und laden.<br>
+    <textarea name="settingstoload"></textarea>
+    <input type="button" name="load" value="Laden" />
 </div>
- -->
+<div id="savedplots">
+Gespeicherte Plots können mit einem Doppelklick geladen werden. Die Ploteinstellungen werden auch geladen.<br>
+</div>
+
+</div>
 
 </div>
 <footer>Cosmic Trigger, Zeuthen, 2012</footer>

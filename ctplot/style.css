@@ -174,10 +174,6 @@ label:hover {
 	background: #ddf;
 }
 
-.hidden {
-	display: none !important;
-}
-
 input[type="text"]:focus,select:focus {
 	border: 1px solid #007acc;
 }
@@ -187,24 +183,23 @@ label .help {
 	cursor: help;
 }
 
-.global,.plot {
-	
-}
-
 .global {
 	max-width: 60em;
+	vertical-align: top;
 }
 
 .global label {
 	display: inline-block;
 	padding: .2em;
+	margin: 0;
 	width: 32.5%;
 	-webkit-box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	box-sizing: border-box;
+	width: 32.5%;
 }
 
-.global label input, .global label select {
+.global label input,.global label select {
 	width: 100%;
 	margin-top: .1em;
 }
@@ -260,6 +255,17 @@ label .help {
 	display: block;
 	margin: 1em auto;
 	max-width: 95%
+}
+
+#savedplots img {
+	display: inline-block;
+	height: 8em;
+	border: 1px solid #aaa;
+	margin: 1em 0 0 1em;
+}
+
+#savedplots img:hover {
+	border: 1px solid #007acc;
 }
 
 @media all and (max-width: 30em) {

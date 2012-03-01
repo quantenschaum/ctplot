@@ -422,6 +422,7 @@ class Plot(object):
         self.progress = 1
 
 
+    __tick_density = 1.5
 
 
     def _configure_pre(self):
@@ -434,7 +435,7 @@ class Plot(object):
         plt.gcf().set_size_inches((w, w / np.sqrt(2)), forward = True);
         f = 0.09
         plt.gca().set_position([f, f, 1 - 2 * f, 1 - 2 * f])
-        ticks.set_extended_locator(1.5)
+        ticks.set_extended_locator(self.__tick_density)
         self.axes[''] = plt.gca()
 
 
@@ -444,23 +445,24 @@ class Plot(object):
         # title
         if self.t: plt.title(self.t, fontsize = 1.4 * self.f)
 
-        # ranges
-        if self.xr: plt.xlim(eval(self.xr))
-        if self.yr: plt.ylim(eval(self.yr))
-
         # settings for main and twin axes
         for v, ax in self.axes.iteritems():
             plt.axes(ax)
+
             # grid
             plt.grid(which = 'major', axis = v or 'both', linestyle = '--' if v else '-', color = 'k', alpha = 0.4)
             plt.grid(which = 'minor', axis = v or 'both', linestyle = '-.' if v else ':', color = 'k', alpha = 0.4)
-            # labels
-            plt.xlabel(self.alabel('x', v))
-            plt.ylabel(self.alabel('y', v))
-            #set scales
+
+            #set labels, scales and ranges
             for a in 'xy':
+                if v and a != v: continue # on twins, set only axis
+                getattr(plt, '{}label'.format(a))(self.alabel(a, v)) # label
                 s = getattr(self, a + 's' + ('tw' if a == v else ''))
-                if s: getattr(plt, '{}scale'.format(a))(s)
+                if s: # scale
+                    getattr(plt, '{}scale'.format(a))(s)
+                r = getattr(self, a + 'r' + ('tw' if a == v else ''))
+                if r: # range (limits)
+                    getattr(plt, '{}lim'.format(a))(eval(r))
 
         # legend
         plt.axes(self.axes.values()[-1]) # activate last added axes
@@ -586,7 +588,7 @@ class Plot(object):
                 plt.axes(self.axes[v]) # activate twin x/y axes
             else:
                 self.axes[v] = self.__twin[v]() # create twin x/y axes
-                ticks.set_extended_locator(1.5) # add tick locator
+                ticks.set_extended_locator(self.__tick_density) # add tick locator
             return
 
 
@@ -795,9 +797,9 @@ class Plot(object):
 if __name__ == '__main__':
     logging.basicConfig(level = logging.DEBUG)
 
-    p = Plot(w = '15', l = 'lower right',
+    p = Plot(w = '', l = 'lower right',
              m0 = 'xy', tw0 = 'y', x0 = 'time', y0 = 'p', o0color = 'b', rw0 = '', x0b = '20', c0 = 'time>2.5e8', s0 = 'data/wetter.h5:/raw/zeuthen_weather',
-             m1 = 'xy', tw1 = 'x', x1 = 'time', y1 = 'T_a', o1color = 'r', rw1 = '', x1b = '20', c1 = 'time>2.5e8', s1 = 'data/wetter.h5:/raw/zeuthen_weather',
+             m1 = 'xy', tw1 = '', x1 = 'time', y1 = 'T_a', o1color = 'r', rw1 = '', x1b = '20', c1 = 'time>2.5e8', s1 = 'data/wetter.h5:/raw/zeuthen_weather',
              m2 = 'xy', tw2 = '', x2 = 'time', y2 = 'H_a', o2color = 'g', rw2 = '', x2b = '20', c2 = 'time>2.5e8', s2 = 'data/wetter.h5:/raw/zeuthen_weather'
              )
 
