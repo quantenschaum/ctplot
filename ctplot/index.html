@@ -180,6 +180,7 @@ $Id$
     <div id="varsbox">verfügbare Variablen: <span id="vars">a, b, c, &hellip;</span></div>
     <fieldset class="plot">
         <legend>Plot *</legend>
+        <img src="img/cross.png" class="delplot" title="Plot entfernen" />
         
 		<label data-help="">Plottyp<select name="m*">
           <option value="xy">xy-Plot</option>
@@ -303,14 +304,13 @@ $Id$
         <label data-help="" class="opt t-map">Bluemarble<input type="text" name="o*bluemarble" /></label>
         <label data-help="" class="opt t-map">Landesgrenzen<input type="text" name="o*drawcountries" /></label>
 	    -->
-	    <input type="button" name="delplot" value="Plot entfernen" />
     </fieldset>
+	<button type="button" id="addplot" ><img src="img/add.png" /> Plot hinzufügen</button>
 </div>
 <div class="buttons">
-	<input type="button" name="addplot" value="Plot hinzufügen" />
     <input type="hidden" name="a" value="plot" />
-    <input type="reset" name="reset" value="Reset" />
-    <input type="submit" name="plot" value="Plot erstellen" />
+    <button type="reset"><img src="img/arrow_undo.png" /> Reset</button>
+    <button type="submit"><img src="img/chart_line.png" /> Plot erstellen</button>
 </div>
 </form>
 <div id="debug"></div>
@@ -330,9 +330,8 @@ $Id$
     <textarea name="settingstoload"></textarea>
     <input type="button" name="load" value="Laden" />
 </div>
-<div id="savedplots">
 Gespeicherte Plots können mit einem Doppelklick geladen werden. Die Ploteinstellungen werden auch geladen.<br>
-</div>
+<div id="savedplots"></div>
 
 </div>
 

@@ -208,6 +208,18 @@ label .help {
 	display: inline-block;
 	width: 22%;
 	vertical-align: top;
+	position: relative;
+}
+
+.plot .delplot {
+	position: absolute;
+	top: 1em;
+	right: .5em;
+}
+
+#addplot {
+	display: inline-block;
+	margin: 20em 0 20em 3em;
 }
 
 .plot h2 {
@@ -257,15 +269,25 @@ label .help {
 	max-width: 95%
 }
 
-#savedplots img {
+#savedplots > div {
 	display: inline-block;
-	height: 8em;
-	border: 1px solid #aaa;
+	position: relative;
 	margin: 1em 0 0 1em;
 }
 
-#savedplots img:hover {
+#savedplots .savedplot {
+	height: 8em;
+	border: 1px solid #aaa;
+}
+
+#savedplots .savedplot:hover {
 	border: 1px solid #007acc;
+}
+
+#savedplots .delete {
+	position: absolute;
+	top: 3px;
+	right: 3px;
 }
 
 @media all and (max-width: 30em) {

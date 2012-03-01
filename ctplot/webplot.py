@@ -27,6 +27,7 @@ matplotlib.use('Agg')
 import json, os, cgitb, cgi, sys, subprocess, time
 from plot import Plot, available_tables
 from utils import hashargs, getCpuLoad
+from datetime import datetime
 from config import *
 from threading import Thread
 
@@ -81,6 +82,7 @@ if __name__ == '__main__':
 #            else: print >> sys.stderr, 'discarded', k, '=', fields.getfirst(k).strip()
 
         images = make_plot(settings)
+        images['timestamp'] = '{}'.format(datetime.now())
 
         if action == 'plot':
             print "Content-Type: text/plain;charset=utf-8\n"
@@ -100,17 +102,19 @@ if __name__ == '__main__':
 
     elif action == 'save':
         id = fields.getfirst('id').strip()
+        if len(id) < 8: raise RuntimeError('session id must have at least 8 digits')
         data = fields.getfirst('data').strip()
-        with open(os.path.join(sessiondir, 'data{}'.format(id)), 'w') as f:
+        with open(os.path.join(sessiondir, '{}.session'.format(id)), 'w') as f:
             f.write(data)
         print "Content-Type: text/plain;charset=utf-8\n"
         print 'saved {}'.format(id)
 
     elif action == 'load':
         id = fields.getfirst('id').strip()
+        if len(id) < 8: raise RuntimeError('session id must have at least 8 digits')
         print "Content-Type: text/plain;charset=utf-8\n"
         try:
-            with open(os.path.join(sessiondir, 'data{}'.format(id))) as f:
+            with open(os.path.join(sessiondir, '{}.session'.format(id))) as f:
                 for l in f: print l.strip()
         except:
             print 'no data for {}'.format(id)

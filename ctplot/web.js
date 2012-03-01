@@ -22,7 +22,8 @@ $Id$
 /** ajax default settings */
 $.ajaxSetup({
 	url : 'webplot.py',
-	dataType : 'json'
+	dataType : 'json',
+	type : 'post'
 });
 
 var speed = 'fast';
@@ -88,9 +89,12 @@ function renumber() {
 			e = $(this);
 			e.attr('name', e.attr('name').replace(/\*|\d/, '' + i));
 		});
-		plot.find(':button[name="delplot"]').prop('disabled', ch.length <= 1);
+		// plot.find('.delplot').prop('disabled', ch.length <= 1);
 	});
-	$(':button[name="addplot"]').prop('disabled', ch.length >= 4);
+	if (ch.length >= 4)
+		$('#addplot').hide();
+	else
+		$('#addplot').show();
 }
 
 function isExpertmode() {
@@ -138,7 +142,9 @@ function updateHiddenFields() {
 		}
 		// shift and weight
 		r = plot.find(':input[name^="rs"], :input[name^="rc"]').parents('label');
-		if ($(':input[name^="rw"]').val().replace(/\s+/, '') == '') { // no window given
+		if ($(':input[name^="rw"]').val().replace(/\s+/, '') == '') { // no
+			// window
+			// given
 			hide(r);
 		} else if (expert) {
 			show(r);
@@ -173,7 +179,7 @@ function addHandlers(plot) {
 	});
 
 	// delete plot button
-	plot.find(':button[name="delplot"]').click(function() {
+	plot.find('.delplot').click(function() {
 		$(this).parents('.plot').remove();
 		renumber();
 	});
@@ -267,16 +273,16 @@ function initPlots() {
 	sourcesBox().prependTo('.plot');
 	// detach the plot template (to be added by pressing 'add plot' button)
 	templatePlot = $('.plot').detach();
-	
+
 	$('#varsbox').hide();
 
-	$(':button[name="addplot"]').click(addPlot);
+	$('#addplot').click(addPlot);
 
-	// try {
-	// setSettings(JSON.parse($.cookie('lastsettings')));
-	// } catch (e) {
-	// addPlot();
-	// }
+	try {
+		setSettings(JSON.parse($.cookie('lastsettings')));
+	} catch (e) {
+		addPlot();
+	}
 
 	loadPlots();
 }
@@ -287,6 +293,7 @@ function addPlot() {
 	else
 		newplot = $('.plot:first').clone();
 	newplot.appendTo('#plots');
+	$('#addplot').appendTo('#plots');
 	renumber();
 	addHandlers(newplot);
 	updateHiddenFields();
@@ -323,23 +330,23 @@ function initScroll() {
 	}).scroll();
 
 	// set section size to viewport size
-	// $(window).resize(function() {
-	// $('#content > div').css('min-height', $(this).height());
-	// }).resize();
+	$(window).resize(function() {
+		$('#content > div').css('min-height', $(this).height());
+	}).resize();
 }
 
 function getSessionID() {
-	return 'abc123';
+	return 'abc123xyz';
 }
 
 function savePlots() {
 	o = new Object();
 	o.savedPlots = [];
-	$('#savedplots img').each(function() {
+	$('.savedplot').each(function() {
 		o.savedPlots.push($(this).data('settings'));
 	});
 	$.ajax({
-		// async : false,
+		async : false,
 		data : {
 			a : 'save',
 			id : getSessionID(),
@@ -358,7 +365,7 @@ function savePlots() {
 
 function loadPlots() {
 	$.ajax({
-		// async : false,
+		async : false,
 		data : {
 			a : 'load',
 			id : getSessionID(),
@@ -379,11 +386,18 @@ function loadPlots() {
 }
 
 function addPlotToSaved(settings) {
-	$('<img>').attr('src', settings.png).attr('alt', settings.t).attr('title', settings.t).data('settings', settings).appendTo('#savedplots').dblclick(
-			function() {
-				setSettings($(this).data('settings'));
-				// $('form').submit();
-			});
+	$('<div>').appendTo('#savedplots').append(
+			$('<img>').attr('src', settings.png).attr('alt', settings.t).attr('title', settings.t).data('settings', settings).addClass('savedplot').dblclick(
+					function() {
+						setSettings($(this).data('settings'));
+						// $('nav a[href="#settings"]').click();
+						$('form').submit();
+					}))
+
+	.append($('<img>').attr('src', 'img/cross.png').attr('title', 'Plot löschen').addClass('delete').click(function() {
+		$(this).parent().remove();
+		savePlots();
+	}));
 }
 
 var xhr;
@@ -401,6 +415,7 @@ function initSubmit() {
 				// the form (all input fields) as url query string
 				query = $('form').serialize();
 				settings = getSettings();
+				$.cookie('lastsettings', JSON.stringify(settings));
 
 				// store current plot settings (all input fields) into
 				// settings object
@@ -412,7 +427,7 @@ function initSubmit() {
 				;
 
 				// scroll to plot section
-				// $('nav a[href="#output"]').click();
+				$('nav a[href="#output"]').click();
 
 				// perform ajax request to get the plot (created on
 				// server)
@@ -430,18 +445,20 @@ function initSubmit() {
 						p = $('<p>').appendTo(result);
 						p.append('Download als ');
 						$('<a>').attr('href', data.pdf).attr('target', '_blank').text('PDF').appendTo(p);
-						p.append(', ')
+						p.append(', ');
 						$('<a>').attr('href', data.svg).attr('target', '_blank').text('SVG').appendTo(p);
 
 						// store settings in cookie
 						$.extend(settings, data); // append plot image urls to
 						$.cookie('lastsettings', JSON.stringify(settings));
 						// save plot button
-						$('<input>').attr('type', 'button').attr('value', 'Plot speichern').click(function() {
-							addPlotToSaved(settings);
-							$(this).hide(speed);
-							savePlots();
-						}).appendTo(p);
+						p.append(', ');
+						$('<input>').attr('type', 'image').attr('src', 'img/disk.png').attr('title', 'Plot speichern').attr('value', 'Plot speichern').click(
+								function() {
+									addPlotToSaved(settings);
+									$(this).hide(speed);
+									savePlots();
+								}).appendTo(p);
 
 						// plot settings
 						result.append('<br>Einstellungen dieses Plots:<br>');
