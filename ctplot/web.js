@@ -97,31 +97,51 @@ function isExpertmode() {
 	return $(':checkbox[name="expertmode"]').prop('checked');
 }
 
+function hide(s) {
+	s = $(s);
+	s.hide(speed).find(':input').prop('disabled', true);
+	return s;
+}
+
+function show(s) {
+	s = $(s);
+	s.show(speed).find(':input').prop('disabled', false);
+	return s;
+}
+
 /** disable/enable fields according to expertmode and plotmode */
 function updateHiddenFields() {
 	expert = isExpertmode();
 	if (!expert) // hide expert fields
-		$('.expert').hide(speed).find(':input').prop('disabled', true);
+		hide('.expert');
 	else {
 		// twin axes global fields
 		$.each([ 'x', 'y' ], function(i, v) {
 			if ($(':input[name^="tw"][value="' + v + '"]').size() > 0)
-				$('.twin' + v).show(speed).find(':input').prop('disabled', false);
+				show('.twin' + v);
 			else
-				$('.twin' + v).hide(speed).find(':input').prop('disabled', true);
+				hide('.twin' + v);
 		});
 	}
 
 	// field in individual plot settings
 	$('.plot').each(function() {
 		plot = $(this);
+		// mode dependant fields
 		plotmode = '.t-' + plot.find(':input[name^="m"]').val();
 		opts = plot.find('.opt');
-		opts.not(plotmode).hide(speed).find(':input').prop('disabled', true);
+		hide(opts.not(plotmode));
 		if (expert) {
-			opts.filter(plotmode).show(speed).find(':input').prop('disabled', false);
+			show(opts.filter(plotmode));
 		} else {
-			opts.filter(plotmode).not('.expert').show(speed).find(':input').prop('disabled', false);
+			show(opts.filter(plotmode).not('.expert'));
+		}
+		// shift and weight
+		r = plot.find(':input[name^="rs"], :input[name^="rc"]').parents('label');
+		if ($(':input[name^="rw"]').val().replace(/\s+/, '') == '') { // no window given
+			hide(r);
+		} else if (expert) {
+			show(r);
 		}
 	});
 }
@@ -151,7 +171,6 @@ function addHandlers(plot) {
 	}).focusout(function() {
 		$('#varsbox').hide();
 	});
-	$('#varsbox').hide();
 
 	// delete plot button
 	plot.find(':button[name="delplot"]').click(function() {
@@ -162,25 +181,19 @@ function addHandlers(plot) {
 	// plot mode dropdown box
 	plot.find(':input[name^="m"]').change(function() {
 		updateHiddenFields();
-	}).change();
+	});
 
 	// rate window field
 	plot.find(':input[name^="rw"]').keyup(function() {
-		r = $(this).parents('.plot').find(':input[name^="rs"], :input[name^="rc"]');
-		// if window empty:
-		if ($(this).val().replace(/\s+/, '') == '') {
-			r.prop('disabled', true);
-			r.parent().hide(speed);
-		} else if (isExpertmode()) {
-			r.prop('disabled', false);
-			r.parent().show(speed);
-		}
-	}).keyup();
+		updateHiddenFields();
+	});
 
 	// twin axes dropdown box
 	plot.find(':input[name^="tw"]').change(function() {
 		updateHiddenFields();
-	}).change();
+	});
+
+	updateHiddenFields();
 
 	return plot;
 }
@@ -254,13 +267,15 @@ function initPlots() {
 	sourcesBox().prependTo('.plot');
 	// detach the plot template (to be added by pressing 'add plot' button)
 	templatePlot = $('.plot').detach();
+	
+	$('#varsbox').hide();
 
 	$(':button[name="addplot"]').click(addPlot);
 
 	// try {
 	// setSettings(JSON.parse($.cookie('lastsettings')));
 	// } catch (e) {
-	addPlot();
+	// addPlot();
 	// }
 
 	loadPlots();
@@ -367,7 +382,7 @@ function addPlotToSaved(settings) {
 	$('<img>').attr('src', settings.png).attr('alt', settings.t).attr('title', settings.t).data('settings', settings).appendTo('#savedplots').dblclick(
 			function() {
 				setSettings($(this).data('settings'));
-				$('form').submit();
+				// $('form').submit();
 			});
 }
 
