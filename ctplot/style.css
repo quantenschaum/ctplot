@@ -140,6 +140,16 @@ legend {
 	font-weight: bold;
 }
 
+button {
+	font-family: "Helvetica Neue", Helvetica, Arial, "Lucida Grande",
+		sans-serif;
+	padding: .2em;
+}
+
+button img {
+	vertical-align: top;
+}
+
 input[type="text"],select,textarea {
 	font-family: "Droid Sans Mono", monospace;
 	font-size: 90%;
@@ -240,6 +250,8 @@ label .help {
 
 .buttons {
 	clear: both;
+	text-align: center;
+	padding: 2em 0;
 }
 
 #varsbox {
@@ -252,6 +264,7 @@ label .help {
 	background: #fff;
 	border-top: 1px solid #aaa;
 	box-shadow: 0 0 6px 3px rgba(0, 0, 0, 0.2);
+	z-index: 5;
 }
 
 #vars {
@@ -266,10 +279,11 @@ label .help {
 #result img {
 	display: block;
 	margin: 1em auto;
-	max-width: 95%
+	max-width: 95%;
+	-ms-interpolation-mode: bicubic;
 }
 
-#savedplots > div {
+#savedplots>div {
 	display: inline-block;
 	position: relative;
 	margin: 1em 0 0 1em;
@@ -278,16 +292,25 @@ label .help {
 #savedplots .savedplot {
 	height: 8em;
 	border: 1px solid #aaa;
+	-ms-interpolation-mode: bicubic;
 }
 
 #savedplots .savedplot:hover {
 	border: 1px solid #007acc;
 }
 
-#savedplots .delete {
+#savedplots .delete,#savedplots .loadplot {
 	position: absolute;
 	top: 3px;
+	background: rgba(255, 255, 255, 0.8);
+}
+
+#savedplots .delete {
 	right: 3px;
+}
+
+#savedplots .loadplot {
+	right: 22px;
 }
 
 @media all and (max-width: 30em) {

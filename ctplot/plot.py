@@ -222,12 +222,13 @@ class Plot(object):
         # prefilled with empty lists
         expr_data = {}
         joined_cuts = {} # OR of all cuts
+        log.debug('self.sr={}'.format(self.sr))
         for n, s in enumerate(self.sr):
             if s:
                 if s not in expr_data:
-                    expr_data[s] = {}
+                    expr_data[s] = {} #  add dict for every unique source s (plot n)
                 for v in 'xyzc':
-                    expr = getattr(self, v)[n]
+                    expr = getattr(self, v)[n] # x/y/z/c expression for source s (plot n)
                     if expr:
                         expr_data[s][expr] = []
                     if v == 'c':
@@ -236,7 +237,10 @@ class Plot(object):
                         else:
                             joined_cuts[s] = '({})'.format(expr)
 
+                log.debug('*joined_cuts[{}]={}'.format(s, joined_cuts.get(s)))
                 if '(None)' in joined_cuts[s]: del joined_cuts[s]
+                log.debug('joined_cuts[{}]={}'.format(s, joined_cuts.get(s)))
+
 
 
         # loop over tables and fill data lists in expr_data
@@ -253,8 +257,8 @@ class Plot(object):
         log.debug('source={}'.format(self.s))
         log.debug('srcavg={}'.format(self.sr))
         for v in 'xyzc':
-            log.debug(' {}data {}'.format(x, [len(x) if x is not None else None for x in getattr(self, v + 'data')]))
-            log.debug(' {}unit {}'.format(x, [x for x in getattr(self, v + 'unit')]))
+            log.debug(' {}data {}'.format(v, [len(x) if x is not None else None for x in getattr(self, v + 'data')]))
+            log.debug(' {}unit {}'.format(v, [x for x in getattr(self, v + 'unit')]))
 
 
 
@@ -795,11 +799,11 @@ class Plot(object):
 
 
 if __name__ == '__main__':
-    logging.basicConfig(level = logging.DEBUG)
+    logging.basicConfig(level = logging.DEBUG, format = '%(filename)s:%(funcName)s:%(lineno)d: %(message)s')
 
     p = Plot(w = '', l = 'lower right',
-             m0 = 'xy', tw0 = 'y', x0 = 'time', y0 = 'p', o0color = 'b', rw0 = '', x0b = '20', c0 = 'time>2.5e8', s0 = 'data/wetter.h5:/raw/zeuthen_weather',
-             m1 = 'xy', tw1 = '', x1 = 'time', y1 = 'T_a', o1color = 'r', rw1 = '', x1b = '20', c1 = 'time>2.5e8', s1 = 'data/wetter.h5:/raw/zeuthen_weather',
+             m0 = 'xy', tw0 = 'y', x0 = 'time', y0 = 'p', o0color = 'b', rw0 = '', x0b = '20', c0 = '', s0 = 'data/wetter.h5:/raw/zeuthen_weather',
+             m1 = 'xy', tw1 = '', x1 = 'time', y1 = 'T_a', o1color = 'r', rw1 = '', x1b = '20', c1 = '', s1 = 'data/wetter.h5:/raw/zeuthen_weather',
              m2 = 'xy', tw2 = '', x2 = 'time', y2 = 'H_a', o2color = 'g', rw2 = '', x2b = '20', c2 = 'time>2.5e8', s2 = 'data/wetter.h5:/raw/zeuthen_weather'
              )
 

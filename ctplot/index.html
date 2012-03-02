@@ -28,8 +28,10 @@ $Id$
 <script src="jquery.scrollTo.js"></script>
 <script src="jquery.localscroll.js"></script>
 <script src="jquery.cookie.js"></script>
+<script src="jquery.lightbox.js"></script>
 <script src="json2.js"></script>
 <script src="web.js"></script>
+<link rel="stylesheet" type="text/css" href="lightbox.css" media="screen" />
 <link rel="stylesheet" type="text/css" href="style.css" />
 <script type="text/javascript">
 	var $buoop = {}
@@ -313,12 +315,11 @@ $Id$
     <button type="submit"><img src="img/chart_line.png" /> Plot erstellen</button>
 </div>
 </form>
-<div id="debug"></div>
 </div>
 
 <div id="output">
 <h1>Plot</h1>
-<div id="result"></div>
+<div id="result">Bitte unter <a href="#settings">Einstellungen</a> einen Plot konfigurieren und auf "Plot erstellen" klicken.</div>
 <div id="error"></div>
 </div>
 
@@ -328,9 +329,16 @@ $Id$
 <div id="loadsettings">
     Zum Laden von gespeicherten Settings, die Settings in dieses Feld kopieren und laden.<br>
     <textarea name="settingstoload"></textarea>
-    <input type="button" name="load" value="Laden" />
+    <button type="button" name="load">Laden</button>
 </div>
-Gespeicherte Plots können mit einem Doppelklick geladen werden. Die Ploteinstellungen werden auch geladen.<br>
+<div>Die in der Session gespeicherten Plots werden unter der angegebenen Session-ID auf dem Server gespeichert. Durch Klick auf "neue ID" wird eine neue, zufällige ID erzeugt. 
+Es kann aber auch eine selbst gewählte (mind. 8 Zeichen) Session-ID verwendet werden. Zum Anlegen/Laden einer eigenen Session-ID diese eingeben und die "Session laden". 
+Existiert diese Session nicht, so ist sie leer und enthält keine gespeicherten Plots. Die Session-ID, unter der man seine Plots speichert, notiert man sich 
+und kann damit die Plots inklusive ihrer Einstellungen zu einem späteren Zeitpunkt (oder anderen Rechner) wieder laden.<br>
+<label>Session-ID <input type="text" id="sessionid" /></label><button type="button" id="newid">neue ID</button><button type="button" id="loadid">Session laden</button></div>
+
+Gespeicherte Plots und ihre Einstellungen können mit einem Klick auf <img src="img/arrow_redo.png"> geladen und auf <img src="img/cross.png"> gelöscht werden.
+Ein Klick auf das Bild, vergrößert es.<br>
 <div id="savedplots"></div>
 
 </div>

@@ -80,7 +80,7 @@ function sourcesBox() {
 }
 
 /** renumber form field names after add/del of plot */
-function renumber() {
+function renumberPlots() {
 	ch = $('#plots').children('.plot');
 	ch.each(function(i) {
 		plot = $(this);
@@ -181,7 +181,7 @@ function addHandlers(plot) {
 	// delete plot button
 	plot.find('.delplot').click(function() {
 		$(this).parents('.plot').remove();
-		renumber();
+		renumberPlots();
 	});
 
 	// plot mode dropdown box
@@ -283,8 +283,6 @@ function initPlots() {
 	} catch (e) {
 		addPlot();
 	}
-
-	loadPlots();
 }
 
 function addPlot() {
@@ -294,7 +292,7 @@ function addPlot() {
 		newplot = $('.plot:first').clone();
 	newplot.appendTo('#plots');
 	$('#addplot').appendTo('#plots');
-	renumber();
+	renumberPlots();
 	addHandlers(newplot);
 	updateHiddenFields();
 }
@@ -336,7 +334,49 @@ function initScroll() {
 }
 
 function getSessionID() {
-	return 'abc123xyz';
+	id = $.cookie('session');
+	if (id != null)
+		$('#sessionid').val(id);
+	else
+		newSessionID();
+	return $('#sessionid').val();
+}
+
+function newSessionID() {
+	$.ajax({
+		async : false,
+		data : {
+			a : 'newid',
+		},
+		dataType : 'text',
+		success : function(data, status, xhr) {
+			$('#sessionid').val(data);
+			$.cookie('session', data);
+		}
+	});
+}
+
+function initSavedPlots() {
+	getSessionID();
+	$('#newid').click(function() {
+		newSessionID();
+		loadPlots();
+	});
+	$('#loadid').click(function() {
+		id = $('#sessionid').val();
+		if (id.length < 8) {
+			alert('Die Session-ID muss mindestens 8 Zeichen lang sein.');
+			return;
+		}
+		$.cookie('session', id);
+		loadPlots();
+	});
+	$('#sessionid').keyup(function(e) {
+		if (e.keyCode == 13) {
+			$('#loadid').click();
+		}
+	});
+	loadPlots();
 }
 
 function savePlots() {
@@ -352,51 +392,52 @@ function savePlots() {
 			id : getSessionID(),
 			data : JSON.stringify(o)
 		},
-		dataType : 'text',
 		// success : function(data, status, xhr) {
 		// $('#debug').empty().append('' +
 		// o).append('<br>').append(''+status).append('<br>').append(''+xhr);
 		// },
 		error : function(xhr, text, error) {
-			alert('saving plots faild ' + text + ' ' + error);
+			alert('saving plots failed ' + xhr['responseText']);
 		}
 	});
 }
 
 function loadPlots() {
+	$('#savedplots').empty();
 	$.ajax({
 		async : false,
 		data : {
 			a : 'load',
 			id : getSessionID(),
 		},
-		dataType : 'json',
 		success : function(o, status, xhr) {
 			// $('#debug').empty().append('' + o).append('<br>').append('' +
 			// status).append('<br>').append('' + xhr);
-			$('#savedplots').empty();
 			$.each(o.savedPlots, function(i, s) {
 				addPlotToSaved(s);
 			});
 		},
 	// error : function(xhr, text, error) {
-	// alert('loading plots faild ' + text + ' ' + error);
+	// alert('loading plots failed ' + xhr['responseText'] + ' ' + text + ' ' +
+	// error);
 	// }
 	});
 }
 
 function addPlotToSaved(settings) {
 	$('<div>').appendTo('#savedplots').append(
-			$('<img>').attr('src', settings.png).attr('alt', settings.t).attr('title', settings.t).data('settings', settings).addClass('savedplot').dblclick(
-					function() {
-						setSettings($(this).data('settings'));
-						// $('nav a[href="#settings"]').click();
-						$('form').submit();
-					}))
+			$('<img>').attr('src', settings.png).attr('href', settings.png).attr('alt', settings.t).attr('title', settings.t).attr('rel', 'lightbox[savedplots]').data('settings', settings)
+					.addClass('savedplot').lightBox())
 
 	.append($('<img>').attr('src', 'img/cross.png').attr('title', 'Plot löschen').addClass('delete').click(function() {
 		$(this).parent().remove();
 		savePlots();
+	}))
+
+	.append($('<img>').attr('src', 'img/arrow_redo.png').attr('title', 'Plot laden').addClass('loadplot').click(function() {
+		setSettings($(this).parent().find('.savedplot').data('settings'));
+		// $('nav a[href="#settings"]').click();
+		$('form').submit();
 	}));
 }
 
@@ -490,9 +531,10 @@ function initSubmit() {
 /** on page load... */
 $(function() {
 	initScroll();
-	initPlots();
 	initHelp();
 	initExpertMode();
+	initPlots();
 	initSubmit();
 	initSettingsLoader();
+	initSavedPlots();
 });

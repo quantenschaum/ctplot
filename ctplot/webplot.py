@@ -1,6 +1,6 @@
-#!c:\Program Files (x86)\Python27\python.exe
-# -*- coding: utf-8 -*-
 #!/opt/python/bin/python
+# -*- coding: utf-8 -*-
+#!c:\Program Files (x86)\Python27\python.exe
 #!/usr/bin/python
 #    pyplot - python based data plotting tools
 #    created for DESY Zeuthen
@@ -24,7 +24,7 @@
 import matplotlib
 matplotlib.use('Agg')
 
-import json, os, cgitb, cgi, sys, subprocess, time
+import json, os, cgitb, cgi, sys, subprocess, time, random, string
 from plot import Plot, available_tables
 from utils import hashargs, getCpuLoad
 from datetime import datetime
@@ -68,6 +68,11 @@ def countInstances(process):
             count += 1
     return count
 
+_chars = string.ascii_letters + string.digits
+
+def randomChars(n):
+    return ''.join(random.choice(_chars) for i in xrange(n))
+
 
 if __name__ == '__main__':
     fields = cgi.FieldStorage()
@@ -105,9 +110,9 @@ if __name__ == '__main__':
         if len(id) < 8: raise RuntimeError('session id must have at least 8 digits')
         data = fields.getfirst('data').strip()
         with open(os.path.join(sessiondir, '{}.session'.format(id)), 'w') as f:
-            f.write(data)
+            f.write(data.replace('},{', '},\n{'))
         print "Content-Type: text/plain;charset=utf-8\n"
-        print 'saved {}'.format(id)
+        print json.dumps('saved {}'.format(id))
 
     elif action == 'load':
         id = fields.getfirst('id').strip()
@@ -119,6 +124,12 @@ if __name__ == '__main__':
         except:
             print 'no data for {}'.format(id)
 
+    elif action == 'newid':
+        id = randomChars(8)
+        while os.path.isfile(os.path.join(sessiondir, '{}.session'.format(id))):
+            id = randomChars(8)
+        print "Content-Type: text/plain;charset=utf-8\n"
+        print id
     else:
         raise ValueError('unknown action {}'.format(action))
 
