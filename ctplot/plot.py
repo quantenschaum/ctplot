@@ -237,9 +237,9 @@ class Plot(object):
                         else:
                             joined_cuts[s] = '({})'.format(expr)
 
-                log.debug('*joined_cuts[{}]={}'.format(s, joined_cuts.get(s)))
-                if '(None)' in joined_cuts[s]: del joined_cuts[s]
-                log.debug('joined_cuts[{}]={}'.format(s, joined_cuts.get(s)))
+        for s in joined_cuts.keys():
+            if '(None)' in joined_cuts[s]: del joined_cuts[s]
+        log.debug('joined_cuts = {}'.format(joined_cuts))
 
 
 
@@ -258,7 +258,7 @@ class Plot(object):
         log.debug('srcavg={}'.format(self.sr))
         for v in 'xyzc':
             log.debug(' {}data {}'.format(v, [len(x) if x is not None else None for x in getattr(self, v + 'data')]))
-            log.debug(' {}unit {}'.format(v, [x for x in getattr(self, v + 'unit')]))
+#            log.debug(' {}unit {}'.format(v, [x for x in getattr(self, v + 'unit')]))
 
 
 
@@ -804,7 +804,8 @@ if __name__ == '__main__':
     p = Plot(w = '', l = 'lower right',
              m0 = 'xy', tw0 = 'y', x0 = 'time', y0 = 'p', o0color = 'b', rw0 = '', x0b = '20', c0 = '', s0 = 'data/wetter.h5:/raw/zeuthen_weather',
              m1 = 'xy', tw1 = '', x1 = 'time', y1 = 'T_a', o1color = 'r', rw1 = '', x1b = '20', c1 = '', s1 = 'data/wetter.h5:/raw/zeuthen_weather',
-             m2 = 'xy', tw2 = '', x2 = 'time', y2 = 'H_a', o2color = 'g', rw2 = '', x2b = '20', c2 = 'time>2.5e8', s2 = 'data/wetter.h5:/raw/zeuthen_weather'
+             m2 = 'xy', tw2 = '', x2 = 'time', y2 = 'H_a', o2color = 'g', rw2 = '', x2b = '20', c2 = '', s2 = 'data/wetter.h5:/raw/zeuthen_weather',
+             m3 = 'xy', tw3 = '', x3 = 'time', y3 = 'rain', o3color = 'y', rw3 = '', x3b = '20', c3 = 'rain<100', s3 = 'data/wetter.h5:/raw/zeuthen_weather'
              )
 
     import threading

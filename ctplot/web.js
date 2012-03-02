@@ -426,7 +426,7 @@ function loadPlots() {
 
 function addPlotToSaved(settings) {
 	$('<div>').appendTo('#savedplots').append(
-			$('<img>').attr('src', settings.png).attr('href', settings.png).attr('alt', settings.t).attr('title', settings.t).attr('rel', 'lightbox[savedplots]').data('settings', settings)
+			$('<img>').attr('src', settings.png).attr('href', settings.png).attr('alt', settings.t).attr('title', settings.t).data('settings', settings)
 					.addClass('savedplot').lightBox())
 
 	.append($('<img>').attr('src', 'img/cross.png').attr('title', 'Plot löschen').addClass('delete').click(function() {
