@@ -192,3 +192,4 @@ def getCpuLoad():
     usage = getCpuUsage()
     del usage['idle']
     return sum(usage.values())
+

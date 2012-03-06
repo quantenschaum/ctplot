@@ -119,6 +119,8 @@ function updateHiddenFields() {
 	if (!expert) // hide expert fields
 		hide('.expert');
 	else {
+		// options
+		show('option.expert')
 		// twin axes global fields
 		$.each([ 'x', 'y' ], function(i, v) {
 			if ($(':input[name^="tw"][value="' + v + '"]').size() > 0)
@@ -427,18 +429,21 @@ function loadPlots() {
 function addPlotToSaved(settings) {
 	$('<div>').appendTo('#savedplots').append(
 			$('<img>').attr('src', settings.png).attr('href', settings.png).attr('alt', settings.t).attr('title', settings.t).data('settings', settings)
-					.addClass('savedplot').lightBox())
+					.addClass('savedplot'))
 
 	.append($('<img>').attr('src', 'img/cross.png').attr('title', 'Plot löschen').addClass('delete').click(function() {
 		$(this).parent().remove();
+		$('.savedplot').unbind().lightBox();
 		savePlots();
 	}))
 
 	.append($('<img>').attr('src', 'img/arrow_redo.png').attr('title', 'Plot laden').addClass('loadplot').click(function() {
 		setSettings($(this).parent().find('.savedplot').data('settings'));
-		// $('nav a[href="#settings"]').click();
-		$('form').submit();
+		$('nav a[href="#settings"]').click();
+		// $('form').submit();
 	}));
+	
+	$('.savedplot').unbind().lightBox();
 }
 
 var xhr;

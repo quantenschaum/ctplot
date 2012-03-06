@@ -291,8 +291,10 @@ label .help {
 
 #savedplots .savedplot {
 	height: 8em;
+	max-width: 20em;
 	border: 1px solid #aaa;
 	-ms-interpolation-mode: bicubic;
+	border: 1px solid #aaa;
 }
 
 #savedplots .savedplot:hover {

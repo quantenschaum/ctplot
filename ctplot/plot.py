@@ -26,11 +26,11 @@ import numpy as np
 import numpy.ma as ma
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-from utils import get_args_from, isseq, set_defaults, number_mathformat, hashargs, \
-    noop
+from utils import get_args_from, isseq, set_defaults, number_mathformat, number_format, hashargs, noop
 from itertools import product
 from safeeval import safeeval
 from config import *
+from numpy.core.fromnumeric import prod
 
 log = logging.getLogger('plot')
 
@@ -138,6 +138,52 @@ def sproduct(a, b):
         yield '{}{}'.format(x, y)
 
 
+def stats_fields1d(data, contents, errors, edges):
+    centers = (edges[1:] + edges[:-1]) / 2
+    assert len(centers) == len(edges) - 1
+    widths = np.diff(edges)
+    stats = {}
+    stats['N'] = N = np.sum(contents)
+    stats['uflow'] = np.sum(data < edges[0])
+    stats['oflow'] = np.sum(edges[-1] < data)
+    stats['mean'] = mean = np.sum(centers * contents) / N
+    stats['std'] = std = np.sqrt(np.sum((centers - mean) ** 2 * contents) / N)
+    stats['mode'] = centers[np.argmax(contents)]
+    bc, be = get_density(contents, errors, widths)
+    bc, be = get_cumulative(bc, be, 1, widths)
+    median_i = np.searchsorted(bc, 0.5, side = 'right')
+    stats['median'] = median = centers[median_i]
+    if len(centers) % 2 == 0: # even # of s
+        stats['median'] = median = (median + centers[median_i - 1]) / 2
+    stats['skew'] = np.sum(((centers - mean) / std) ** 3 * contents) / N
+    stats['kurtos'] = kurtosis = np.sum(((centers - mean) / std) ** 4 * contents) / N
+    stats['excess'] = kurtosis - 3
+    log.debug(stats)
+    return stats
+
+def stats_fields2d(contents, xcenters, ycenters):
+    stats = {}
+    stats['N'] = N = contents.sum()
+    stats['mean'] = mean = np.array([ (contents.sum(axis = 0) * xcenters).sum(),
+                     (contents.sum(axis = 1) * ycenters).sum()]) / N
+    stats['std'] = np.sqrt(np.array([(contents.sum(axis = 0) * (xcenters - mean[0]) ** 2).sum(),
+                              (contents.sum(axis = 1) * (ycenters - mean[1]) ** 2).sum()]) / N)
+    cov = 0
+    for k, l in product(xrange(contents.shape[1]), xrange(contents.shape[0])):
+        cov += contents[l, k] * (xcenters[k] - mean[0]) * (ycenters[l] - mean[1])
+    stats['cov'] = cov / N
+    log.debug(stats)
+    return stats
+
+
+stats_abrv = {'n':'N', 'u':'uflow', 'o':'oflow', 'm':'mean', 's':'std', 'p':'mode', 'e':'median', 'w':'skew', 'k':'kurtos', 'x':'excess', 'c':'cov'}
+
+stats_poss = map(np.array, [(1, -1), (-1, -1), (-1, 1), (1, 1), (0.5, -1), (-1, 0.5), (0.5, 1), (1, 0.5)])
+stats_algn = [('left', 'top'), ('right', 'top'), ('right', 'bottom'), ('left', 'bottom'), ('center', 'top'), ('right', 'center'), ('center', 'bottom'), ('left', 'center')]
+
+
+
+
 class Plot(object):
     def __init__(self, **kwargs):
         log.debug(json.dumps(kwargs))
@@ -165,6 +211,9 @@ class Plot(object):
             self._append('rs', _get(kwargs, 'rs' + n, '1'))
             self._append('rc', _get(kwargs, 'rc' + n, '1'))
 
+            # statsbox
+            self._append('sb', _get(kwargs, 'sb' + n, 'nmsc'))
+
             # x- and y-binnings for histograms/profile
             for v, w in product('xy', 'b'):
                 self._append(v + w, _get(kwargs, v + n + w))
@@ -184,8 +233,8 @@ class Plot(object):
             setattr(self, v + 'tw', _get(kwargs, v + 'tw'))
 
 
-        # title, fontsize, width, grid, legend
-        for v in 'tfwgl':
+        # title, fontsize, width,height, grid, legend
+        for v in 'tfwhgl':
             setattr(self, v, _get(kwargs, v))
 
         # source with rate averaging
@@ -193,6 +242,7 @@ class Plot(object):
             self._append('sr', '{}:{}:{}:{}'.format(s, self.rw[i], self.rs[i], self.rc[i]) if s else None)
 
         self.lines = 10 * [None]
+        self.stats = 10 * [None]
 
         self.progress = 0 # reaching from 0 to 1
 
@@ -436,7 +486,8 @@ class Plot(object):
         #plt.rc('axes', grid = True)
         plt.rc('lines', markeredgewidth = 0)
         w = self._get('w', 10, float)
-        plt.gcf().set_size_inches((w, w / np.sqrt(2)), forward = True);
+        h = self._get('h', w / np.sqrt(2), float)
+        plt.gcf().set_size_inches((w, h), forward = True);
         f = 0.09
         plt.gca().set_position([f, f, 1 - 2 * f, 1 - 2 * f])
         ticks.set_extended_locator(self.__tick_density)
@@ -470,14 +521,41 @@ class Plot(object):
 
         # legend
         plt.axes(self.axes.values()[-1]) # activate last added axes
-        if self.l != 'none' and len(filter(bool, self.lines)) > 1:
+        if self.l != 'none' and len(filter(bool, self.lines)) > 0:
             lines, names = [], []
             for i, l in enumerate(self.lines):
                 if l:
                     lines.append(l)
                     names.append(self.llabel(i))
             if len(lines) > 0 and 'map' not in self.m :
-                plt.legend(tuple(lines), tuple(names), loc = self.l or 'best')
+                leg = plt.legend(tuple(lines), tuple(names), loc = self.l or 'best', fancybox = True)
+                plt.setp(leg.get_texts(), fontsize = self.f)
+                leg.get_frame().set_alpha(0.8)
+
+        # statsboxes
+        for i, stats in enumerate(self.stats):
+            if stats:
+                text = '{:6} {}'.format('hist', self.llabel(i))
+                sb = self.sb[i]
+                if 'a' in sb: sb = 'nmscpewx'
+                if 'uflow' in stats and stats['uflow']: sb += 'u'
+                if 'oflow' in stats and stats['oflow']: sb += 'o'
+                for k in sb:
+                    k = stats_abrv[k]
+                    if k in stats:
+                        v = stats[k]
+                        try:
+                            v = number_format(v)
+                        except:
+                            v = '({})'.format(','.join(map(number_format, v)))
+                        text += '\n{:6} {}'.format(k, v)
+                pos = stats_poss[i]
+                ha, va = stats_algn[i]
+                plt.annotate(text, 10 * pos, xycoords = 'axes points', family = 'monospace', size = 'small',
+                         horizontalalignment = ha, verticalalignment = va, multialignment = 'left',
+                         bbox = dict(facecolor = 'w', alpha = 0.8, boxstyle = "round,pad=0.5"))
+
+
 
 
 #        plt.tight_layout(pad = 0.5, h_pad = 0, w_pad = 0)
@@ -638,6 +716,9 @@ class Plot(object):
         assert np.all(binedges == _d1)
         binerrors = np.sqrt(bincontents)
 
+        # statsbox    
+        self.stats[i] = stats_fields1d(x, bincontents, binerrors, binedges)
+
         if o.density:
             bincontents, binerrors = get_density(bincontents, binerrors, binwidths)
 
@@ -693,6 +774,9 @@ class Plot(object):
         bincontents = np.transpose(bincontents)
         assert np.all(_d1 == xedges)
         assert np.all(_d2 == yedges)
+
+        # statsbox
+        self.stats[i] = stats_fields2d(bincontents, xcenters, ycenters)
 
         if o.density:
             bincontents = get_density2d(bincontents, xwidths, ywidths)
@@ -801,11 +885,11 @@ class Plot(object):
 if __name__ == '__main__':
     logging.basicConfig(level = logging.DEBUG, format = '%(filename)s:%(funcName)s:%(lineno)d: %(message)s')
 
-    p = Plot(w = '', l = 'lower right',
-             m0 = 'xy', tw0 = 'y', x0 = 'time', y0 = 'p', o0color = 'b', rw0 = '', x0b = '20', c0 = '', s0 = 'data/wetter.h5:/raw/zeuthen_weather',
-             m1 = 'xy', tw1 = '', x1 = 'time', y1 = 'T_a', o1color = 'r', rw1 = '', x1b = '20', c1 = '', s1 = 'data/wetter.h5:/raw/zeuthen_weather',
-             m2 = 'xy', tw2 = '', x2 = 'time', y2 = 'H_a', o2color = 'g', rw2 = '', x2b = '20', c2 = '', s2 = 'data/wetter.h5:/raw/zeuthen_weather',
-             m3 = 'xy', tw3 = '', x3 = 'time', y3 = 'rain', o3color = 'y', rw3 = '', x3b = '20', c3 = 'rain<100', s3 = 'data/wetter.h5:/raw/zeuthen_weather'
+    p = Plot(
+             m0 = 'h2', tw0 = '', x0 = 'p', y0 = 'T_a', o0color = '', rw0 = '', x0b = '30', y0b = '35', c0 = '', s0 = 'data/wetter.h5:/raw/zeuthen_weather',
+#             m1 = 'h1', tw1 = 'x', x1 = 'T_a', y1 = '', o1color = 'r', rw1 = '', x1b = '20', c1 = '', s1 = 'data/wetter.h5:/raw/zeuthen_weather',
+#             m2 = 'xy', tw2 = '', x2 = 'time', y2 = 'H_a', o2color = 'g', rw2 = '', x2b = '20', c2 = '', s2 = 'data/wetter.h5:/raw/zeuthen_weather',
+#             m3 = 'xy', tw3 = '', x3 = 'time', y3 = 'rain', o3color = 'y', rw3 = '', x3b = '20', c3 = 'rain<100', s3 = 'data/wetter.h5:/raw/zeuthen_weather',
              )
 
     import threading

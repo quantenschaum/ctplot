@@ -1,6 +1,6 @@
-#!/opt/python/bin/python
-# -*- coding: utf-8 -*-
 #!c:\Program Files (x86)\Python27\python.exe
+# -*- coding: utf-8 -*-
+#!/opt/python/bin/python
 #!/usr/bin/python
 #    pyplot - python based data plotting tools
 #    created for DESY Zeuthen
@@ -82,7 +82,7 @@ if __name__ == '__main__':
 
         settings = {}
         for k in fields.keys():
-            if k[0] in 'xyzcmsorntwfgl':
+            if k[0] in 'xyzcmsorntwhfgl':
                 settings[k] = fields.getfirst(k).strip().decode('utf8', errors = 'ignore')
 #            else: print >> sys.stderr, 'discarded', k, '=', fields.getfirst(k).strip()
 

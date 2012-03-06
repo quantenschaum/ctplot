@@ -95,8 +95,9 @@ $Id$
 <fieldset class="global">
     <legend>globale Einstellungen</legend>
     <label data-help="Titel des Plots, wird über dem Plot als Überschift angezeigt">Titel<input type="text" name="t" /></label>
-    <label data-help="Breite des Plots in inch">Breite<input type="text" name="w" /></label>
-    <label data-help="Schriftgröße in ???">Schriftgröße<input type="text" name="f" /></label>
+    <label data-help="Breite des Plots in inch (default=10)">Breite<input type="text" name="w" /></label>
+    <label data-help="Höhe des Plots in inch (default=7)">Höhe<input type="text" name="h" /></label>
+    <!-- label data-help="Schriftgröße in ???">Schriftgröße<input type="text" name="f" /></label -->
   
     <!-- X -->
     <label data-help="Wertebereich der x-Achse, anzugeben in der Form (von, bis), Beipsiel: (-12.3, 102.8)">x-Range<input type="text" name="xr" /></label>
@@ -244,6 +245,8 @@ $Id$
             </select>
         </label>
   
+        <label data-help="" class="opt t-h1 t-h2 expert">Statsbox<input type="text" name="sb*" /></label>
+        
         <label data-help="" class="opt t-h2 expert">Konturlinien<input type="text" name="o*levels" /></label>
         
         <label data-help="" class="opt t-h1 t-h2">Dichte<input type="checkbox" name="o*density" /></label>
