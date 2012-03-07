@@ -285,20 +285,22 @@ label .help {
 
 #savedplots>div {
 	display: inline-block;
+	vertical-align: top;
 	position: relative;
 	margin: 1em 0 0 1em;
+	min-width: 5em;
+	min-height: 5em;
+	border: 1px solid #aaa;
+}
+
+#savedplots>div:hover {
+	border: 1px solid #007acc;
 }
 
 #savedplots .savedplot {
 	height: 8em;
 	max-width: 20em;
-	border: 1px solid #aaa;
 	-ms-interpolation-mode: bicubic;
-	border: 1px solid #aaa;
-}
-
-#savedplots .savedplot:hover {
-	border: 1px solid #007acc;
 }
 
 #savedplots .delete,#savedplots .loadplot {

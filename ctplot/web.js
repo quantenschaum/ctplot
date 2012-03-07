@@ -428,7 +428,7 @@ function loadPlots() {
 
 function addPlotToSaved(settings) {
 	$('<div>').appendTo('#savedplots').append(
-			$('<img>').attr('src', settings.png).attr('href', settings.png).attr('alt', settings.t).attr('title', settings.t).data('settings', settings)
+			$('<img>').attr('src', settings.png).attr('href', settings.png).attr('alt', 'plot '+$('.savedplot').size()).attr('title', settings.t).data('settings', settings)
 					.addClass('savedplot'))
 
 	.append($('<img>').attr('src', 'img/cross.png').attr('title', 'Plot löschen').addClass('delete').click(function() {
@@ -439,8 +439,8 @@ function addPlotToSaved(settings) {
 
 	.append($('<img>').attr('src', 'img/arrow_redo.png').attr('title', 'Plot laden').addClass('loadplot').click(function() {
 		setSettings($(this).parent().find('.savedplot').data('settings'));
-		$('nav a[href="#settings"]').click();
-		// $('form').submit();
+//		$('nav a[href="#settings"]').click();
+		 $('form').submit();
 	}));
 	
 	$('.savedplot').unbind().lightBox();

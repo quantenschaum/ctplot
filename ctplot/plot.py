@@ -217,7 +217,7 @@ class Plot(object):
             # fit function
             self._append('ff', _get(kwargs, 'ff' + n))
             self._append('fp', _get(kwargs, 'fp' + n))
-            self._append('fl', _get(kwargs, 'fl' + n, 'r-'))
+            self._append('fl', _get(kwargs, 'fl' + n))
 
             # x- and y-binnings for histograms/profile
             for v, w in product('xy', 'b'):
@@ -246,7 +246,7 @@ class Plot(object):
         for i, s in enumerate(self.s):
             self._append('sr', '{}:{}:{}:{}'.format(s, self.rw[i], self.rs[i], self.rc[i]) if s else None)
 
-        self.lines = 10 * [None]
+        self.lines = []
         self.stats = []
         self.fits = []
 
@@ -527,16 +527,12 @@ class Plot(object):
 
         # legend
         plt.axes(self.axes.values()[-1]) # activate last added axes
-        if self.l != 'none' and len(filter(bool, self.lines)) > 1:
-            lines, names = [], []
-            for i, l in enumerate(self.lines):
-                if l:
-                    lines.append(l)
-                    names.append(self.llabel(i))
-            if len(lines) > 0 and 'map' not in self.m :
-                leg = plt.legend(tuple(lines), tuple(names), loc = self.l or 'best', fancybox = True)
-                plt.setp(leg.get_texts(), fontsize = self.f)
-                leg.get_frame().set_alpha(0.8)
+        if self.l != 'none' and len(self.lines) > 0 and 'map' not in self.m :
+            lines = [v[0] for v in self.lines]
+            labels = [v[1] for v in self.lines]
+            leg = plt.legend(lines, labels, loc = self.l or 'best', fancybox = True)
+            plt.setp(leg.get_texts(), fontsize = self.f)
+            leg.get_frame().set_alpha(0.8)
 
         # statsboxes
         for i, stats in enumerate(self.stats):
@@ -590,10 +586,9 @@ class Plot(object):
         o = {}
         for k, v in self.__dict__.iteritems():
             if k.startswith('o') and v[i] is not None:
-                try:
-                    o[k[1:]] = eval(v[i])
-                except:
-                    o[k[1:]] = v[i]
+#                o[k[1:]] = v[i]
+                try: o[k[1:]] = eval(v[i])
+                except: o[k[1:]] = v[i]
         return o
 
 
@@ -712,7 +707,9 @@ class Plot(object):
             # plot fit result
             xfit = np.linspace(np.nanmin(x), np.nanmax(x), 1000)
             yfit = fitfunc(xfit, *p)
-            plt.plot(xfit, yfit, self.fl[i])
+            args = [xfit, yfit]
+            if self.fl[i]: args.append(self.fl[i])
+            l, = plt.plot(*args)
 
             N = len(x)
             chi2 = fitfunc(x, *p) - y
@@ -728,6 +725,8 @@ class Plot(object):
                 except:
                     t += '\np[{}] = {}$\\pm${}'.format(k, v, c)
             self.fits.append(t)
+            self.lines.append((l, 'Fit y=' + ff))
+
 
 
 
@@ -744,10 +743,10 @@ class Plot(object):
 
 
         if z is None:
-            self.lines[i], = plt.plot(*args, **kwargs)
+            l, = plt.plot(*args, **kwargs)
         else:
             o = get_args_from(kwargs, markersize = 2, cbfrac = 0.04, cblabel = self.z[i])
-            self.lines[i] = plt.scatter(x, y, c = z, s = o.markersize ** 2, edgecolor = 'none', **kwargs)
+            l = plt.scatter(x, y, c = z, s = o.markersize ** 2, edgecolor = 'none', **kwargs)
 
             m = 6.0
             dmin, dmax = np.nanmin(z), np.nanmax(z)
@@ -755,6 +754,8 @@ class Plot(object):
             formatter = mpl.ticker.FuncFormatter(func = lambda x, i:number_mathformat(x))
             cb = plt.colorbar(fraction = o.cbfrac, pad = 0.01, aspect = 40, ticks = cticks, format = formatter)
             cb.set_label(o.cblabel)
+
+        self.lines.append((l, self.llabel(i)))
 
         # fit
         self.fit(i, x, y)
@@ -793,20 +794,20 @@ class Plot(object):
             x, y = get_step_points(bincontents, binedges)
 
         if 'fill' in o.style:
-            line, = plt.fill(x, y, **kwargs)
+            l, = plt.fill(x, y, **kwargs)
 
         elif 'hist' in o.style:
-            line, = plt.plot(x, y, **kwargs)
+            l, = plt.plot(x, y, **kwargs)
 
         elif 'scat' in o.style:
             pargs = set_defaults(kwargs, linestyle = '', marker = '.')
-            line, = plt.plot(bincenters, bincontents, **pargs)
+            l, = plt.plot(bincenters, bincontents, **pargs)
 
         else:
             raise ValueError('unknown style: ' + o.style)
 
         if o.xerr or o.yerr:
-            pargs = set_defaults(kwargs, capsize = o.capsize, ecolor = line.get_c())
+            pargs = set_defaults(kwargs, capsize = o.capsize, ecolor = l.get_c())
             xerr = 0.5 * binwidths if o.xerr else None
             yerr = binerrors if o.yerr else None
             plt.errorbar(bincenters, bincontents, yerr, xerr, fmt = None, **pargs)
@@ -815,7 +816,7 @@ class Plot(object):
         adjust_limits('x', binedges)
         adjust_limits('y', bincontents + binerrors, marl = 0)
 
-        self.lines[i] = line
+        self.lines.append((l, self.llabel(i)))
 
         self.fit(i, bincenters, bincontents, binerrors)
 
@@ -913,8 +914,10 @@ class Plot(object):
         if not o.yerr:
             yerr = None
 
-        pargs = set_defaults(kwargs, capsize = 3, marker = '.')
-        self.lines[i], _d, _d = plt.errorbar(xx, yy, yerr, xerr, **pargs)
+        pargs = set_defaults(kwargs, capsize = 3, marker = '.', linestyle = 'none')
+        l, _d, _d = plt.errorbar(xx, yy, yerr, xerr, **pargs)
+
+        self.lines.append((l, self.llabel(i)))
 
         self.fit(i, xx, yy, yerr)
 
@@ -931,11 +934,11 @@ class Plot(object):
         x, y = m(x, y)
 
         if z is None:
-            self.lines[i], = plt.plot(x, y, **kwargs)
+            l, = plt.plot(x, y, **kwargs)
         else:
             o = get_args_from(kwargs, markersize = 6, cbfrac = 0.04, cblabel = self.alabel('z'))
             p = set_defaults(kwargs, zorder = 100)
-            self.lines[i] = plt.scatter(x, y, c = z, s = o.markersize ** 2, edgecolor = 'none', **p)
+            l = plt.scatter(x, y, c = z, s = o.markersize ** 2, edgecolor = 'none', **p)
 
             m = 6.0
             dmin, dmax = np.nanmin(z), np.nanmax(z)
@@ -943,6 +946,8 @@ class Plot(object):
             formatter = mpl.ticker.FuncFormatter(func = lambda x, i:number_mathformat(x))
             cb = plt.colorbar(fraction = o.cbfrac, pad = 0.01, aspect = 40, ticks = cticks, format = formatter)
             cb.set_label(o.cblabel)
+
+        self.lines.append((l, self.llabel(i)))
 
 
 if __name__ == '__main__':

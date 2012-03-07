@@ -18,27 +18,22 @@
 #
 #    $Id$
 #
-from numpy import *
+import numpy as np
 import dateutil.parser as dp
 
 _safe_globals = {"__builtins__":None}
 _safe_locals = {}
 
 #add any needed builtins back in. 
-for k in ['abs', 'all', 'any', 'bool', 'cmp', 'complex', 'float', 'int', 'len', 'max', 'min', 'pow', 'reduce', 'round',
-          'sum', 'zip', 'True', 'False', 'range', 'xrange', 'arange', 'linspace', 'logspace', 'random',
-          'power', 'log', 'log10', 'log2', 'exp', 'sin', 'cos', 'tan', 'floor', 'ceil']:
+for k in []:
     _safe_locals[k] = eval(k)
 
-def logbins(start, stop, count):
-    return [exp(x) for x in linspace(log(start), log(stop), count)]
+# numpy functions    
+for k, v in np.__dict__.iteritems():
+    _safe_locals[k] = getattr(np, k)
 
-_safe_locals['logbins'] = logbins
-
-def date(s):
-    return (dp.parse(s) - dp.parse('2004-01-01 00:00 +01')).total_seconds()
-
-_safe_locals['date'] = date
+_safe_locals['logbins'] = lambda start, stop, count: [np.exp(x) for x in np.linspace(np.log(start), np.log(stop), count)]
+_safe_locals['since04'] = lambda s: (dp.parse(s) - dp.parse('2004-01-01 00:00 +01')).total_seconds()
 
 class safeeval:
     def __init__(self, safe_globals = _safe_globals, safe_locals = _safe_locals):
