@@ -24,13 +24,13 @@ from collections import OrderedDict, namedtuple
 from itertools import chain
 import numpy as np
 import numpy.ma as ma
+from scipy.optimize import *
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from utils import get_args_from, isseq, set_defaults, number_mathformat, number_format, hashargs, noop
 from itertools import product
 from safeeval import safeeval
 from config import *
-from numpy.core.fromnumeric import prod
 
 log = logging.getLogger('plot')
 
@@ -214,6 +214,11 @@ class Plot(object):
             # statsbox
             self._append('sb', _get(kwargs, 'sb' + n, 'nmsc'))
 
+            # fit function
+            self._append('ff', _get(kwargs, 'ff' + n))
+            self._append('fp', _get(kwargs, 'fp' + n))
+            self._append('fl', _get(kwargs, 'fl' + n, 'r-'))
+
             # x- and y-binnings for histograms/profile
             for v, w in product('xy', 'b'):
                 self._append(v + w, _get(kwargs, v + n + w))
@@ -242,7 +247,8 @@ class Plot(object):
             self._append('sr', '{}:{}:{}:{}'.format(s, self.rw[i], self.rs[i], self.rc[i]) if s else None)
 
         self.lines = 10 * [None]
-        self.stats = 10 * [None]
+        self.stats = []
+        self.fits = []
 
         self.progress = 0 # reaching from 0 to 1
 
@@ -521,7 +527,7 @@ class Plot(object):
 
         # legend
         plt.axes(self.axes.values()[-1]) # activate last added axes
-        if self.l != 'none' and len(filter(bool, self.lines)) > 0:
+        if self.l != 'none' and len(filter(bool, self.lines)) > 1:
             lines, names = [], []
             for i, l in enumerate(self.lines):
                 if l:
@@ -534,26 +540,33 @@ class Plot(object):
 
         # statsboxes
         for i, stats in enumerate(self.stats):
-            if stats:
-                text = '{:6} {}'.format('hist', self.llabel(i))
-                sb = self.sb[i]
-                if 'a' in sb: sb = 'nmscpewx'
-                if 'uflow' in stats and stats['uflow']: sb += 'u'
-                if 'oflow' in stats and stats['oflow']: sb += 'o'
-                for k in sb:
-                    k = stats_abrv[k]
-                    if k in stats:
-                        v = stats[k]
-                        try:
-                            v = number_format(v)
-                        except:
-                            v = '({})'.format(','.join(map(number_format, v)))
-                        text += '\n{:6} {}'.format(k, v)
-                pos = stats_poss[i]
-                ha, va = stats_algn[i]
-                plt.annotate(text, 10 * pos, xycoords = 'axes points', family = 'monospace', size = 'small',
-                         horizontalalignment = ha, verticalalignment = va, multialignment = 'left',
-                         bbox = dict(facecolor = 'w', alpha = 0.8, boxstyle = "round,pad=0.5"))
+            text = '{:6} {}'.format('hist', self.llabel(i))
+            sb = self.sb[i]
+            if 'a' in sb: sb = 'nmscpewx'
+            if 'uflow' in stats and stats['uflow']: sb += 'u'
+            if 'oflow' in stats and stats['oflow']: sb += 'o'
+            for k in sb:
+                k = stats_abrv[k]
+                if k in stats:
+                    v = stats[k]
+                    try:
+                        v = number_format(v)
+                    except:
+                        v = '({})'.format(','.join(map(number_format, v)))
+                    text += '\n{:6} {}'.format(k, v)
+            pos = stats_poss[i]
+            ha, va = stats_algn[i]
+            plt.annotate(text, 10 * pos, xycoords = 'axes points', family = 'monospace', size = 'small',
+                     horizontalalignment = ha, verticalalignment = va, multialignment = 'left',
+                     bbox = dict(facecolor = 'w', alpha = 0.8, boxstyle = "round,pad=0.5"))
+
+        # fits (parameter info boxes)
+        for i, f in enumerate(self.fits):
+            pos = stats_poss[(i + 1) % 4]
+            ha, va = stats_algn[(i + 1) % 4]
+            plt.annotate(f, 10 * pos, xycoords = 'axes points', family = 'monospace', size = 'small',
+                     horizontalalignment = ha, verticalalignment = va, multialignment = 'left',
+                     bbox = dict(facecolor = 'w', alpha = 0.8, boxstyle = "round,pad=0.5"))
 
 
 
@@ -675,6 +688,50 @@ class Plot(object):
 
 
 
+    def fit(self, i, x, y, yerr = None):
+        ff = self.ff[i]
+        if ff:
+            ff = ff.replace(' ', '')
+            log.debug('fitting {}'.format(ff))
+            fitfunc = eval('lambda x,*p:' + ff)
+            x, y = np.array(x), np.array(y)
+            m = np.logical_and(np.isfinite(x), np.isfinite(y))
+            if yerr is not None:
+                yerr = np.array(yerr)
+                m = np.logical_and(m, np.isfinite(yerr))
+                yerr = yerr[m]
+            x , y = x[m], y[m]
+
+
+
+            p = eval(self.fp[i])
+            p, c = curve_fit(fitfunc, x, y, p, yerr)
+            log.debug('p = {}'.format(p))
+            log.debug('c = {}'.format(c))
+
+            # plot fit result
+            xfit = np.linspace(np.nanmin(x), np.nanmax(x), 1000)
+            yfit = fitfunc(xfit, *p)
+            plt.plot(xfit, yfit, self.fl[i])
+
+            N = len(x)
+            chi2 = fitfunc(x, *p) - y
+            if yerr is not None:
+                chi2 = chi2 / yerr
+            chi2 = (chi2 ** 2).sum()
+
+            t = 'y=' + ff
+            t += '\n$\\chi^2$/N = {}/{}'.format(number_format(chi2), number_format(N))
+            for k, v in enumerate(p):
+                try:
+                    t += '\np[{}] = {}$\\pm${}'.format(k, number_format(v), number_format(np.sqrt(c[k, k])))
+                except:
+                    t += '\np[{}] = {}$\\pm${}'.format(k, v, c)
+            self.fits.append(t)
+
+
+
+
     def _xy(self, i):
         log.debug('xy plot of {}'.format([getattr(self, v)[i] for v in 'sxyzc']))
         kwargs = self.opts(i)
@@ -684,6 +741,7 @@ class Plot(object):
             args = (x, y)
         else:
             args = (y,)
+
 
         if z is None:
             self.lines[i], = plt.plot(*args, **kwargs)
@@ -698,6 +756,8 @@ class Plot(object):
             cb = plt.colorbar(fraction = o.cbfrac, pad = 0.01, aspect = 40, ticks = cticks, format = formatter)
             cb.set_label(o.cblabel)
 
+        # fit
+        self.fit(i, x, y)
 
     def _hist1d(self, i):
         self.plotted_lines = []
@@ -715,9 +775,10 @@ class Plot(object):
         bincontents, _d1 = np.histogram(x, binedges)
         assert np.all(binedges == _d1)
         binerrors = np.sqrt(bincontents)
+        binerrors[binerrors == 0] = 1
 
         # statsbox    
-        self.stats[i] = stats_fields1d(x, bincontents, binerrors, binedges)
+        self.stats.append(stats_fields1d(x, bincontents, binerrors, binedges))
 
         if o.density:
             bincontents, binerrors = get_density(bincontents, binerrors, binwidths)
@@ -756,7 +817,7 @@ class Plot(object):
 
         self.lines[i] = line
 
-
+        self.fit(i, bincenters, bincontents, binerrors)
 
     def _hist2d(self, i):
         log.debug('2D histogram of {}'.format([getattr(self, v)[i] for v in 'sxyzc']))
@@ -776,7 +837,7 @@ class Plot(object):
         assert np.all(_d2 == yedges)
 
         # statsbox
-        self.stats[i] = stats_fields2d(bincontents, xcenters, ycenters)
+        self.stats.append(stats_fields2d(bincontents, xcenters, ycenters))
 
         if o.density:
             bincontents = get_density2d(bincontents, xwidths, ywidths)
@@ -855,6 +916,8 @@ class Plot(object):
         pargs = set_defaults(kwargs, capsize = 3, marker = '.')
         self.lines[i], _d, _d = plt.errorbar(xx, yy, yerr, xerr, **pargs)
 
+        self.fit(i, xx, yy, yerr)
+
 
     def _map(self, i):
         import maps
@@ -885,8 +948,8 @@ class Plot(object):
 if __name__ == '__main__':
     logging.basicConfig(level = logging.DEBUG, format = '%(filename)s:%(funcName)s:%(lineno)d: %(message)s')
 
-    p = Plot(
-             m0 = 'h2', tw0 = '', x0 = 'p', y0 = 'T_a', o0color = '', rw0 = '', x0b = '30', y0b = '35', c0 = '', s0 = 'data/wetter.h5:/raw/zeuthen_weather',
+    p = Plot(ff0 = 'p[0]+x*p[1]+x**2*p[2]', fp0 = '0,0,0', o0yerr = '1',
+             m0 = 'p', tw0 = '', x0 = 'time', y0 = 'p', o0color = '', rw0 = '', x0b = '50', y0b = '35', c0 = '', s0 = 'data/wetter.h5:/raw/zeuthen_weather',
 #             m1 = 'h1', tw1 = 'x', x1 = 'T_a', y1 = '', o1color = 'r', rw1 = '', x1b = '20', c1 = '', s1 = 'data/wetter.h5:/raw/zeuthen_weather',
 #             m2 = 'xy', tw2 = '', x2 = 'time', y2 = 'H_a', o2color = 'g', rw2 = '', x2b = '20', c2 = '', s2 = 'data/wetter.h5:/raw/zeuthen_weather',
 #             m3 = 'xy', tw3 = '', x3 = 'time', y3 = 'rain', o3color = 'y', rw3 = '', x3b = '20', c3 = 'rain<100', s3 = 'data/wetter.h5:/raw/zeuthen_weather',

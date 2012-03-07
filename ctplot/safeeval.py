@@ -18,25 +18,20 @@
 #
 #    $Id$
 #
-import math, numpy
-from numpy import arange, linspace, logspace, random
+from numpy import *
 import dateutil.parser as dp
 
 _safe_globals = {"__builtins__":None}
-
-# add safe symbols to locals (like math.*) 
 _safe_locals = {}
-for k, v in math.__dict__.iteritems():
-    if not k.startswith('_'):
-        _safe_locals[k] = v
 
 #add any needed builtins back in. 
 for k in ['abs', 'all', 'any', 'bool', 'cmp', 'complex', 'float', 'int', 'len', 'max', 'min', 'pow', 'reduce', 'round',
-          'sum', 'zip', 'True', 'False', 'range', 'xrange', 'arange', 'linspace', 'logspace', 'random']:
+          'sum', 'zip', 'True', 'False', 'range', 'xrange', 'arange', 'linspace', 'logspace', 'random',
+          'power', 'log', 'log10', 'log2', 'exp', 'sin', 'cos', 'tan', 'floor', 'ceil']:
     _safe_locals[k] = eval(k)
 
 def logbins(start, stop, count):
-    return [numpy.exp(x) for x in linspace(numpy.log(start), numpy.log(stop), count)]
+    return [exp(x) for x in linspace(log(start), log(stop), count)]
 
 _safe_locals['logbins'] = logbins
 
@@ -48,7 +43,8 @@ _safe_locals['date'] = date
 class safeeval:
     def __init__(self, safe_globals = _safe_globals, safe_locals = _safe_locals):
         self.globals = safe_globals.copy()
-        self.locals = safe_locals.copy()
+        self.globals.update(safe_locals)
+        self.locals = {}
 
     def __setitem__(self, key, value):
         self.locals[key] = value
@@ -62,4 +58,8 @@ class safeeval:
     def __call__(self, expr):
 #        print 'safeval', expr
         return eval(expr, self.globals, self.locals)
+
+if __name__ == '__main__':
+    for k, v in _safe_locals.iteritems():
+        print k, v
 
