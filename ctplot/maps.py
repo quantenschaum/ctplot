@@ -132,7 +132,7 @@ if __name__ == '__main__':
     f = 0.09
     plt.gca().set_position([f, f, 1 - 2 * f, 1 - 2 * f])
 
-    f = tables.openFile('data/dwd.h5', 'r')
+    f = tables.openFile('data/x-dwd.h5', 'r')
 
     zvalue = 'tm'
     time = set()

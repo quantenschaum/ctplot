@@ -301,20 +301,38 @@ $Id$
         <label data-help="" class="opt t-xy t-h1 t-p t-map">Muster<input type="text" name="o*hatch" /></label>
         <label data-help="" class="opt t-xy">Marker jede<input type="text" name="o*markerevery" /></label>
         <label data-help="" class="opt t-h1 t-p">Endkappengröße<input type="text" name="o*capsize" /></label>
-        
-        <h2>Kartenoptionen</h2>
-        <label data-help="" class="opt t-map">Kartenprojketion<input type="text" name="o*projection" /></label>
-        <label data-help="" class="opt t-map">Höhe<input type="text" name="o*height" /></label>
-        <label data-help="" class="opt t-map">Breite<input type="text" name="o*width" /></label>
-        <label data-help="" class="opt t-map">Grenzbreite<input type="text" name="o*boundarylat" /></label>
-        <label data-help="" class="opt t-map">Bluemarble<input type="text" name="o*bluemarble" /></label>
-        <label data-help="" class="opt t-map">Landesgrenzen<input type="text" name="o*drawcountries" /></label>
 	    -->
+        
+        <h2 class="opt t-map">Kartenoptionen</h2>
+        <label data-help="" class="opt t-map">Projektion
+            <select name="o*projection">
+                <option value=""></option>
+                <option value="cyl">zylindrisch</option>
+                <option value="ortho">orthographisch</option>
+                <option value="merc">Mercator</option>
+                <option value="robin">Robinson</option>
+                <option value="aeqd" class="expert">äquidistant</option>
+                <option value="laea" class="expert">Lambert-Azimutal</option>
+                <option value="stere" class="expert">stereographisch</option>
+                <option value="npaeqd" class="expert">nord-polar, äquidistant</option>
+                <option value="nplaea" class="expert">nord-polar, Lambert-Azimutal</option>
+                <option value="npstere" class="expert">nord-polar, stereographisch</option>
+                <option value="spaeqd" class="expert">süd-polar, äquidistant</option>
+                <option value="splaea" class="expert">süd-polar, Lambert-Azimutal</option>
+                <option value="spstere" class="expert">süd-polar, stereographisch</option>
+            </select>
+        </label>
+        <label data-help="" class="opt t-map expert">Breite des Ausschnitts [m]<input type="text" name="o*width" /></label>
+        <label data-help="" class="opt t-map expert">Höhe des Ausschnitts [m]<input type="text" name="o*height" /></label>
+        <label data-help="" class="opt t-map expert">Grenzbreite für (N/S-polar) [°]<input type="text" name="o*boundarylat" /></label>
+        <!-- label data-help="" class="opt t-map expert">Bluemarble<input type="checkbox" name="o*bluemarble" /></label -->
+        <label data-help="" class="opt t-map expert">Landesgrenzen<input type="checkbox" name="o*drawcountries" /></label>
 	    
 	    <!-- fit options -->
-        <label data-help="" class="opt t-xy t-h1 t-p expert">Fit-Funktion<input type="text" name="ff*" /></label>
-        <label data-help="" class="opt t-xy t-h1 t-p expert">Startparameter<input type="text" name="fp*" /></label>
-        <label data-help="" class="opt t-xy t-h1 t-p expert">Fit-Linienoptionen<input type="text" name="fl*" /></label>
+	    <h2 class="opt t-xy t-h1 t-p">Fit-Optionen</h2>
+        <label data-help="Fitfuntion, unabhängige Variable ist x, Parameter sind p[0], p[1], ... Beispiel: p[0]+p[1]*x" class="opt t-xy t-h1 t-p">Fit-Funktion<input type="text" name="ff*" /></label>
+        <label data-help="Startwerte für die Fit-Parameter, durch Komma getrennt" class="opt t-xy t-h1 t-p">Startparameter<input type="text" name="fp*" /></label>
+        <label data-help="Linienfarbe- und Stil für Fitresultat, Beispiel 'r-' = rot, durchgezogen" class="opt t-xy t-h1 t-p expert">Fit-Linienoptionen<input type="text" name="fl*" /></label>
 	    
     </fieldset>
 	<button type="button" id="addplot" ><img src="img/add.png" /> Plot hinzufügen</button>

@@ -428,7 +428,7 @@ function loadPlots() {
 
 function addPlotToSaved(settings) {
 	$('<div>').appendTo('#savedplots').append(
-			$('<img>').attr('src', settings.png).attr('href', settings.png).attr('alt', 'plot '+$('.savedplot').size()).attr('title', settings.t).data('settings', settings)
+			$('<img>').attr('src', settings.png).attr('href', settings.png).attr('alt', 'Plot '+$('.savedplot').size()+ ' (Plot wird nicht angezeigt? Einfach neu laden.)').attr('title', settings.t).data('settings', settings)
 					.addClass('savedplot'))
 
 	.append($('<img>').attr('src', 'img/cross.png').attr('title', 'Plot löschen').addClass('delete').click(function() {
@@ -490,9 +490,9 @@ function initSubmit() {
 						// links to pdf and svg
 						p = $('<p>').appendTo(result);
 						p.append('Download als ');
-						$('<a>').attr('href', data.pdf).attr('target', '_blank').text('PDF').appendTo(p);
+						$('<a>').attr('href', data.pdf).text('PDF').appendTo(p);
 						p.append(', ');
-						$('<a>').attr('href', data.svg).attr('target', '_blank').text('SVG').appendTo(p);
+						$('<a>').attr('href', data.svg).text('SVG').appendTo(p);
 
 						// store settings in cookie
 						$.extend(settings, data); // append plot image urls to

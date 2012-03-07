@@ -138,48 +138,12 @@ def sproduct(a, b):
         yield '{}{}'.format(x, y)
 
 
-def stats_fields1d(data, contents, errors, edges):
-    centers = (edges[1:] + edges[:-1]) / 2
-    assert len(centers) == len(edges) - 1
-    widths = np.diff(edges)
-    stats = {}
-    stats['N'] = N = np.sum(contents)
-    stats['uflow'] = np.sum(data < edges[0])
-    stats['oflow'] = np.sum(edges[-1] < data)
-    stats['mean'] = mean = np.sum(centers * contents) / N
-    stats['std'] = std = np.sqrt(np.sum((centers - mean) ** 2 * contents) / N)
-    stats['mode'] = centers[np.argmax(contents)]
-    bc, be = get_density(contents, errors, widths)
-    bc, be = get_cumulative(bc, be, 1, widths)
-    median_i = np.searchsorted(bc, 0.5, side = 'right')
-    stats['median'] = median = centers[median_i]
-    if len(centers) % 2 == 0: # even # of s
-        stats['median'] = median = (median + centers[median_i - 1]) / 2
-    stats['skew'] = np.sum(((centers - mean) / std) ** 3 * contents) / N
-    stats['kurtos'] = kurtosis = np.sum(((centers - mean) / std) ** 4 * contents) / N
-    stats['excess'] = kurtosis - 3
-    log.debug(stats)
-    return stats
-
-def stats_fields2d(contents, xcenters, ycenters):
-    stats = {}
-    stats['N'] = N = contents.sum()
-    stats['mean'] = mean = np.array([ (contents.sum(axis = 0) * xcenters).sum(),
-                     (contents.sum(axis = 1) * ycenters).sum()]) / N
-    stats['std'] = np.sqrt(np.array([(contents.sum(axis = 0) * (xcenters - mean[0]) ** 2).sum(),
-                              (contents.sum(axis = 1) * (ycenters - mean[1]) ** 2).sum()]) / N)
-    cov = 0
-    for k, l in product(xrange(contents.shape[1]), xrange(contents.shape[0])):
-        cov += contents[l, k] * (xcenters[k] - mean[0]) * (ycenters[l] - mean[1])
-    stats['cov'] = cov / N
-    log.debug(stats)
-    return stats
 
 
+
+text_poss = map(np.array, [(1, -1), (-1, -1), (-1, 1), (1, 1), (0.5, -1), (-1, 0.5), (0.5, 1), (1, 0.5)])
+text_algn = [('left', 'top'), ('right', 'top'), ('right', 'bottom'), ('left', 'bottom'), ('center', 'top'), ('right', 'center'), ('center', 'bottom'), ('left', 'center')]
 stats_abrv = {'n':'N', 'u':'uflow', 'o':'oflow', 'm':'mean', 's':'std', 'p':'mode', 'e':'median', 'w':'skew', 'k':'kurtos', 'x':'excess', 'c':'cov'}
-
-stats_poss = map(np.array, [(1, -1), (-1, -1), (-1, 1), (1, 1), (0.5, -1), (-1, 0.5), (0.5, 1), (1, 0.5)])
-stats_algn = [('left', 'top'), ('right', 'top'), ('right', 'bottom'), ('left', 'bottom'), ('center', 'top'), ('right', 'center'), ('center', 'bottom'), ('left', 'center')]
 
 
 
@@ -246,9 +210,8 @@ class Plot(object):
         for i, s in enumerate(self.s):
             self._append('sr', '{}:{}:{}:{}'.format(s, self.rw[i], self.rs[i], self.rc[i]) if s else None)
 
-        self.lines = []
-        self.stats = []
-        self.fits = []
+        self.legend = []
+        self.textboxes = []
 
         self.progress = 0 # reaching from 0 to 1
 
@@ -488,16 +451,20 @@ class Plot(object):
     def _configure_pre(self):
         # configure plotlib
         self.f = self._get('f', 10, float)
+        if 'map' in self.m: self.f *= 0.8 # smaller font if plotting map
         plt.rc('font', **{'family':'sans-serif', 'sans-serif':['Dejavu Sans'], 'size':self.f})
         #plt.rc('axes', grid = True)
         plt.rc('lines', markeredgewidth = 0)
         w = self._get('w', 10, float)
         h = self._get('h', w / np.sqrt(2), float)
-        plt.gcf().set_size_inches((w, h), forward = True);
-        f = 0.09
-        plt.gca().set_position([f, f, 1 - 2 * f, 1 - 2 * f])
+        plt.gcf().set_size_inches([w, h], forward = True);
+#        f = 0.09
+#        if 'map' in self.m: f = 0.06 # more margin if plotting map
+#        plt.gca().set_position([f, f, 1 - 2 * f, 1 - 2 * f])
+#        plt.subplots_adjust(left = f, bottom = f, right = 1 - f, top = 1 - f, wspace = 0, hspace = 0)
         ticks.set_extended_locator(self.__tick_density)
         self.axes[''] = plt.gca()
+
 
 
     def _configure_post(self):
@@ -505,6 +472,8 @@ class Plot(object):
 
         # title
         if self.t: plt.title(self.t, fontsize = 1.4 * self.f)
+
+        if 'map' in self.m: return
 
         # settings for main and twin axes
         for v, ax in self.axes.iteritems():
@@ -527,47 +496,23 @@ class Plot(object):
 
         # legend
         plt.axes(self.axes.values()[-1]) # activate last added axes
-        if self.l != 'none' and len(self.lines) > 0 and 'map' not in self.m :
-            lines = [v[0] for v in self.lines]
-            labels = [v[1] for v in self.lines]
+        if self.l != 'none' and len(self.legend) > 1 and 'map' not in self.m :
+            lines = [v[0] for v in self.legend]
+            labels = [v[1] for v in self.legend]
             leg = plt.legend(lines, labels, loc = self.l or 'best', fancybox = True)
             plt.setp(leg.get_texts(), fontsize = self.f)
             leg.get_frame().set_alpha(0.8)
 
-        # statsboxes
-        for i, stats in enumerate(self.stats):
-            text = '{:6} {}'.format('hist', self.llabel(i))
-            sb = self.sb[i]
-            if 'a' in sb: sb = 'nmscpewx'
-            if 'uflow' in stats and stats['uflow']: sb += 'u'
-            if 'oflow' in stats and stats['oflow']: sb += 'o'
-            for k in sb:
-                k = stats_abrv[k]
-                if k in stats:
-                    v = stats[k]
-                    try:
-                        v = number_format(v)
-                    except:
-                        v = '({})'.format(','.join(map(number_format, v)))
-                    text += '\n{:6} {}'.format(k, v)
-            pos = stats_poss[i]
-            ha, va = stats_algn[i]
-            plt.annotate(text, 10 * pos, xycoords = 'axes points', family = 'monospace', size = 'small',
-                     horizontalalignment = ha, verticalalignment = va, multialignment = 'left',
-                     bbox = dict(facecolor = 'w', alpha = 0.8, boxstyle = "round,pad=0.5"))
-
-        # fits (parameter info boxes)
-        for i, f in enumerate(self.fits):
-            pos = stats_poss[(i + 1) % 4]
-            ha, va = stats_algn[(i + 1) % 4]
-            plt.annotate(f, 10 * pos, xycoords = 'axes points', family = 'monospace', size = 'small',
+        # textboxes
+        for i, t in enumerate(self.textboxes):
+            pos = text_poss[i]
+            ha, va = text_algn[i]
+            plt.annotate(t, 10 * pos, xycoords = 'axes points', family = 'monospace', size = 'small',
                      horizontalalignment = ha, verticalalignment = va, multialignment = 'left',
                      bbox = dict(facecolor = 'w', alpha = 0.8, boxstyle = "round,pad=0.5"))
 
 
 
-
-#        plt.tight_layout(pad = 0.5, h_pad = 0, w_pad = 0)
 
 
 
@@ -650,19 +595,19 @@ class Plot(object):
 
 
     def show(self):
-        if not any(self.lines):
+        if not any(self.legend):
             self.plot()
         plt.show()
 
 
     def save(self, name = 'fig', extensions = ('png', 'pdf', 'svg')):
         plt.ioff()
-        if not any(self.lines):
+        if not any(self.legend):
             self.plot()
         names = []
         for ext in extensions:
             n = name + '.' + ext
-            plt.savefig(n, bbox_inches = 'tight')
+            plt.savefig(n, bbox_inches = 'tight', pad_inches = 0.5 if 'map' in self.m else 0.05, transparent = False)
             names.append(n)
 
         return dict(zip(extensions, names))
@@ -700,9 +645,15 @@ class Plot(object):
 
 
             p = eval(self.fp[i])
-            p, c = curve_fit(fitfunc, x, y, p, yerr)
-            log.debug('p = {}'.format(p))
-            log.debug('c = {}'.format(c))
+            try:
+                p, c = curve_fit(fitfunc, x, y, p, yerr)
+                log.debug('p = {}'.format(p))
+                log.debug('c = {}'.format(c))
+                fit_status = ''
+            except:
+                fit_status = ' (failed)'
+                c = None
+                log.debug('fit failed')
 
             # plot fit result
             xfit = np.linspace(np.nanmin(x), np.nanmax(x), 1000)
@@ -717,6 +668,7 @@ class Plot(object):
                 chi2 = chi2 / yerr
             chi2 = (chi2 ** 2).sum()
 
+            # add textbox
             t = 'y=' + ff
             t += '\n$\\chi^2$/N = {}/{}'.format(number_format(chi2), number_format(N))
             for k, v in enumerate(p):
@@ -724,8 +676,11 @@ class Plot(object):
                     t += '\np[{}] = {}$\\pm${}'.format(k, number_format(v), number_format(np.sqrt(c[k, k])))
                 except:
                     t += '\np[{}] = {}$\\pm${}'.format(k, v, c)
-            self.fits.append(t)
-            self.lines.append((l, 'Fit y=' + ff))
+            self.textboxes.append(t)
+            ll = ('Fit' + fit_status + ' y=' + ff)
+            for k, v in  enumerate(p):
+                ll = ll.replace('p[{}]'.format(k), number_format(v, 3))
+            self.legend.append((l, ll))
 
 
 
@@ -755,7 +710,7 @@ class Plot(object):
             cb = plt.colorbar(fraction = o.cbfrac, pad = 0.01, aspect = 40, ticks = cticks, format = formatter)
             cb.set_label(o.cblabel)
 
-        self.lines.append((l, self.llabel(i)))
+        self.legend.append((l, self.llabel(i)))
 
         # fit
         self.fit(i, x, y)
@@ -779,7 +734,7 @@ class Plot(object):
         binerrors[binerrors == 0] = 1
 
         # statsbox    
-        self.stats.append(stats_fields1d(x, bincontents, binerrors, binedges))
+        self.stats_fields1d(i, x, bincontents, binerrors, binedges)
 
         if o.density:
             bincontents, binerrors = get_density(bincontents, binerrors, binwidths)
@@ -807,7 +762,7 @@ class Plot(object):
             raise ValueError('unknown style: ' + o.style)
 
         if o.xerr or o.yerr:
-            pargs = set_defaults(kwargs, capsize = o.capsize, ecolor = l.get_c())
+            pargs = set_defaults(kwargs, capsize = o.capsize, ecolor = 'k' if 'fill' in o.style else l.get_c())
             xerr = 0.5 * binwidths if o.xerr else None
             yerr = binerrors if o.yerr else None
             plt.errorbar(bincenters, bincontents, yerr, xerr, fmt = None, **pargs)
@@ -816,7 +771,7 @@ class Plot(object):
         adjust_limits('x', binedges)
         adjust_limits('y', bincontents + binerrors, marl = 0)
 
-        self.lines.append((l, self.llabel(i)))
+        self.legend.append((l, self.llabel(i)))
 
         self.fit(i, bincenters, bincontents, binerrors)
 
@@ -838,7 +793,7 @@ class Plot(object):
         assert np.all(_d2 == yedges)
 
         # statsbox
-        self.stats.append(stats_fields2d(bincontents, xcenters, ycenters))
+        self.stats_fields2d(i, bincontents, xcenters, ycenters)
 
         if o.density:
             bincontents = get_density2d(bincontents, xwidths, ywidths)
@@ -917,7 +872,7 @@ class Plot(object):
         pargs = set_defaults(kwargs, capsize = 3, marker = '.', linestyle = 'none')
         l, _d, _d = plt.errorbar(xx, yy, yerr, xerr, **pargs)
 
-        self.lines.append((l, self.llabel(i)))
+        self.legend.append((l, self.llabel(i)))
 
         self.fit(i, xx, yy, yerr)
 
@@ -947,14 +902,77 @@ class Plot(object):
             cb = plt.colorbar(fraction = o.cbfrac, pad = 0.01, aspect = 40, ticks = cticks, format = formatter)
             cb.set_label(o.cblabel)
 
-        self.lines.append((l, self.llabel(i)))
+        self.legend.append((l, self.llabel(i)))
+
+
+    def stats_fields1d(self, i, data, contents, errors, edges):
+        centers = (edges[1:] + edges[:-1]) / 2
+        widths = np.diff(edges)
+
+        stats = {}
+        stats['N'] = N = np.sum(contents)
+        stats['uflow'] = np.sum(data < edges[0])
+        stats['oflow'] = np.sum(edges[-1] < data)
+        stats['mean'] = mean = np.sum(centers * contents) / N
+        stats['std'] = std = np.sqrt(np.sum((centers - mean) ** 2 * contents) / N)
+        stats['mode'] = centers[np.argmax(contents)]
+        bc, be = get_density(contents, errors, widths)
+        bc, be = get_cumulative(bc, be, 1, widths)
+        median_i = np.searchsorted(bc, 0.5, side = 'right')
+        stats['median'] = median = centers[median_i]
+        if len(centers) % 2 == 0: # even # of s
+            stats['median'] = median = (median + centers[median_i - 1]) / 2
+        stats['skew'] = np.sum(((centers - mean) / std) ** 3 * contents) / N
+        stats['kurtos'] = kurtosis = np.sum(((centers - mean) / std) ** 4 * contents) / N
+        stats['excess'] = kurtosis - 3
+        log.debug(stats)
+
+        text = '{:6} {}'.format('hist', self.llabel(i))
+        sb = self.sb[i]
+        if 'a' in sb: sb = 'nmscpewx'
+        if 'uflow' in stats and stats['uflow']: sb += 'u'
+        if 'oflow' in stats and stats['oflow']: sb += 'o'
+        for k in sb:
+            k = stats_abrv[k]
+            if k in stats:
+                text += '\n{:6} {}'.format(k, number_format(stats[k]))
+        self.textboxes.append(text)
+
+    def stats_fields2d(self, i, contents, xcenters, ycenters):
+        stats = {}
+        stats['N'] = N = contents.sum()
+        stats['mean'] = mean = np.array([ (contents.sum(axis = 0) * xcenters).sum(),
+                         (contents.sum(axis = 1) * ycenters).sum()]) / N
+        stats['std'] = np.sqrt(np.array([(contents.sum(axis = 0) * (xcenters - mean[0]) ** 2).sum(),
+                                  (contents.sum(axis = 1) * (ycenters - mean[1]) ** 2).sum()]) / N)
+        cov = 0
+        for k, l in product(xrange(contents.shape[1]), xrange(contents.shape[0])):
+            cov += contents[l, k] * (xcenters[k] - mean[0]) * (ycenters[l] - mean[1])
+        stats['cov'] = cov / N
+        log.debug(stats)
+
+        text = '{:6} {}'.format('hist', self.llabel(i))
+        sb = self.sb[i]
+        if 'a' in sb: sb = 'nmscpewx'
+        if 'uflow' in stats and stats['uflow']: sb += 'u'
+        if 'oflow' in stats and stats['oflow']: sb += 'o'
+        for k in sb:
+            k = stats_abrv[k]
+            if k in stats:
+                v = stats[k]
+                try:
+                    v = number_format(v)
+                except:
+                    v = '({})'.format(','.join(map(number_format, v)))
+                text += '\n{:6} {}'.format(k, v)
+        self.textboxes.append(text)
 
 
 if __name__ == '__main__':
     logging.basicConfig(level = logging.DEBUG, format = '%(filename)s:%(funcName)s:%(lineno)d: %(message)s')
 
-    p = Plot(ff0 = 'p[0]+x*p[1]+x**2*p[2]', fp0 = '0,0,0', o0yerr = '1',
-             m0 = 'p', tw0 = '', x0 = 'time', y0 = 'p', o0color = '', rw0 = '', x0b = '50', y0b = '35', c0 = '', s0 = 'data/wetter.h5:/raw/zeuthen_weather',
+    p = Plot(t = 'title', w = '15',
+             m0 = 'h1', tw0 = '', x0 = 'time', y0 = 'p', o0color = '', rw0 = '', x0b = '50', y0b = '35', c0 = '', s0 = 'data/wetter.h5:/raw/zeuthen_weather',
 #             m1 = 'h1', tw1 = 'x', x1 = 'T_a', y1 = '', o1color = 'r', rw1 = '', x1b = '20', c1 = '', s1 = 'data/wetter.h5:/raw/zeuthen_weather',
 #             m2 = 'xy', tw2 = '', x2 = 'time', y2 = 'H_a', o2color = 'g', rw2 = '', x2b = '20', c2 = '', s2 = 'data/wetter.h5:/raw/zeuthen_weather',
 #             m3 = 'xy', tw3 = '', x3 = 'time', y3 = 'rain', o3color = 'y', rw3 = '', x3b = '20', c3 = 'rain<100', s3 = 'data/wetter.h5:/raw/zeuthen_weather',
