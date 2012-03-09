@@ -607,7 +607,7 @@ class Plot(object):
         names = []
         for ext in extensions:
             n = name + '.' + ext
-            plt.savefig(n, bbox_inches = 'tight', pad_inches = 0.5 if 'map' in self.m else 0.05, transparent = False)
+            plt.savefig(n, bbox_inches = 'tight', pad_inches = 0.5 if 'map' in self.m else 0.1, transparent = False)
             names.append(n)
 
         return dict(zip(extensions, names))

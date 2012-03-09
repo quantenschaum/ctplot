@@ -18,13 +18,14 @@
 #
 #    $Id$
 #
-import pytz, json, time, re
+import pytz, json, time, re, os
 import dateutil.parser as dp
 import datetime as dt
 from datetime import timedelta
 import safeeval
 from math import  floor, log10
 import numpy as np
+import subprocess
 
 class AttrDict(dict):
     __getattr__ = dict.__getitem__
@@ -189,7 +190,20 @@ def getCpuUsage():
 
 
 def getCpuLoad():
-    usage = getCpuUsage()
-    del usage['idle']
-    return sum(usage.values())
+    if os.name == 'posix':
+        usage = getCpuUsage()
+        del usage['idle']
+        return sum(usage.values())
+    else:
+        return 0
+
+def getRunning(name):
+    if os.name == 'posix':
+        p = subprocess.Popen(['ps', 'auxr'], stdout = subprocess.PIPE)
+        n = 0
+        for l in p.stdout:
+            if name in l: n += 1
+        return n
+    else:
+        return 0
 

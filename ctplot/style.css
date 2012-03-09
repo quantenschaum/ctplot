@@ -24,6 +24,10 @@ $Id$
 
 @import url(http://fonts.googleapis.com/css?family=Droid+Serif);
 
+ie {
+	display: 
+}
+
 body {
 	font-family: "Droid Serif", serif;
 	font-size: 90%;
@@ -322,3 +326,4 @@ label .help {
 		width: 100%;
 	}
 }
+

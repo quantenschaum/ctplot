@@ -427,9 +427,9 @@ function loadPlots() {
 }
 
 function addPlotToSaved(settings) {
-	$('<div>').appendTo('#savedplots').append(
-			$('<img>').attr('src', settings.png).attr('href', settings.png).attr('alt', 'Plot '+$('.savedplot').size()+ ' (Plot wird nicht angezeigt? Einfach neu laden.)').attr('title', settings.t).data('settings', settings)
-					.addClass('savedplot'))
+	$('<div>').appendTo('#savedplots').append( 
+			$('<img>').attr('src', settings.url).attr('href', settings.url).attr('alt', 'Plot ' + $('.savedplot').size()+' wird geladen...').attr('title', settings.t).data(
+					'settings', settings).addClass('savedplot'))
 
 	.append($('<img>').attr('src', 'img/cross.png').attr('title', 'Plot löschen').addClass('delete').click(function() {
 		$(this).parent().remove();
@@ -439,11 +439,25 @@ function addPlotToSaved(settings) {
 
 	.append($('<img>').attr('src', 'img/arrow_redo.png').attr('title', 'Plot laden').addClass('loadplot').click(function() {
 		setSettings($(this).parent().find('.savedplot').data('settings'));
-//		$('nav a[href="#settings"]').click();
-		 $('form').submit();
+		// $('nav a[href="#settings"]').click();
+		$('form').submit();
 	}));
-	
+
 	$('.savedplot').unbind().lightBox();
+//
+//	$.ajax({
+//		url : settings.png,
+//		type : 'HEAD',
+//		error : function() {
+//			settings['a'] = 'plot';
+//			$.ajax({
+//				data : settings,
+//				success : function() {
+//
+//				}
+//			});
+//		}
+//	});
 }
 
 var xhr;
@@ -494,18 +508,6 @@ function initSubmit() {
 						p.append(', ');
 						$('<a>').attr('href', data.svg).text('SVG').appendTo(p);
 
-						// store settings in cookie
-						$.extend(settings, data); // append plot image urls to
-						$.cookie('lastsettings', JSON.stringify(settings));
-						// save plot button
-						p.append(', ');
-						$('<input>').attr('type', 'image').attr('src', 'img/disk.png').attr('title', 'Plot speichern').attr('value', 'Plot speichern').click(
-								function() {
-									addPlotToSaved(settings);
-									$(this).hide(speed);
-									savePlots();
-								}).appendTo(p);
-
 						// plot settings
 						result.append('<br>Einstellungen dieses Plots:<br>');
 						jsonsettings = JSON.stringify(settings);
@@ -515,6 +517,18 @@ function initSubmit() {
 						result.append('<br>Diesen Plot auf einer Webseite einbinden:<br>');
 						ploturl = $(location).attr('href').replace(/[#?].*/, '') + 'webplot.py?' + query.replace(/a=plot/, 'a=png');
 						result.append($('<textarea id="ploturl">').text('<img src="' + ploturl + '" />'));
+
+						// store settings in cookie
+						$.extend(settings, data); // append plot image urls to
+						settings['url'] = ploturl;
+						// save plot button
+						p.append(', ');
+						$('<input>').attr('type', 'image').attr('src', 'img/disk.png').attr('title', 'Plot speichern').attr('value', 'Plot speichern').click(
+								function() {
+									addPlotToSaved(settings);
+									$(this).hide(speed);
+									savePlots();
+								}).appendTo(p);
 
 						// scroll to plot section
 						$('nav a[href="#output"]').click();

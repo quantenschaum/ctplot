@@ -1,6 +1,6 @@
-#!c:\Program Files (x86)\Python27\python.exe
-# -*- coding: utf-8 -*-
 #!/opt/python/bin/python
+# -*- coding: utf-8 -*-
+#!c:\Program Files (x86)\Python27\python.exe
 #!/usr/bin/python
 #    pyplot - python based data plotting tools
 #    created for DESY Zeuthen
@@ -26,10 +26,9 @@ matplotlib.use('Agg')
 
 import json, os, cgitb, cgi, sys, subprocess, time, random, string
 from plot import Plot, available_tables
-from utils import hashargs, getCpuLoad
+from utils import hashargs, getCpuLoad, getRunning
 from datetime import datetime
 from config import *
-from threading import Thread
 
 cgitb.enable(context = 1, format = 'html')
 
@@ -37,14 +36,21 @@ cgitb.enable(context = 1, format = 'html')
 
 
 def make_plot(settings):
-    # wait until cpu usage is <80%
-    if os.name == 'posix':
-        for i in xrange(1000):
-            if getCpuLoad() < .8: break
-
     name = os.path.join(plotdir, 'plot{}'.format(hashargs(settings))).replace('\\', '/')
-    if usecache and os.path.isfile(name + '.png'):
-        return dict([(e, name + '.' + e) for e in ['png', 'svg', 'pdf']])
+
+    # wait until there is free capacity
+    for i in xrange(1000):
+        # try to get plot from cache
+        if usecache and os.path.isfile(name + '.png'):
+            return dict([(e, name + '.' + e) for e in ['png', 'svg', 'pdf']])
+        time.sleep(random.random())
+        #if getCpuLoad() < .8: break # cpu usage <80%
+        if getRunning('webplot') <= 2: break # max 3 processes
+
+
+    # lower priority and create the plot
+    if os.name == 'posix':
+        os.nice(5)
 
     p = Plot(**settings)
     return p.save(name)
