@@ -393,7 +393,7 @@ class Plot(object):
                                         cacherow['time'] = (ta + tb) * 0.5 # overwrite with interval center
                                         cacherow['count'] = n
                                         cacherow['weight'] = wdsum[-1] / n
-                                        cacherow['rate'] = wdsum[-1] / window
+                                        cacherow['rate'] = n / window
                                         self.progress = progr_prev + row.nrow * progr_factor
                                         yield cacherow
                                         cacherow.append()
@@ -543,7 +543,7 @@ class Plot(object):
             if b: return eval(b)
             else: raise
         except:
-            return 10
+            return 0
 
 
 
@@ -726,7 +726,10 @@ class Plot(object):
         err = 0 #o.style.startswith('s')
         o.update(get_args_from(kwargs, xerr = err, yerr = err, capsize = 3 if err else 0))
 
-        binedges, bincenters, binwidths = get_binning(self.bins(i, 'x'), x)
+        bins = self.bins(i, 'x')
+        if  bins == 0:
+            bins = int(1 + np.log2(len(x)))
+        binedges, bincenters, binwidths = get_binning(bins, x)
 
         bincontents, _d1 = np.histogram(x, binedges)
         assert np.all(binedges == _d1)
@@ -784,8 +787,15 @@ class Plot(object):
         o.update(get_args_from(kwargs, hidezero = o.log or filled, colorbar = filled, clabels = not filled))
 
         # make binnings
-        xedges, xcenters, xwidths = get_binning(self.bins(i, 'x'), x)
-        yedges, ycenters, ywidths = get_binning(self.bins(i, 'y'), y)
+        bins = self.bins(i, 'x')
+        if  bins == 0:
+            bins = int(1 + np.log2(len(x)))
+        xedges, xcenters, xwidths = get_binning(bins, x)
+
+        bins = self.bins(i, 'y')
+        if  bins == 0:
+            bins = int(1 + np.log2(len(y)))
+        yedges, ycenters, ywidths = get_binning(bins, y)
 
         bincontents, _d1, _d2 = np.histogram2d(x, y, [xedges, yedges])
         bincontents = np.transpose(bincontents)

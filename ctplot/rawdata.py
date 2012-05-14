@@ -66,27 +66,27 @@ def filescaniter(filename, validator = None):
 
 def fileiter(filename, linehandler, skip_on_assert = False, print_failures = True):
     'returns iterator yielding objects created by linehandler from each line'
-    datafile = open(filename)
+    if verbose > 1: print 'reading', filename
+    with open(filename) as datafile:
+        try:
+            for i, line in enumerate(datafile, 1):
+                try:
+                    if verbose > 2: print 'line', i, ':', line.strip()
+                    data = linehandler(line)
+                    if verbose > 2: print 'data', i, ':', data, '\n'
+                    if data is not None:
+                        yield data
 
-    try:
-        for i, line in enumerate(datafile, 1):
-            try:
-                data = linehandler(line)
-                if data is not None:
-                    yield data
+                except AssertionError as e:
+                    if not skip_on_assert:
+                        raise
+                    else:
+                        if print_failures:
+                            print "%s:%d '%s'" % (filename, i, e)
 
-            except AssertionError as e:
-                if not skip_on_assert:
-                    raise
-                else:
-                    if print_failures:
-                        print "%s:%d '%s'" % (filename, i, e)
+        except Exception as e:
+            raise RuntimeError("Error parsing line %d in %s" % (i, filename), e)
 
-    except Exception as e:
-        raise RuntimeError("Error parsing line %d in %s" % (i, filename), e)
-
-    finally:
-        datafile.close()
 
 
 
@@ -512,7 +512,63 @@ class PolarsternHandler(LineHandler):
         return descriptor
 
 
-available_handlers = (WeatherHandler, CTEventHandler, ITTEventHandler, DWDTageswerteHandler, PolarsternHandler)
+class PolarsternHandler2(LineHandler):
+    description = 'Polarstern myon rate data [example: 2010 10 26 04 55495.1667 -2144.4 1044.9 53.3298333333  N  3.46916666667  E  1025.8  9.3  14910  -1.0  0.00  59.9  10000 1550]'
+    table_name = 'polarstern_events'
+    table_title = 'Polarstern myon rate data'
+    cols_and_units = OrderedDict([('time', 's'), ('MJD', ''), ('T_s', '°C'), ('p_s', 'hPa'), ('lat', '°'), ('lon', '°'),
+                                  ('p', 'hPa'), ('T', '°C'), ('ceil', '?'), ('radi', '?'), ('rain', ''),
+                                  ('H', '%'), ('visi', '?'), ('events', '')])
+
+    def __call__(self, line):
+        'parse line and return tuple with data or None if line was skipped (comment/empty)'
+        line = line.strip()
+        # skip comments or empty lines
+        if line.startswith('#') or line == '':
+            return
+
+        fields = line.split()
+        #assert len(fields) == 19
+
+        yy, mm, dd, hh = map(int, fields[:4])
+        time = dt.datetime(yy, mm, dd, hh)
+
+        mjd, Ts, ps = map(float, fields[4:7])
+
+        lat = float(fields[7]) * (-1 if fields[8] == 'S' else 1)
+        lon = float(fields[9]) * (-1 if fields[10] == 'W' else 1)
+
+        data = [time, mjd, Ts, ps, lat, lon]
+
+        data.extend(map(float, fields[11:]))
+
+        self.sanitize(data) # modify data (perform cleanup, transformations, etc.)
+        data = tuple(data) # freeze data (tuples are immutable)
+
+        self.verify(data) # verify that data fulfills certain criteria
+        return data
+
+    _timezone = pytz.timezone('Europe/Berlin')
+
+    def sanitize(self, data):
+        data[0] = self._timezone.localize(data[0])
+
+    def verify(self, data):
+        time, mjd, Ts, ps , lat, lon, p, T, ceil, radi, rain, H, visi, events = data
+        self._verify_time(time)
+        verifyrange('lat', lat, -90, 90)
+        verifyrange('lon', lon, -180, 180)
+        verifyrange('T', T, -50 , 50)
+        verifyrange('H', H, 0 , 100)
+        verifyrange('p', p , 800, 1200)
+        verifyrange('events', events, 0, 5000)
+
+    def _col_descriptor(self):
+        descriptor = OrderedDict([(k, t.FloatCol(dflt = nan, pos = i)) for i, k in enumerate(self.col_names)])
+        return descriptor
+
+
+available_handlers = (WeatherHandler, CTEventHandler, ITTEventHandler, DWDTageswerteHandler, PolarsternHandler, PolarsternHandler2)
 
 
 def autodetect(filename, handlers = available_handlers):
@@ -527,21 +583,27 @@ def autodetect(filename, handlers = available_handlers):
     # try each handler
     for h in handlers:
         try: # try to parse the file
+            print 'trying', h
+            datalines = []
             for i, data in enumerate(fileiter(filename, h())):
+                datalines.append(data)
                 if i > 10: break # stop after 10 lines
 
             # if parsing was successful (no exception), add this handler
-            matched_handlers.append(h)
+            if len(datalines) > 5: # require at least 5 table rows to be read
+                matched_handlers.append(h)
 
         except Exception as e: # ignore errors, try next handler
-#            print h, e
+            if verbose > 0:
+                print '{0} failed to read {1}'.format(h, filename)
+                print e
             pass
 
     # return a unique match...
     if len(matched_handlers) == 1:
         return matched_handlers[0]
     else: # ...or raise
-        raise RuntimeError('could not autodetect handler for ' + filename)
+        raise RuntimeError(('could not autodetect handler for {0} \nmatching handlers: \n{1}'.format(filename, matched_handlers)))
 
 
 def starttime(filename, handler):
@@ -601,6 +663,12 @@ def raw_to_h5(filenames, out = "out.h5", handlers = available_handlers,
             else:
                 _filenames.append(f)
     filenames = _filenames
+    if verbose > 0:
+        print 'files to process:'
+        for fn in filenames:
+            print '   ', fn
+
+    assert len(filenames) > 0, 'no input files'
 
     if show_progress:
         pb = ProgressBar(maxval = len(filenames), widgets = [Bar(), ' ', Percentage(), ' ', ETA()], fd = sys.stdout)
@@ -654,6 +722,8 @@ def raw_to_h5(filenames, out = "out.h5", handlers = available_handlers,
     if show_progress:
         pb.finish()
 
+verbose = 0
+
 if __name__ == '__main__':
     import argparse as ap
     formats = ''
@@ -667,17 +737,20 @@ if __name__ == '__main__':
                                '. The program tries to autodetect the file format and sorts the input files by time automatically. ' +
                                'Times are stored as double as seconds since reference time t0.')
 
-    parser.add_argument('--version', action = 'version', version = '%(prog)s {} from {}'.format(__version__, __date__))
+    parser.add_argument('--version', action = 'version', version = ' % (prog)s {} from {}'.format(__version__, __date__))
     parser.add_argument('-o', '--out', metavar = 'file', default = 'out.h5', help = 'HDF5 output file (default: out.h5)')
     parser.add_argument('-f', '--force', action = 'store_true', help = 'overwrite existing file')
 #    parser.add_argument('-a', '--append', action = 'store_true', help = 'append new data to existing file')
-    parser.add_argument('-t', '--reftime', metavar = 'datetime', default = '2004-01-01T00:00:00+0000', type = dp.parse, help = 'reference time t0 (default: 2004-01-01T00:00:00+0000)')
+    parser.add_argument('-t', '--reftime', metavar = 'datetime', default = '2004-01-01T00:00:00+0000', type = dp.parse,
+                        help = 'reference time t0 (default: 2004-01-01T00:00:00+0000)')
     parser.add_argument('-s', '--noskip', action = 'store_true', help = 'do not skip invalid lines, stop on error')
     parser.add_argument('-q', '--quiet', action = 'store_true', help = 'do not show progressbar, just print error messages')
+    parser.add_argument('-v', '--verbose', action = 'count', help = 'show additional processing information')
     parser.add_argument('infiles', nargs = '+', help = 'input files, if a directory is given, all files in it and in its subdirectories are used')
 
     opts = parser.parse_args()
 
+    verbose = opts.verbose
 
     if not opts.out.endswith('.h5'):
         out = opts.out + '.h5'

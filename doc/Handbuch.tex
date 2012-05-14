@@ -59,7 +59,7 @@
 %\extratitle{extra}
 %\titlehead{Kopf}
 %\subject{Typisierung}
-\title{\texttt{pyplot}-Handbuch}
+\title{\texttt{ctplot}-Handbuch}
 %\subtitle{Untertitel}
 \author{Adam Lucke}
 \date{\today}
@@ -69,12 +69,12 @@
 
 \tableofcontents
 \chapter{Installation}
-Eine Installation des Softwarepaketes ist eigentlich nicht notwendig. Unter Installation ist hier zu verstehen, dass das Paket \texttt{pyplot.zip} in das gewünschte Verzeichnis entpackt wird.
+Eine Installation des Softwarepaketes ist eigentlich nicht notwendig. Unter Installation ist hier zu verstehen, dass das Paket \texttt{ctplot.zip} in das gewünschte Verzeichnis entpackt wird.
 
 Die Software ist in Python geschrieben und sollte daher auf allen Systemen laufen, auf denen Python und die notwendigen Bibliotheken installiert sind.
 
 \section{Bibliotheken}
-Im folgenden sind alle notwendigen Bibliotheken aufgelistet, die für \texttt{pyplot} notwendig sind.
+Im folgenden sind alle notwendigen Bibliotheken aufgelistet, die für \texttt{ctplot} notwendig sind.
 \begin{itemize}
   \item Python 2.7+, \url{http://python.org/}
   \item pytz, \url{http://pytz.sourceforge.net/}
@@ -87,7 +87,7 @@ Im folgenden sind alle notwendigen Bibliotheken aufgelistet, die für \texttt{py
   \item PIL 1.1+ (für basemap), \url{http://www.pythonware.com/products/pil/}
 \end{itemize}
 
-Sind diese Bibliotheken installiert, so können die \texttt{pyplot}-Tools verwendet werden.
+Sind diese Bibliotheken installiert, so können die \texttt{ctplot}-Tools verwendet werden.
 
 
 \chapter{Rohdatenkonvertierung}
@@ -200,7 +200,7 @@ Die Variable \texttt{available\_handlers} in \texttt{rawdata.py} enthält eine A
 \subsection{vorhandene LineHandler}
 Die folgenden LineHandler sind in \texttt{rawdata.py} bereits vorhanden:
 \begin{description}
-  \item[\texttt{WeatherHandler}] Ließt Wetterdaten der Wetterstation Zeuthen. Das Datenformat hat eine Struktur wie in \autoref{lst:zweather}. Die Felder einer Zeile sind durch Leerzeichen getrennt und enthalten die Werte: 
+  \item[\texttt{WeatherHandler}] Ließt Wetterdaten der Wetterstation Zeuthen. Das Datenformat hat eine Struktur wie in \autoref{lst:zweather}. Die Felder einer Zeile sind durch Leerzeichen getrennt und enthalten die Werte:
       \textsf{time [s], T\_i [C°], T\_a [C°], T\_dew [C°], H\_i [\%], H\_a [\%], v\_wind [m/s], d\_wind [°], gust, chill, rain [mm], p [hPa], clouds}
   \item[\texttt{CTEventHandler}] Ließt CosmicTrigger-Events im Format wie in \autoref{lst:ctascii}. Die Felder einer Zeile sind durch Leerzeichen getrennt und enthalten die Werte: \textsf{time [s], a1, a2, a3, a4, b1, b2, b3, b4, c1, c2, c3, c4}. Dabei bedeutet \textsf{a1} = Ebene a, Element 1, usw.
   \item[\texttt{ITTEventHandler}] Ließt Eventdaten des Zeuthener IctTop-Tanks. Es werden immer zwei aufeinander folgende Zeilen gelesen. Die Daten haben die folgende Struktur:
@@ -221,7 +221,7 @@ Die folgenden LineHandler sind in \texttt{rawdata.py} bereits vorhanden:
 
       \end{lstlisting}
       Von Interesse sind die Zeilen, die mit Zahlen $>0$ beginnen. Darauf folgt ein Zeitstempel (\textsf{time}). Die 2 bzw. 8 Zahlen am Ende der Zeilen sind die gemessenen Ladungen in dem DOMs (\textsf{dom1, dom2}) bzw. den Segmenten der Triggerebenen (\textsf{a1-b4}).
-      
+
       Die Felder der zurückgegebenen Daten sind: \textsf{time [s], dom1, dom2, run, time2 [s], a1, a2, a3, a4, b1, b2, b3, b4}.
       Dabei bedeutet \textsf{a1} = Ebene a, Element 1, usw., \textsf{time2} ist der Zeitstempel der zweiten Zeile.
   \item[\texttt{PolarsternHandler}] Ließt Daten aus vorprozessierten Datenfiles des Myondetektors auf der Polarstern.
@@ -274,7 +274,7 @@ Die einzelnen Optionen bedeuten:
 
 
 \subsection{Funktionsweise}
-Es werden beide Tabelle geöffnet und alle Events (primäre Tabelle) durchgegangen. In der Zusatzdatentabelle (sekundäre Tabelle) werden die Zeilen gesucht, die zeitlich vor bzw. nach dem aktuellen Event liegen. Durch lineare Interpolation werden die Zusatzdaten zum Eventzeitpunkt berechnet und dem Event zugeordnet. 
+Es werden beide Tabelle geöffnet und alle Events (primäre Tabelle) durchgegangen. In der Zusatzdatentabelle (sekundäre Tabelle) werden die Zeilen gesucht, die zeitlich vor bzw. nach dem aktuellen Event liegen. Durch lineare Interpolation werden die Zusatzdaten zum Eventzeitpunkt berechnet und dem Event zugeordnet.
 
 Werden keine Zusatzdaten vor und nach dem aktuellen Event gefunden, oder ist der Abstand zwischen den beiden Zusatzdatenzeilen zu groß (Option \texttt{-x}), so wird das Event verworfen.
 
@@ -290,9 +290,101 @@ Werden keine Zusatzdaten vor und nach dem aktuellen Event gefunden, oder ist der
 \chapter{Ploterzeugung}
 \section{plot.py}
 
-\chapter{Webinterface}
+\chapter{Anleitung zum Webinterface}
+			<p>Diese Webseite stellt ein interaktives Werkzeug bereit, mit dem sich die Daten verschiedener Experimente analysieren lassen.
+			Die Experimente und dieses Analysewerkzeug sind Projekte von <a href="https://physik-begreifen-zeuthen.desy.de/">Physik begreifen</a> und
+			<a href="http://www.teilchenwelt.de/">Teilchenwelt</a>.</p>
+			<p style="color: red;">Zur Zeit befindet sich dieses Auswertungstool im Testbetrieb.</p>
+			<p>Für weitere Info siehe: <a href="https://znwiki3.ifh.de/KosmischeTeilchen/Software%3A%20Webinterface">https://znwiki3.ifh.de/KosmischeTeilchen/Software: Webinterface</a></p>
+			<p>Hält man die Maus über ein Eingabefeld, so wird ein kurzer, beschreibender Hilfetext eingeblended.</p>
+			
+			
+			
+			<h2>Experimente</h2>
+				<p>Die Daten, die auf dieser Seite ausgewertet werden können, stammen von den folgenden Experimenten.</p>
+				
+				<h3>Cosmic-Trigger, Zeuthen</h3>
+					<p>Der Cosmic-Trigger besteht aus Teilen von Szintillationszählern, die bis zum Jahr 2000 im L3-Cosmic Experiment am CERN eingesetzt wurden.</p>
+		            <p>Das Hodoskop besteht aus 3 übereinander angeordneten Szitillator-Ebenen. Jede Ebene ist aus vier 0.5×0.5 m² großen Segmenten zusammengesetzt.
+		            Wenn ein geladenes kosmisches Teilchen ein Segment durchfliegt, wird Szintillationslicht erzeugt, das ein Photomultiplier registriert und in ein
+		            elektrisches Signal umwandelt.</p>
+		            <p>Die Segmente sind elektronisch miteinander verknüpft. Die Triggerbedingung ist, dass in einem Zeitfenster von 1/10000 Sekunden Länge ein Signal
+		            in mindestens einem Segment in jeder Ebene registriert wird. Nur dann wird die Information auf einen PC übertragen und abgespeichert.</p>
+		            <p>Mit dem Trigger-Hodoskop werden seit Mai 2004 Daten genommen und in Datenfiles abgespeichert. Diese Daten erlauben eine Vielzahl von Untersuchungen, wie z.B.
+		            Bestimmung der Rate kosmischer Teilchen  (Anzahl der Trigger pro Zeiteinheit)    Variation der Triggerbedingung    (1 Trigger/Ebene – Myon-Kandidat, Trigger in mehreren Segmenten/Ebene – Luftschauer)
+		            Rate in Abhängigkeit von den Wetterbedingungen    (Luftdruck, Temperatur, Luftfeuchte)    Vergleich der Ergebnisse verschiedener Jahre.</p>
+		            <p><a href="https://znwiki3.ifh.de/KosmischeTeilchen/Cosmic%20Trigger%20Zeuthen" target="_blank">weiter lesen...</a></p>
+		
+		        <h3>Szintillationsdetektor, FS Polarstern</h3>
+		            <p>Im Jahr ???? wurde ein kleiner Myon-Detektor auf dem Forschungschiff "Polarstern" installiert. Die Polarstern unternimmt jährlich Fahrten von...</p>
+		            <p>Der Detektor besteht aus...</p>
+		            <p><a href="#">weiter lesen...</a></p>
+
+                <h3>Wetterballons, FS Polarstern</h3>
+                    <p>Auf der Polarstern werden routinemäßig Wetterballonaufstiege durchgeführt. Die bei diesen Aufstiegen gewonnen Daten liefern Informationen über...</p>
+                    <p><a href="#">weiter lesen...</a></p>
+
+                <h3>IceTop-Tank, Zeuthen</h3>
+                    <p>Seit ???? befindet sich im DESY Zeuthen ein Tank aus dem IceCube-Experiment. Dieser Tank...</p>
+                    <p><a href="#">weiter lesen...</a></p>
+
+                <h3>Myon-Mühle, Zeuthen</h3>
+                    <p>Speziell für Schülerexperimente zur Untersuchung der kosmischen Strahlung wurde die sog. "Myon-Mühle" von ... selbst konstruiert. Dieser Detektor erlaubt es...</p>
+                    <p><a href="#">weiter lesen...</a></p>
+
+                <h3>Wetterstation, Zeuthen</h3>
+                    <p>Hierbei handelt es sich eigentlich nicht um ein eigenständiges Experiment, sondern einfach um die Erfassung von Wetterdaten. Diese Wetterdaten werden
+                    beim Bereitstellen der Daten der Experiemente in Zeuthen im den Daten der Experimente kombiniert. Dies ermöglicht die Auswertung der Experimentdaten
+                    zusammen mit den Wetterinformationen.</p>
+                    <p></p>
+
+            <h2>Datenanalyse</h2>
+                <h3>Struktur der Datensätze</h3>
+                    <p>Alle Datensätze, die mit Hilfe dieser Webanwendung ausgewertet werden können, haben die Struktur einer Tabelle. Jede Spalte der Tabelle steht für eine
+                    Größe, die in dem jeweiligen Experiement erfasst wird. Jede Tabellenzeile steht für einen Datenpunkt und enthält die Werte der einzelnen Größen.
+                    Ein Zeile entspricht also z.B. einem Detektorevent oder Wetterdaten zu einem bestimmten Zeitpunkt.</p>
+                    <p>Welche Spalten eine solche Tabelle enthält, hängt vom Experiment ab und welche Größen in diesem erfasst werden. Die erste Spalte ist in der Regel immer die Zeit,
+                    denn in allen Experimenten werden alle zu erfassenden Größen immer gleichzeitig erfasst. Es treffen z.B. ein oder mehrere Teilchen auf einen Detektor, was
+                    die Datenspeicherung auslöst. Die vom Detektor erfassten Messwerte werden darauf hin, versehen mit einem Zeitstempel,
+                    in eine neue Zeile der Datentabelle geschrieben. Bei den Wetterdaten wird in festen Zeitabständen eine Tabellenzeile hinzugefügt, die sämtliche, von der
+                    Wetterstation erfassten Messgrößen, enthält.</p>
 
 
+                <h3>Berechnung von Raten</h3>
+
+                <h3>Schnitte (Filter)</h3>
+
+                <h3>xy-Plots</h3>
+
+                <h3>Histogramme</h3>
+
+                    <h4>1D-Histogramme</h4>
+
+                    <h4>2D-Histogramme</h4>
+
+                <h3>Profile</h3>
+
+                <h3>Plots auf Karten</h3>
+
+                <h3>Fitten von Funktionen</h3>
+
+
+            <h2>Bedienungshinweise</h2>
+                <h3>Anpassung der Darstellung</h3>
+
+                <h3>Expertenmodus</h3>
+
+                <h3>Überlagern von Plots</h3>
+
+                <h3>zweite Achse</h3>
+
+                <h3>Speichern und Laden von Plots</h3>
+
+
+            <h2>zusätzliche Software</h2>
+
+
+            <h2>Beispiele</h2>
 
 
 

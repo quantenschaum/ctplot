@@ -1,6 +1,6 @@
-#!/opt/python/bin/python
-# -*- coding: utf-8 -*-
 #!c:\Program Files (x86)\Python27\python.exe
+# -*- coding: utf-8 -*-
+#!/opt/python/bin/python
 #!/usr/bin/python
 #    pyplot - python based data plotting tools
 #    created for DESY Zeuthen
@@ -102,10 +102,13 @@ if __name__ == '__main__':
         elif action in ['png', 'svg', 'pdf']:
             ct = action
             imgfile = images[ct]
-            print 'Content-Type: {}\n'.format(contenttypes[ct])
-            with open(imgfile) as img:
-                for l in img:
-                    sys.stdout.write(l)
+            if sys.platform == "win32":
+                import msvcrt
+                msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
+            with open(imgfile, 'rb') as img:
+                data = img.read()
+                print 'Content-Type: {}\n'.format(contenttypes[ct])
+                print data,
 
     elif action == 'list':
         print "Content-Type: text/plain;charset=utf-8\n"

@@ -23,7 +23,9 @@ $Id$
  -->
 <head>
 <title>PlotTool</title>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta charset="utf-8">
+<link rel="stylesheet" type="text/css" href="lightbox.css" media="screen" />
+<link rel="stylesheet" type="text/css" href="style.css" />
 <script src="jquery.js"></script>
 <script src="jquery.scrollTo.js"></script>
 <script src="jquery.localscroll.js"></script>
@@ -31,8 +33,9 @@ $Id$
 <script src="jquery.lightbox.js"></script>
 <script src="json2.js"></script>
 <script src="web.js"></script>
-<link rel="stylesheet" type="text/css" href="lightbox.css" media="screen" />
-<link rel="stylesheet" type="text/css" href="style.css" />
+
+<script type="text/javascript"  src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
 <script type="text/javascript">
 	var $buoop = {}
 	$buoop.ol = window.onload;
@@ -48,6 +51,30 @@ $Id$
 		document.body.appendChild(e);
 	}
 </script>
+
+<script>
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement({
+    pageLanguage: 'de',
+    floatPosition: google.translate.TranslateElement.FloatPosition.TOP_RIGHT
+  });
+}
+</script>
+<script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-7060372-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
 </head>
 <body>
 	<noscript>
@@ -60,9 +87,9 @@ $Id$
 		</p>
 	</noscript>
 	<header>
-		<img alt="DESY"
-			src="http://www.desy.de/++resource++desy/images/logo_desy.gif">
-			Cosmic Trigger Zeuthen<span class="orange">.</span>
+		<a href="https://physik-begreifen-zeuthen.desy.de/"><img title="DESY, Physik begreifen." id="logo-desy" src="img/logo-desy.png" /></a>
+			Datenanalyse<span class="orange">.</span>
+		<a href="http://www.teilchenwelt.de/"><img title="Netzwerk Teilchenwelt" id="logo-tw" src="img/logo-tw2.png" /></a>
 	</header>
 	<nav>
 		<ul>
@@ -76,14 +103,195 @@ $Id$
 <div id="content">
 <div id="explaination">
 		<h1>Anleitung</h1>
+			<p>Diese Webseite stellt ein interaktives Werkzeug bereit, mit dem sich die Daten verschiedener Experimente analysieren lassen. 
+			Die Experimente und dieses Analysewerkzeug sind Projekte von <a href="https://physik-begreifen-zeuthen.desy.de/">Physik begreifen</a> und 
+			<a href="http://www.teilchenwelt.de/">Teilchenwelt</a>.</p>
 			<p style="color: red;">Zur Zeit befindet sich dieses Auswertungstool im Testbetrieb.</p>
-			<p>Für weitere Info siehe im Wiki: <a href="https://znwiki3.ifh.de/KosmischeTeilchen/Software%3A%20Webinterface">https://znwiki3.ifh.de/KosmischeTeilchen/Software: Webinterface</a></p>
-		</div>
+			<p>Für weitere Info siehe: <a href="https://znwiki3.ifh.de/KosmischeTeilchen/Software%3A%20Webinterface">https://znwiki3.ifh.de/KosmischeTeilchen/Software: Webinterface</a></p>
+			<p>Hält man die Maus über ein Eingabefeld, so wird ein kurzer, beschreibender Hilfetext eingeblended.</p>
+			
+			
+			
+			<h2>Experimente</h2>
+				<p>Die Daten, die auf dieser Seite ausgewertet werden können, stammen von den folgenden Experimenten.</p>
+				
+				<h3>Cosmic-Trigger, Zeuthen</h3>
+					<p>Der Cosmic-Trigger besteht aus Teilen von Szintillationszählern, die bis zum Jahr 2000 im L3-Cosmic Experiment am CERN eingesetzt wurden.</p>
+		            <p>Das Hodoskop besteht aus 3 übereinander angeordneten Szitillator-Ebenen. Jede Ebene ist aus vier 0.5×0.5 m² großen Segmenten zusammengesetzt. 
+		            Wenn ein geladenes kosmisches Teilchen ein Segment durchfliegt, wird Szintillationslicht erzeugt, das ein Photomultiplier registriert und in ein 
+		            elektrisches Signal umwandelt.</p>
+		            <p>Die Segmente sind elektronisch miteinander verknüpft. Die Triggerbedingung ist, dass in einem Zeitfenster von 1/10000 Sekunden Länge ein Signal 
+		            in mindestens einem Segment in jeder Ebene registriert wird. Nur dann wird die Information auf einen PC übertragen und abgespeichert.</p>
+		            <p>Mit dem Trigger-Hodoskop werden seit Mai 2004 Daten genommen und in Datenfiles abgespeichert. Diese Daten erlauben eine Vielzahl von Untersuchungen, wie z.B.
+		            Bestimmung der Rate kosmischer Teilchen  (Anzahl der Trigger pro Zeiteinheit)    Variation der Triggerbedingung    (1 Trigger/Ebene – Myon-Kandidat, Trigger in mehreren Segmenten/Ebene – Luftschauer)
+		            Rate in Abhängigkeit von den Wetterbedingungen    (Luftdruck, Temperatur, Luftfeuchte)    Vergleich der Ergebnisse verschiedener Jahre.</p>
+		            <p><a href="https://znwiki3.ifh.de/KosmischeTeilchen/Cosmic%20Trigger%20Zeuthen" target="_blank">weiter lesen...</a></p>
+		        
+		        <h3>Szintillationsdetektor, FS Polarstern</h3>
+		            <p>Im Jahr ???? wurde ein kleiner Myon-Detektor auf dem Forschungschiff "Polarstern" installiert. Die Polarstern unternimmt jährlich Fahrten von...</p>
+		            <p>Der Detektor besteht aus...</p>
+		            <p><a href="#">weiter lesen...</a></p>
+
+                <h3>Wetterballons, FS Polarstern</h3>
+                    <p>Auf der Polarstern werden routinemäßig Wetterballonaufstiege durchgeführt. Die bei diesen Aufstiegen gewonnen Daten liefern Informationen über...</p>
+                    <p><a href="#">weiter lesen...</a></p>
+                
+                <h3>IceTop-Tank, Zeuthen</h3>
+                    <p>Seit ???? befindet sich im DESY Zeuthen ein Tank aus dem IceCube-Experiment. Dieser Tank...</p>
+                    <p><a href="#">weiter lesen...</a></p>
+                    
+                <h3>Myon-Mühle, Zeuthen</h3>
+                    <p>Speziell für Schülerexperimente zur Untersuchung der kosmischen Strahlung wurde die sog. "Myon-Mühle" von ... selbst konstruiert. Dieser Detektor erlaubt es...</p>
+                    <p><a href="#">weiter lesen...</a></p>
+                    
+                <h3>Wetterstation, Zeuthen</h3>
+                    <p>Hierbei handelt es sich eigentlich nicht um ein eigenständiges Experiment, sondern einfach um die Erfassung von Wetterdaten. Diese Wetterdaten werden
+                    beim Bereitstellen der Daten der Experimente in Zeuthen im den Daten der Experimente kombiniert. Dies ermöglicht die Auswertung der Experimentdaten
+                    zusammen mit den Wetterinformationen.</p>
+                    <p></p>
+                    
+            <h2>Datenanalyse</h2>
+                <h3>Struktur der Datensätze</h3>
+                    <p>Alle Datensätze, die mit Hilfe dieser Webanwendung ausgewertet werden können, haben die Struktur einer Tabelle. Jede Spalte der Tabelle steht für eine 
+                    Größe, die in dem jeweiligen Experiment erfasst wird. Jede Tabellenzeile steht für einen Datenpunkt und enthält die Werte der einzelnen Größen. 
+                    Ein Zeile entspricht also z.B. einem Detektorevent oder Wetterdaten zu einem bestimmten Zeitpunkt.</p>
+                    <p>Welche Spalten eine solche Tabelle enthält, hängt vom Experiment ab und welche Größen in diesem erfasst werden. Die erste Spalte ist in der Regel immer die Zeit,
+                    denn in allen Experimenten wird ein voller Satz Messgrößen zu einem gemeinsamen Zeitpunkt erfasst. Es treffen z.B. ein oder mehrere Teilchen auf einen Detektor, was
+                    die Datenspeicherung auslöst. Die vom Detektor erfassten Messwerte werden darauf hin, versehen mit einem Zeitstempel,
+                    in eine neue Zeile der Datentabelle geschrieben. Bei den Wetterdaten wird in festen Zeitabständen eine Tabellenzeile hinzugefügt, die sämtliche, von der
+                    Wetterstation erfassten Messgrößen, enthält.</p>
+                    <p>Die Datentabellen werden bei der Aufbereitung für die Auswertung in HDF5-Tabelle konvertiert. <a href="http://www.hdfgroup.org/HDF5/whatishdf5.html">HDF5</a>
+                    ist ein effizientes, offenes Datenformat, das unter anderem für die Speicherung von Daten in Tabellenform verwendet werden kann. Liegen die Daten verschiedener
+                    Experimente in einem gemeinsamen, einheitlichen Format vor, so können sie mit der selben Software analysiert werden.</p>
+                    <p>Zum Betrachten der Datentabellen kann z.B. HDFView verwendet werden. HDFView ist ein Programm zum Betrachten des Inhalts von beliebiegen HDF-Dateien. Die Tabelle der
+                    Wetterdaten sieht in HDFView so aus: </p>
+                    <img src="img/doc/hdfview.png" alt="HDFView" class="figure lightbox" />    
+                    
+                    <h4>Zeit</h4>
+                        <p><img src="img/attention.png" class="left" alt="attention" />Die Angabe eines Zeitpunktes besteht aus Datum, Uhrzeit und einer Angabe der Zeitzone (Sommer-/Winterzeit), 
+                        z.B. "02.03.2008 14:23:55.678 +0100". Das "+0100" am Ende bedeutet 1 Stunde Verschiebung von UTC (siehe <a href="http://de.wikipedia.org/wiki/ISO_8601">ISO-8601</a>).
+                        Derartig formatierte Zeitangaben sind zwar gut lesbar, aber man kann schlecht mit ihnen rechnen und sie benötigen viel Speicherplatz. 
+                        Daher werden Zeitpunkte in den Datentabellen als  Fließkommazahl gespeichert. Der Wert der Zahlen in der Tabellenspalte "time" entspricht der 
+                        Anzahl der Sekunden seit 01.01.2004 00:00:00 +0100. So kann z.B.     eine Größe in einem xy-Plot über der Zeit
+                        dargestellt werden, ohne die Datum-Uhrzeit-Angaben erst in Zahlenwerte umrechnen zu müssen. Die zwischen zwei Zeitpunkten vergangene Zeit kann auch sehr
+                        leicht berechnet werden, denn man braucht nur die Differenz der Zahlenwerte zu bilden und erhält die Zeitdifferenz in Sekunden.</p>
+                                    
+                
+                <h3>Berechnung von Raten</h3>
+                    <p>Im Fall der Experimente, bei denen jede Zeile der Datentabelle einem Detektorereignis entspricht, sind die Zeitpunkte, zu denen die Detektormessgrößen erfasst werden,
+                    nicht fest vorgegeben. Ausgelöst wird der Trigger (der Speichervorgang) von z.B. der Strahlung (Teilchen), die auf den Detektor treffen.
+                    Die Zeitpunkte der  Detektorereignisse sind also zufällig.</p>
+                    <p>Von Interesse ist oft die Ereignisrate, d.h. wieviele Ereignisse pro Zeitintervall aufgezeichnet werden. Um die Rate zu ermitteln, wird hier wie folge vorgegangen.
+                    Die Zeit-Achse wird  in Zeitfenster gleicher Größe \(\Delta t\) unterteilt. In jeden Zeitintervall wird die Anzahl \(N\) der Ereignisse ausgezählt.</p>
+                    <img src="img/doc/rate1.png" alt="Ratenermittlung" class="figure" />   
+                    <p>Die Rate \(R\) ergibt sich dann zu
+                    \[R = \frac{N}{\Delta t}.\] Jedem Zeitintervall wird also eine Rate zugeordnet.</p> 
+                    <p><img src="img/attention.png" class="left" alt="attention" />Aus der ursprünglichen Datentabelle wird durch die Ratenberechnung eine neue
+                    Tabelle erzeugt, in der alle Datenpunkte in einem Zeitintervall zu einem neuen Datenpunkt zusammengefasst werden. Die geschieht sobalb ein Zeitfenster angegeben wurde.
+                    Der Zeitpunkt, der diesem neuen Datenpunkt zugeordnet wird,
+                    ist die Mitte des Zeitintervalls. Alle anderen Größen der ursprünglichen Tabelle werden jeweils im Zeitintervall gemittelt und dem neuen Datenpunkt zugeordnet.
+                    Zusätzlich zu den Mittelwerten aller Größen werden
+                    Spalten für die Größen "rate", "weight" und "count" hinzugefügt. Im folgenden Beispiel wird die Größe \(a\) aus 9 Datenpunkten gemittelt zu 2.111 und 
+                    die Ereignisrate beträgt 0.45   Ereignisse pro Zeiteinheit. </p> 
+                    <img src="img/doc/rate2.png" alt="Ratenermittlung" class="figure" />   
+                    <p>"rate" enthält die Rate \(R\) und "count" die Anzahl \(N\) der Datenpunkte in Zeitintervall.</p> 
+                    <h4>Gewicht</h4>
+                    <p>"weight" steht für das mittlere Gewicht \(G\) und ist der Mittelwert eines vom Benutzer definierten Ausdrucks (Feld "Gewicht", im Expertenmodus).
+                    Das mittlere Gewicht kann für zwei Zwecke eingesetzt werden.</p> 
+                 
+                    <p>1. Zur Bestimmung der Rate von Ereignissen eines Bestimmten Typs. Im obigen Beispiel wurde für das Gewicht der Ausdruck \(a \lt 3\) angegeben. Dieser Ausdruck wird
+                    in jedem Datenpunkt ausgewertet. Es handelt sich um einen boolschen Ausdruck, d.h. das Ergebnis der Auswertung des Ausdrucks in einem Datenpunkt liefert entweder
+                    1 (wahr, wenn \(a \lt 3\)) oder 0 (falsch, wenn \(a \geq 3\)). Das mittlere Gewicht, der Mittelwert des Ausdrucks im Zeitintervall, ergibt sich in diesem Beispiel zu
+                    \[G = \frac{1+0+1+0+1+1+1+1+0}{9} = \frac{2}{3} = 0.666\ldots.\]</p> 
+                    <p>Die Rate der Ereignisse, die die Bedingung \(a \lt 3\) erfüllen, ergibt sich als Produkt der Rate \(R\) aller Ereignisse mit dem Mittelwert der Bedingung \(G\).
+                    \[R_G = R \cdot G.\]
+                    In diesem Beispiel also \(R_G=0.3\). Durch Angabe von "rate*weight" in einem Eingabefeld (x, y oder z) kann also die Rate eines bestimmten Ereignistyps ausgewertet werden.</p> 
+                 
+                    <p>2. Zur Bestimmung einer beliebigen mittleren Größe. Das Trigger-Hodoskop besteht aus 12 Detektorsegmenten, die jeweils entweder ein Signal "gesehen" haben oder nicht.
+                    Die Information, ob das Segment etwas gesehen hat, ist in den Tabellenspalten a1 bis c4 mit den Werten 1 (Signal) oder 0 (kein Signal) gespeichert.
+                    Man kann nun fragen: "Was ist die mittlere Anzahl von Segmenten, die ein Signal gesehen haben?" Die Anzahl der Segmente mit Signal bezeichnet man als "Multiplizität" des Ereignisses.
+                    Mittelt man diese über ein Zeitintervall, so erhält man die mittlere Multiplizität. Als Gewicht gibt man "a1+a2+a3+a4+b1+b2+b3+b4+c1+c2+c3+c4" an und erhält
+                    die mittlere Multiplizität in der Tabellenspalte "weight". Nun kann man z.B. die mittlere Multiplizität über der Zeit darstellen.</p>
+                    
+                    <h4>Schub</h4>
+                    <p>Das Eingabefeld "Schub" (engl. "shift") ist im Expertenmodus verfügbar. Hier wird ein Wert aus \((0,1]\) eingegeben. Der Wert gibt an, um welchen Anteil
+                    des Zeitfensters dieses jeweils weiterverschoben wird. Wird nichts angegeben, so entspricht dies einem Schub vom 1, d.h. das Fenster wird je um eine volle
+                    Fensterbreite verschoben. Die Fenster zur Ratenberechnung liegen bei Schub=1 also direkt nebeneinander und decken disjunkte Zeitbereiche ab.</p> 
+                    <p>Wird Schub&lt;1 gesetzt, so wird das Fenster nur jeweils um einen Teil verschoben. Man erhält ein gleitendes Zeitfenster, was nun nicht mehr disjunkte Zeitbereiche
+                    abdeckt. Es werden folglich Ereignisse mehrfach gezählt.</p>
+                    <img src="img/doc/schub.png" alt="Schub" class="figure" />   
+                
+                <h3>Schnitte (Filter)</h3>
+                    <p><img src="img/attention.png" class="left" alt="attention" />Mit "schneiden" (engl. "cut") bezeichnet man das Entfernen/Selektieren von Datenpunkten, die eine bestimmte Bedingung erfüllten. In Feld "Schnitt" kann eine Bedingung
+                    (boolscher Ausdruck) angegeben werden. Der Ausdruck wird für jeden Datenpunkt ausgewertet und nur die Datenpunkte, bei denen der Ausdruck "wahr" ergibt, werden
+                    in die Darstellung aufgenommen. Das Schneiden erfolgt nach der Ratenberechnung, d.h. die Ratenberechnung wird vom Schnitt nicht beeinflusst.</p> 
+                    <p>Diese Funktion kann z.B. dazu verwendet werden, nicht-plausible Messwerte zu entfernen.</p>
+                
+                <h3>xy-Plots</h3>
+                    <p>Die einfachste Art von graphischer Darstellung ist die Darstellung von Datenpaaren als Punkte (oder verbunden zur Linie) in einem xy-Achsensystem.
+                    Nachdem man den gewünschten Datensatz ausgewäht hat, setzt man "Plottyp" auf "xy-Plot". In die Felder "x" und "y" trägt man den Namen der Größe ein, die man
+                    darstellen möchte. Es können jedoch auch Formeln eingegeben werden. Statt "a" kann man "5*a" oder auch "a*b" darstellen.
+                    Beispiel: <img class="figure lightbox small" title="Luftdruck über Zeit" src="img/doc/ex1.png" /></p> 
+                
+                <h3>Histogramme</h3>
+                    Ein <a href="http://de.wikipedia.org/wiki/Histogramm">Histogramm</a> dient zur Darstellung der Häufigkeitsverteilung einer Größe. Der Wertebereich der Größe wird
+                    in Intervalle, die sog. Bins, unterteilt. Nun wird gezählt, wieviele Datenpunkte einer Stichprobe in jedes dieser Bins fallen. 
+                    <h4>1D-Histogramme</h4>
+                        <p>Bei einem 1-dimensionalen Histogramm wird der Wertebereich der zu untersuchenden Größe (die Bins) auf der x-Achse abgebildet. Auf der y-Achse ist die
+                        Anzahl der gezählten Datenpunkte aufgetragen. In der Darstellung eines Histogramms wird nun über jedem Bin die Anzahl der Datenpunkte einer Stichprobe,
+                        die in ein Bins fallen, über diesem aufgetragen. Die so entstehende Darstellung gibt Aufschluss über die zugrundeliegende Wahrscheinlichkeitsverteilung
+                        der untersuchten Größe. Je größer der Stichprobenumfang, desto mehr nähert sich das Histogramm der wahren Wahrscheinlichkeitsverteilung an. 
+                        Beispiel: <img class="figure lightbox small" title="Histogramm des Luftdrucks" src="img/doc/ex2.png" />
+                        Um Histogramme zu erstellen, wählt man den Plottyp "1D-Histogramm".</p>
+                
+                    <h4>2D-Histogramme</h4>
+                        <p>
+                        Beispiel: <img class="figure lightbox small" title="Histogramm von (Luftdruck, Temperatur)" src="img/doc/ex3.png" /></p>
+                    
+                <h3>Profile</h3>
+                    <p>
+                    Beispiel: <img class="figure lightbox small" title="Profil von (Luftdruck, Temperatur)" src="img/doc/ex4.png" /></p>
+                
+                <h3>Plots auf Karten</h3>
+                    <p>
+                    Beispiel: <img class="figure lightbox small" title="Plot auf Karte" src="img/doc/ex5.png" /></p>
+                
+                <h3>Fitten von Funktionen</h3>
+                
+                
+            <h2>Bedienungshinweise</h2>
+                <h3>Formeln</h3>
+            
+                <h3>Anpassung der Darstellung</h3>
+                
+                <h3>Expertenmodus</h3>
+            
+                <h3>Überlagern von Plots</h3>
+                
+                <h3>zweite Achse</h3>
+                
+                <h3>Speichern und Laden von Plots</h3>
+                
+                
+            <h2>zusätzliche Software</h2>
+                
+                
+            <h2>Beispiele</h2>
+                    
+			
+</div>
 
 
 
 <div id="datasets">
 <h1>Datensätze</h1>
+Zur Auswertung stehen die folgenden Datensätze zur Verfügung.
+    <h2>Wetterdaten</h2>
+    <p>Datensatzname: wetter</p>
+    <p>Es gibt nur einen Wetterdatensatz, der Wetterdaten der Jahre 2004 bis heute enthält. Es gab teilweise Ausfälle der Wetterstation, deshalb sind in 
+    einigen Zeiträumen keine Wetterdaten vorhanden.</p> 
+    <p></p>
+    <img class="figure lightbox small" src="http://localhost/ct/webplot.py?t=&w=10&h=5&xr=&xs=&xl=Zeit+%5BJahre%5D&yr=&ys=&yl=&yrtw=&ystw=&yltw=&zr=&zs=&zl=&expertmode=on&l=upper+left&s0=data%2Fwetter.h5%3A%2Fraw%2Fzeuthen_weather&m0=xy&n0=Temperatur&rw0=&x0=time%2F3600%2F24%2F365%2B2004&y0=T_a&tw0=&z0=&c0=&o0color=r&o0alpha=.8&o0linestyle=&o0linewidth=&o0marker=&o0markersize=&o0zorder=&ff0=&fp0=&fl0=&s1=data%2Fwetter.h5%3A%2Fraw%2Fzeuthen_weather&m1=xy&n1=Luftfeuchte&rw1=&x1=time%2F3600%2F24%2F365%2B2004&y1=H_a&tw1=&z1=&c1=&o1color=g&o1alpha=.8&o1linestyle=&o1linewidth=&o1marker=&o1markersize=&o1zorder=&ff1=&fp1=&fl1=&s2=data%2Fwetter.h5%3A%2Fraw%2Fzeuthen_weather&m2=xy&n2=Luftdruck&rw2=&x2=time%2F3600%2F24%2F365%2B2004&y2=p&tw2=y&z2=&c2=&o2color=b&o2alpha=.8&o2linestyle=&o2linewidth=&o2marker=&o2markersize=&o2zorder=&ff2=&fp2=&fl2=&a=png" />
 </div>
 
 
@@ -94,13 +302,13 @@ $Id$
 <form>
 <fieldset class="global">
     <legend>globale Einstellungen</legend>
-    <label data-help="Titel des Plots, wird über dem Plot als Überschift angezeigt">Titel<input type="text" name="t" /></label>
-    <label data-help="Breite des Plots in inch (default=10)">Breite<input type="text" name="w" /></label>
-    <label data-help="Höhe des Plots in inch (default=7)">Höhe<input type="text" name="h" /></label>
+    <label data-help="Titel des Plots, wird über dem Plot als Überschift angezeigt">Titel<input type="text" name="t"></label>
+    <label data-help="Breite des Plots in inch (default=10)">Breite<input type="text" name="w"></label>
+    <label data-help="Höhe des Plots in inch (default=7)">Höhe<input type="text" name="h"></label>
     <!-- label data-help="Schriftgröße in ???">Schriftgröße<input type="text" name="f" /></label -->
   
     <!-- X -->
-    <label data-help="Wertebereich der x-Achse, anzugeben in der Form (von, bis), Beipsiel: (-12.3, 102.8)">x-Range<input type="text" name="xr" /></label>
+    <label data-help="Anzeigebereich der x-Achse, anzugeben in der Form 'von, bis', Beipsiel: '-12.3, 102.8' (ohne ')">x-Range<input type="text" name="xr"></label>
     <label data-help="Skalierung der x-Achse">x-Scale
         <select name="xs">
             <option value=""></option>
@@ -109,10 +317,10 @@ $Id$
             <option value="symlog">symmetrisch-logarithmisch</option>
         </select>
     </label>
-    <label data-help="Beschriftung der x-Achse">x-Label<input type="text" name="xl" /></label>
+    <label data-help="Beschriftung der x-Achse">x-Label<input type="text" name="xl"></label>
 
     <!-- X2 -->
-    <label data-help="Wertebereich der x2-Achse, anzugeben in der Form (von, bis), Beipsiel: (-12.3, 102.8)" class="twinx expert">x2-Range<input type="text" name="xrtw" /></label>
+    <label data-help="Anzeigebereich der x2-Achse, anzugeben in der Form 'von, bis', Beipsiel: '-12.3, 102.8' (ohne ')" class="twinx expert">x2-Range<input type="text" name="xrtw"></label>
     <label data-help="Skalierung der x2-Achse" class="twinx expert">x2-Scale
         <select name="xstw">
             <option value=""></option>
@@ -121,10 +329,10 @@ $Id$
             <option value="symlog">symmetrisch-logarithmisch</option>
         </select>
     </label>
-    <label data-help="Beschriftung der x2-Achse" class="twinx expert">x2-Label<input type="text" name="xltw" /></label>
+    <label data-help="Beschriftung der x2-Achse" class="twinx expert">x2-Label<input type="text" name="xltw"></label>
  
     <!-- Y -->
-    <label data-help="Wertebereich der y-Achse, anzugeben in der Form (von, bis), Beipsiel: (-12.3, 102.8)">y-Range<input type="text" name="yr" /></label>
+    <label data-help="Anzeigebereich der y-Achse, anzugeben in der Form 'von, bis', Beipsiel: '-12.3, 102.8' (ohne ')">y-Range<input type="text" name="yr"></label>
     <label data-help="Skalierung der y-Achse">y-Scale        
         <select name="ys">
             <option value=""></option>
@@ -133,10 +341,10 @@ $Id$
             <option value="symlog">symmetrisch-logarithmisch</option>
         </select>
     </label>
-    <label data-help="Beschriftung der y-Achse">y-Label<input type="text" name="yl" /></label>
+    <label data-help="Beschriftung der y-Achse">y-Label<input type="text" name="yl"></label>
 
     <!-- Y2 -->
-    <label data-help="Wertebereich der y2-Achse, anzugeben in der Form (von, bis), Beipsiel: (-12.3, 102.8)" class="twiny expert">y2-Range<input type="text" name="yrtw" /></label>
+    <label data-help="Anzeigebereich der y2-Achse, anzugeben in der Form 'von, bis', Beipsiel: '-12.3, 102.8' (ohne ')" class="twiny expert">y2-Range<input type="text" name="yrtw"></label>
     <label data-help="Skalierung der y2-Achse" class="twiny expert">y2-Scale        
         <select name="ystw">
             <option value=""></option>
@@ -145,10 +353,10 @@ $Id$
             <option value="symlog">symmetrisch-logarithmisch</option>
         </select>
     </label>
-    <label data-help="Beschriftung der y2-Achse" class="twiny expert">y2-Label<input type="text" name="yltw" /></label>
+    <label data-help="Beschriftung der y2-Achse" class="twiny expert">y2-Label<input type="text" name="yltw"></label>
 
     <!-- Z -->
-    <label data-help="Wertebereich der z-Achse (Farb-Achse), anzugeben in der Form (von, bis), Beipsiel: (-12.3, 102.8)">z-Range<input type="text" name="zr" /></label>
+    <label data-help="Anzeigebereich der z-Achse, anzugeben in der Form 'von, bis', Beipsiel: '-12.3, 102.8' (ohne ')">z-Range<input type="text" name="zr"></label>
     <label data-help="Skalierung der z-Achse (Farb-Achse)">z-Scale
         <select name="zs">
             <option value=""></option>
@@ -157,13 +365,13 @@ $Id$
             <option value="symlog">symmetrisch-logarithmisch</option>
         </select>
     </label>
-    <label data-help="Beschriftung der z-Achse (Farbe)">z-Label<input type="text" name="zl" /></label>
+    <label data-help="Beschriftung der z-Achse (Farbe)">z-Label<input type="text" name="zl"></label>
    
 
    
     <label data-help="wenn aktiviert werden zusätzliche Eingabefelder angezeigt (für fortgeschrittene Benutzer)">
-            Expertenmodus<input type="checkbox" name="expertmode" /></label>
-    <label data-help="">Legende
+            Expertenmodus<input type="checkbox" name="expertmode"></label>
+    <label data-help="legt fest, ob und wo die Legende angezeigt wird. Bei nur einem Plot wird keine Legende angezeigt.">Legende
         <select name="l">
             <option value="">automatisch</option>
             <option value="none">keine Legende</option>
@@ -183,9 +391,9 @@ $Id$
     <div id="varsbox">verfügbare Variablen: <span id="vars">a, b, c, &hellip;</span></div>
     <fieldset class="plot">
         <legend>Plot *</legend>
-        <img src="img/cross.png" class="delplot" title="Plot entfernen" />
+        <img src="img/cross.png" class="delplot" title="hier klicken, um diese Ploteinstellungen zu entfernen">
         
-		<label data-help="">Plottyp<select name="m*">
+		<label data-help="legt fest, in welcher Form die Daten dargestellt werden. Nähere Informationen zu den Plottypen gibt es in der Anleitung">Plottyp<select name="m*">
           <option value="xy">xy-Plot</option>
           <option value="h1">1D-Histogram</option>
           <option value="h2">2D-Histogram</option>
@@ -193,25 +401,25 @@ $Id$
           <option value="map">Plot auf Karte</option>
 		</select></label> 
         
-        <label data-help="">Name<input type="text" name="n*" /></label> 
+        <label data-help="Name des Plots, wird in der Legende angezeigt">Name<input type="text" name="n*"></label> 
         
         <h2>Ratenberechnung</h2>
-        <label data-help="">Fenster (Ratenberechnung)<input type="text" name="rw*" /></label> 
-        <label data-help="" class="expert">Schub<input type="text" name="rs*" /></label> 
-        <label data-help="" class="expert">Gewicht<input type="text" name="rc*" /></label>
+        <label data-help="Fenster in Sekunden zur Ratenberechnung, die Rate wird durch Zählen von Events in einen festen Zeitfenster berechnet, dies hier legt die Größe dieses Fensters in Sekunden fest, weitere Erklärungen in der Anleitung">Fenster (Ratenberechnung)<input type="text" name="rw*"></label> 
+        <label data-help="Ausdruck (Formel), der innerhalb des Zeitfensters gemittelt wird, die Rate ist mittleres Gewicht * Anzahl Events / Zeitfenster, dies erlaubt die Bestimmung der Rate von Event eines bestimmten Typs (z.B. Events mit genau 3 getriggerten Segmenten) oder die Ermittlung von mittleren Größen (z.B. mittlere Multiplizität)" class="expert">Gewicht<input type="text" name="rc*"></label>
+        <label data-help="Anteil des Fensters, um welcher dieses verschoben wird, mögliche Werte aus: (0,1], Standardwert: 1, bei Schub=1 beginnt das jeweils nächste Zeitfenster direkt im Anschluss an der vorhergehende, die Fenster überlappen nicht, bei Schub&lt;1 überlappen die Fenster, des Zeitfenster wird jeweils nur um den angegebenen Anteil weitergeschoben, das Zeitfenster ist gleitend und Events werden mehrfach gezählt" class="expert">Schub<input type="text" name="rs*"></label> 
         
         <h2>Achsen und Daten</h2>
         <label data-help="Wert, der auf der x-Achse dargestellt werden soll. Hier kann ein Variablenname eingegeben werden (z.B. time) oder eine Formel, die Variablen umrechnet oder miteinander verknüpft (z.B. T_a-T_i oder log(p))">
-            x<input type="text" name="x*" /></label> 
-        <label data-help="Unterteilung der x-Achse in Bins. Angabe einer Zahl n bedeutet, dass automatisch n Bins gewählt werden, die die Daten enthalten (10 erzeugt 10 Bins). Angabe von drei durch Komma getrennte Zahlen a,b,n erzeugt n Bins mit linken Kante a und rechter Kante b. Angabe von mehr als drei durch Komma getrennte Zahlen..." class="opt t-h1 t-h2 t-p">
-            x-Bins<input type="text" name="x*b" /></label> 
-        <label data-help="" class="opt t-h1 t-p">x-Fehlerbalken<input type="checkbox" name="o*xerr" /></label>
+            x<input type="text" name="x*"></label> 
+        <label data-help="Unterteilung der x-Achse in Bins. Angabe einer Zahl n bedeutet, dass automatisch n Bins gewählt werden, die die Daten enthalten (z.B. 10 erzeugt 10 Bins). Angabe von drei durch Komma getrennten Zahlen a,b,n erzeugt n Bins mit linker Kante a und rechter Kante b. Angabe von mehr als drei durch Komma getrennten Zahlen erzeugt Bins mit den Binkanten auf den angegebenen Werten" class="opt t-h1 t-h2 t-p">
+            x-Bins<input type="text" name="x*b"></label> 
+        <label data-help="aktiviert die Anzeige von x-Fehlerbalken" class="opt t-h1 t-p">x-Fehlerbalken<input type="checkbox" name="o*xerr"></label>
         
-        <label data-help="" class="opt t-xy t-h2 t-p t-map">y<input type="text" name="y*" /></label> 
-        <label data-help="" class="opt t-h2">y-Bins<input type="text" name="y*b" /></label> 
-        <label data-help="" class="opt t-h1 t-p">y-Fehlerbalken<input type="checkbox" name="o*yerr" /></label>
+        <label data-help="Wert, der auf der y-Achse dargestellt werden soll, analog zu x" class="opt t-xy t-h2 t-p t-map">y<input type="text" name="y*"></label> 
+        <label data-help="Unterteilung der y-Achse in Bins, analog zu x-Bins" class="opt t-h2">y-Bins<input type="text" name="y*b"></label> 
+        <label data-help="aktiviert die Anzeige von y-Fehlerbalken" class="opt t-h1 t-p">y-Fehlerbalken<input type="checkbox" name="o*yerr"></label>
 
-        <label data-help="" class="opt t-xy t-h1 t-p expert">zweite Achse
+        <label data-help="legt fest, ob eine zweite x- oder y-Achse für diesen Plot verwendet werden soll. die x-/y-Werte werden dann unabhängig auf einer eigenen Achse, mit eigener Skalierung oben/rechts dargestellt" class="opt t-xy t-h1 t-p expert">zweite Achse
             <select name="tw*">
                 <option value=""></option>
                 <option value="x">x-Achse</option>
@@ -219,13 +427,13 @@ $Id$
             </select>
         </label> 
         
-        <label data-help="" class="opt t-xy t-map">z (Farbe)<input type="text" name="z*" /></label> 
+        <label data-help="Wert, der auf der z-Achse dargestellt werden soll, analog zu x, die Werte werden als Farbe der Datenpunkte dargestellt" class="opt t-xy t-map">z (Farbe)<input type="text" name="z*"></label> 
 	    
-	    <label data-help="Hier wird ein boolscher Ausdruck eingegeben. Nur Datentupel, bei denen dieser Ausdruck zu wahr evaluiert, werden in den Plot aufgenommen. z.B. T_a>20 bedeutet, dass nur Daten (Tabellenzeilen), bei denen T_a>20 ist in den Plot aufgenommen werden. Alle anderen sind suzusagen weggeschnitten (gefiltert).">
-	       Schnitt (Filter)<input type="text" name="c*" /></label>
+	    <label data-help="Hier wird ein boolscher Ausdruck eingegeben. Nur Datentupel, bei denen dieser Ausdruck zu wahr evaluiert, werden in den Plot aufgenommen. z.B. T_a&gt;20 bedeutet, dass nur Daten (Tabellenzeilen), bei denen T_a&gt;20 ist in den Plot aufgenommen werden. Alle anderen sind sozusagen weggeschnitten (gefiltert).">
+	       Schnitt (Filter)<input type="text" name="c*"></label>
 	    
 	    <h2>Plotoptionen</h2>
-        <label data-help="" class="opt t-h1 expert">Stil
+        <label data-help="Art der Darstellung des Histograms" class="opt t-h1 expert">Stil
             <select name="o*style">
 	            <option value=""></option>
 	            <option value="hist">Histogram</option>
@@ -236,7 +444,7 @@ $Id$
             </select>
         </label>
      
-        <label data-help="" class="opt t-h2 expert">Stil<select name="o*style">
+        <label data-help="Art der Darstellung des Histograms" class="opt t-h2 expert">Stil<select name="o*style">
             <option value=""></option>
             <option value="color">Farbe</option>
             <option value="contour">Kontur</option>
@@ -245,13 +453,14 @@ $Id$
             </select>
         </label>
   
-        <label data-help="" class="opt t-h1 t-h2 expert">Statsbox<input type="text" name="sb*" /></label>
+        <label data-help="gibt an, welche Werte in der Infobox für das Histogram angegeben werden, es bedeuten: n=Anzahl der Einträge, u=underflow, o=overflow, 
+                          m=Mittelwert, s=Standardabweichung, bei 1D: [p=Mode (häufigster Wert), e=Median, w=Skew, k=Kurtosis, x=Excess], bei 2D: [c=Kovarianz]" class="opt t-h1 t-h2 expert">Statsbox<input type="text" name="sb*"></label>
         
-        <label data-help="" class="opt t-h2 expert">Konturlinien<input type="text" name="o*levels" /></label>
+        <label data-help="Anzahl der Konturlinien" class="opt t-h2 expert">Konturlinien<input type="text" name="o*levels"></label>
         
-        <label data-help="" class="opt t-h1 t-h2">Dichte<input type="checkbox" name="o*density" /></label>
+        <label data-help="wenn aktiv wird die Wahrscheinlichkeitsdichte dargestellt, nicht die pro Bin gezählten Einträge" class="opt t-h1 t-h2">Dichte<input type="checkbox" name="o*density"></label>
         
-        <label data-help="" class="opt t-h1 expert">kumulativ
+        <label data-help="kumulative Darstellung des Histograms, die Aufsummation der Bins erfolgt wie angegeben" class="opt t-h1 expert">kumulativ
             <select name="o*cumulative">
                 <option value=""></option>
                 <option value="1">links -&gt; rechts</option>
@@ -259,11 +468,11 @@ $Id$
             </select>
         </label>
         
-        <label data-help="" class="opt t-xy t-h1 t-p t-map">Farbe<input type="text" name="o*color" /></label>
+        <label data-help="Farbe der Linie/Datenpunkte (r=rot, g=grün, b=blau, y=gelb, m=magenta, c=cyan, k=schwarz oder Angabe als Hex-RGB-Tupel: #rrggbb)" class="opt t-xy t-h1 t-p t-map">Farbe<input type="text" name="o*color"></label>
       
-        <label data-help="" class="opt t-xy t-h1 t-h2 t-p t-map expert">Alpha<input type="text" name="o*alpha" /></label>
+        <label data-help="Durchsichtigkeit der Linie/Datenpunke (0=transparent, 1=opak)" class="opt t-xy t-h1 t-h2 t-p t-map expert">Alpha<input type="text" name="o*alpha"></label>
       
-        <label data-help="" class="opt t-xy t-h1 t-p t-map">Linientyp
+        <label data-help="Darstellung der Linie" class="opt t-xy t-h1 t-p t-map">Linientyp
             <select name="o*linestyle">
                 <option value=""></option>
                 <option value="none">keine Linie</option>
@@ -274,9 +483,9 @@ $Id$
             </select>
         </label>
       
-        <label data-help="" class="opt t-xy t-h1 t-p t-map expert">Liniendicke<input type="text" name="o*linewidth" /></label>
+        <label data-help="Dicke der Linie" class="opt t-xy t-h1 t-p t-map expert">Liniendicke<input type="text" name="o*linewidth"></label>
       
-        <label data-help="" class="opt t-xy t-h1 t-p t-map">Markertyp
+        <label data-help="Darstellung der Datenunkte" class="opt t-xy t-h1 t-p t-map">Markertyp
             <select name="o*marker">
                 <option value=""></option>
                 <option value="none">kein Marker</option>
@@ -290,9 +499,9 @@ $Id$
                 <option value="^">Dreieck</option>
             </select>
         </label>
-        <label data-help="" class="opt t-xy t-h1 t-p t-map expert">Markergröße<input type="text" name="o*markersize" /></label>
-        <label data-help="" class="opt t-xy t-h1 t-h2 t-p t-map expert">Farbtabelle<input type="text" name="o*cmap" /></label>
-        <label data-help="" class="opt t-xy t-h1 t-p t-map expert">z-Order<input type="text" name="o*zorder" /></label>
+        <label data-help="Größe der Datenpunkte" class="opt t-xy t-h1 t-p t-map expert">Markergröße<input type="text" name="o*markersize"></label>
+        <!-- label data-help="" class="opt t-xy t-h1 t-h2 t-p t-map expert">Farbtabelle<input type="text" name="o*cmap" /></label -->
+        <label data-help="legt die Zeichenreihenfolge fest, kleine Werte (&lt;0) verschieben den Plot nach hinten, große Werte (&gt;0)" class="opt t-xy t-h1 t-p t-map expert">z-Order<input type="text" name="o*zorder"></label>
         
         <!-- 
         <label data-help="" class="opt t-xy t-h1 t-p t-map">Randfarbe<input type="text" name="o*edgecolor" /></label>
@@ -304,7 +513,7 @@ $Id$
 	    -->
         
         <h2 class="opt t-map">Kartenoptionen</h2>
-        <label data-help="" class="opt t-map">Projektion
+        <label data-help="wählt die Kartenprjektion aus" class="opt t-map">Projektion
             <select name="o*projection">
                 <option value=""></option>
                 <option value="cyl">zylindrisch</option>
@@ -322,25 +531,25 @@ $Id$
                 <option value="spstere" class="expert">süd-polar, stereographisch</option>
             </select>
         </label>
-        <label data-help="" class="opt t-map expert">Breite des Ausschnitts [m]<input type="text" name="o*width" /></label>
-        <label data-help="" class="opt t-map expert">Höhe des Ausschnitts [m]<input type="text" name="o*height" /></label>
-        <label data-help="" class="opt t-map expert">Grenzbreite für (N/S-polar) [°]<input type="text" name="o*boundarylat" /></label>
+        <label data-help="" class="opt t-map expert">Breite des Ausschnitts [m]<input type="text" name="o*width"></label>
+        <label data-help="" class="opt t-map expert">Höhe des Ausschnitts [m]<input type="text" name="o*height"></label>
+        <label data-help="" class="opt t-map expert">Grenzbreite für (N/S-polar) [°]<input type="text" name="o*boundarylat"></label>
         <!-- label data-help="" class="opt t-map expert">Bluemarble<input type="checkbox" name="o*bluemarble" /></label -->
-        <label data-help="" class="opt t-map expert">Landesgrenzen<input type="checkbox" name="o*drawcountries" /></label>
+        <label data-help="" class="opt t-map expert">Landesgrenzen<input type="checkbox" name="o*drawcountries"></label>
 	    
 	    <!-- fit options -->
 	    <h2 class="opt t-xy t-h1 t-p">Fit-Optionen</h2>
-        <label data-help="Fitfuntion, unabhängige Variable ist x, Parameter sind p[0], p[1], ... Beispiel: p[0]+p[1]*x" class="opt t-xy t-h1 t-p">Fit-Funktion<input type="text" name="ff*" /></label>
-        <label data-help="Startwerte für die Fit-Parameter, durch Komma getrennt" class="opt t-xy t-h1 t-p">Startparameter<input type="text" name="fp*" /></label>
-        <label data-help="Linienfarbe- und Stil für Fitresultat, Beispiel 'r-' = rot, durchgezogen" class="opt t-xy t-h1 t-p expert">Fit-Linienoptionen<input type="text" name="fl*" /></label>
+        <label data-help="Fitfuntion, unabhängige Variable ist x, Parameter sind p[0], p[1], ... Beispiel: p[0]+p[1]*x" class="opt t-xy t-h1 t-p">Fit-Funktion<input type="text" name="ff*"></label>
+        <label data-help="Startwerte für die Fit-Parameter, durch Komma getrennt" class="opt t-xy t-h1 t-p">Startparameter<input type="text" name="fp*"></label>
+        <label data-help="Linienfarbe- und Stil für Fitresultat, Beispiel 'r-' = rot, durchgezogen" class="opt t-xy t-h1 t-p expert">Fit-Linienoptionen<input type="text" name="fl*"></label>
 	    
     </fieldset>
-	<button type="button" id="addplot" ><img src="img/add.png" /> Plot hinzufügen</button>
+	<button type="button" id="addplot" title="hier klicken, um einen weiteren, unabhängigen Plot hinzuzufügen"><img src="img/add.png"> Plot hinzufügen</button>
 </div>
 <div class="buttons">
-    <input type="hidden" name="a" value="plot" />
-    <button type="reset"><img src="img/arrow_undo.png" /> Reset</button>
-    <button type="submit"><img src="img/chart_line.png" /> Plot erstellen</button>
+    <input type="hidden" name="a" value="plot">
+    <button type="reset" title="hier klicken, um alle Ploteinstellungen zurückzusetzen"><img src="img/arrow_undo.png"> Reset</button>
+    <button type="submit"><img src="img/chart_line.png"> Plot erstellen</button>
 </div>
 </form>
 </div>
@@ -363,7 +572,7 @@ $Id$
 Es kann aber auch eine selbst gewählte (mind. 8 Zeichen) Session-ID verwendet werden. Zum Anlegen/Laden einer eigenen Session-ID diese eingeben und die "Session laden". 
 Existiert diese Session nicht, so ist sie leer und enthält keine gespeicherten Plots. Die Session-ID, unter der man seine Plots speichert, notiert man sich 
 und kann damit die Plots inklusive ihrer Einstellungen zu einem späteren Zeitpunkt (oder anderen Rechner) wieder laden.<br>
-<label>Session-ID <input type="text" id="sessionid" /></label><button type="button" id="newid">neue ID</button><button type="button" id="loadid">Session laden</button></div>
+<label>Session-ID <input type="text" id="sessionid"></label><button type="button" id="newid">neue ID</button><button type="button" id="loadid">Session laden</button></div>
 
 Gespeicherte Plots und ihre Einstellungen können mit einem Klick auf <img src="img/arrow_redo.png"> geladen und auf <img src="img/cross.png"> gelöscht werden.
 Ein Klick auf das Bild, vergrößert es.<br>

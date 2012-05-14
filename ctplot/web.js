@@ -76,7 +76,7 @@ function sourcesBox() {
 			alert(xhr['responseText']);
 		}
 	});
-	return $('<label>').append('Datensatz').append(ddbox);
+	return $('<label>').attr('data-help', 'her wird der zu verwendende Datensatz ausgewählt.').append('Datensatz').append(ddbox);
 }
 
 /** renumber form field names after add/del of plot */
@@ -207,10 +207,14 @@ function addHandlers(plot) {
 }
 
 /** Hilfe initialisieren */
-function initHelp() {
-	$('label[data-help]').each(function() {
+function initHelp(el) {
+	$(el).find('label[data-help]').each(function() {
 		help = $(this).attr('data-help');
-		$('<img>').attr('src', 'img/help.png').attr('title', help).addClass('help').prependTo(this).hide();
+		if (help != '')
+			// $('<img>').attr('src', 'img/help.png').attr('title',
+			// help).addClass('help').prependTo(this).hide();
+			$(this).find(':input').attr('title', help);
+
 	}).hover(function() {
 		$(this).find('.help').show();
 	}, function() {
@@ -296,6 +300,7 @@ function addPlot() {
 	$('#addplot').appendTo('#plots');
 	renumberPlots();
 	addHandlers(newplot);
+	initHelp(newplot);
 	updateHiddenFields();
 }
 
@@ -427,9 +432,9 @@ function loadPlots() {
 }
 
 function addPlotToSaved(settings) {
-	$('<div>').appendTo('#savedplots').append( 
-			$('<img>').attr('src', settings.url).attr('href', settings.url).attr('alt', 'Plot ' + $('.savedplot').size()+' wird geladen...').attr('title', settings.t).data(
-					'settings', settings).addClass('savedplot'))
+	$('<div>').appendTo('#savedplots').append(
+			$('<img>').attr('src', settings.url).attr('href', settings.url).attr('alt', 'Plot ' + $('.savedplot').size() + ' wird geladen...').attr('title',
+					settings.t).data('settings', settings).addClass('savedplot'))
 
 	.append($('<img>').attr('src', 'img/cross.png').attr('title', 'Plot löschen').addClass('delete').click(function() {
 		$(this).parent().remove();
@@ -444,20 +449,20 @@ function addPlotToSaved(settings) {
 	}));
 
 	$('.savedplot').unbind().lightBox();
-//
-//	$.ajax({
-//		url : settings.png,
-//		type : 'HEAD',
-//		error : function() {
-//			settings['a'] = 'plot';
-//			$.ajax({
-//				data : settings,
-//				success : function() {
-//
-//				}
-//			});
-//		}
-//	});
+	//
+	// $.ajax({
+	// url : settings.png,
+	// type : 'HEAD',
+	// error : function() {
+	// settings['a'] = 'plot';
+	// $.ajax({
+	// data : settings,
+	// success : function() {
+	//
+	// }
+	// });
+	// }
+	// });
 }
 
 var xhr;
@@ -550,10 +555,14 @@ function initSubmit() {
 /** on page load... */
 $(function() {
 	initScroll();
-	initHelp();
+	initHelp('fieldset.global');
 	initExpertMode();
 	initPlots();
 	initSubmit();
 	initSettingsLoader();
 	initSavedPlots();
+	$('img.lightbox').each(function() {
+		$(this).attr('href', $(this).attr('src'));
+	});
+	$('.lightbox').lightBox();
 });
