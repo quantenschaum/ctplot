@@ -36,6 +36,7 @@ from utils import set_attrs
 __version__ = '$Rev$'.replace('$', '').replace('Rev:', '').strip()
 __date__ = '$Date$'.replace('$', '').replace('Date:', '').strip()
 
+NaN = float('NaN')
 
 def filescaniter(filename, validator = None):
     'returns iterator yielding tuples with data from each line'
@@ -170,8 +171,8 @@ class LineHandler:
 nan = float('nan')
 inf = float('inf')
 
-def verifyrange(name, value, lower = -inf, upper = +inf, can_be_nan = False):
-    if not (lower <= value <= upper or (can_be_nan and math.isnan(value))):
+def verifyrange(name, value, lower = -inf, upper = +inf, nan_allowed = False):
+    if not (lower <= value <= upper or (nan_allowed and math.isnan(value))):
         raise AssertionError('%s out of range: %s' % (name, value))
 
 
@@ -228,7 +229,7 @@ class WeatherHandler(LineHandler):
         verifyrange('v_wind', v_wind, 0 , 60, True)
         verifyrange('d_wind', d_wind , 0, 360, True)
         verifyrange('gust', gust, 0 , 120, True)
-        verifyrange('rain', rain, 0, can_be_nan = True)
+        verifyrange('rain', rain, 0, nan_allowed = True)
         verifyrange('p', p , 800, 1200)
         verifyrange('clouds', clouds, 1 , 6, True)
 
@@ -492,7 +493,7 @@ class PolarsternHandler(LineHandler):
         self.verify(data) # verify that data fulfills certain criteria
         return data
 
-    _timezone = pytz.timezone('Europe/Berlin')
+    _timezone = pytz.timezone('UTC')
 
     def sanitize(self, data):
         data[0] = self._timezone.localize(data[0])
@@ -511,14 +512,15 @@ class PolarsternHandler(LineHandler):
         descriptor = OrderedDict([(k, t.FloatCol(dflt = nan, pos = i)) for i, k in enumerate(self.col_names)])
         return descriptor
 
+mjd_epoch = dt.datetime(1858, 11, 17, tzinfo = pytz.timezone('UTC'))
 
 class PolarsternHandler2(LineHandler):
     description = 'Polarstern myon rate data [example: 2010 10 26 04 55495.1667 -2144.4 1044.9 53.3298333333  N  3.46916666667  E  1025.8  9.3  14910  -1.0  0.00  59.9  10000 1550]'
-    table_name = 'polarstern_events'
+    table_name = 'polarstern_events2'
     table_title = 'Polarstern myon rate data'
-    cols_and_units = OrderedDict([('time', 's'), ('MJD', ''), ('T_s', '°C'), ('p_s', 'hPa'), ('lat', '°'), ('lon', '°'),
-                                  ('p', 'hPa'), ('T', '°C'), ('ceil', '?'), ('radi', '?'), ('rain', ''),
-                                  ('H', '%'), ('visi', '?'), ('events', '')])
+    cols_and_units = OrderedDict([('time', 's'), ('T_s', '°C'), ('p_s', 'mbar'), ('lat', '°'), ('lon', '°'),
+                                  ('p', 'mbar'), ('T', '°C'), ('ceil', 'ft'), ('radi', 'W/m²'), ('rain', 'mm/min'),
+                                  ('H', '%'), ('visi', 'm'), ('rate', '1/h')])
 
     def __call__(self, line):
         'parse line and return tuple with data or None if line was skipped (comment/empty)'
@@ -528,7 +530,7 @@ class PolarsternHandler2(LineHandler):
             return
 
         fields = line.split()
-        #assert len(fields) == 19
+        #assert len(fields) == 19, 'invalid number of fields'
 
         yy, mm, dd, hh = map(int, fields[:4])
         time = dt.datetime(yy, mm, dd, hh)
@@ -539,29 +541,46 @@ class PolarsternHandler2(LineHandler):
         lon = float(fields[9]) * (-1 if fields[10] == 'W' else 1)
 
         data = [time, mjd, Ts, ps, lat, lon]
-
         data.extend(map(float, fields[11:]))
 
         self.sanitize(data) # modify data (perform cleanup, transformations, etc.)
+        self.verify(data) # verify that data fulfills certain criteria
+        data.pop(1) # pop MJD
         data = tuple(data) # freeze data (tuples are immutable)
 
-        self.verify(data) # verify that data fulfills certain criteria
         return data
 
-    _timezone = pytz.timezone('Europe/Berlin')
+    _timezone = pytz.timezone('UTC')
 
     def sanitize(self, data):
-        data[0] = self._timezone.localize(data[0])
+        # 0    1   2   3    4    5    6  7   8     9     10   11  12    13
+        time, mjd, Ts, ps , lat, lon, p, T, ceil, radi, rain, H, visi, events = data
+        data[0] = self._timezone.localize(time)
+        if not (-50 <= Ts <= 50): data[2] = NaN
+        if not (800 <= ps <= 1200): data[3] = NaN
+
+        if not (-90 <= lat <= 90) or not (-180 <= lon <= 180):
+            data[4] = data[5] = NaN
+
+        if not (800 <= p <= 1200): data[6] = NaN
+        if not (-50 <= T <= 50): data[7] = NaN
+        if not (0 <= ceil <= 99999): data[8] = NaN
+        if not (0 <= radi <= 9999): data[9] = NaN
+        if not (0 <= rain <= 9999): data[10] = NaN
+        if not (0 <= H <= 100): data[11] = NaN
+        if not (0 <= visi <= 999999999): data[12] = NaN
 
     def verify(self, data):
+        # 0    1   2   3    4    5    6  7   8     9     10   11  12    13
         time, mjd, Ts, ps , lat, lon, p, T, ceil, radi, rain, H, visi, events = data
+        assert abs((time - mjd_epoch).total_seconds() / 3600 - 24 * mjd) < 1. / 60, "MJD does not match time" # mjd-time < 1 minute
         self._verify_time(time)
-        verifyrange('lat', lat, -90, 90)
-        verifyrange('lon', lon, -180, 180)
-        verifyrange('T', T, -50 , 50)
-        verifyrange('H', H, 0 , 100)
-        verifyrange('p', p , 800, 1200)
-        verifyrange('events', events, 0, 5000)
+        verifyrange('lat', lat, -90, 90, True)
+        verifyrange('lon', lon, -180, 180, True)
+        verifyrange('T', T, -50 , 50, True)
+        verifyrange('H', H, 0 , 100, True)
+        verifyrange('p', p , 800, 1200, True)
+        verifyrange('events', events, 0, 10000)
 
     def _col_descriptor(self):
         descriptor = OrderedDict([(k, t.FloatCol(dflt = nan, pos = i)) for i, k in enumerate(self.col_names)])
@@ -583,7 +602,8 @@ def autodetect(filename, handlers = available_handlers):
     # try each handler
     for h in handlers:
         try: # try to parse the file
-            print 'trying', h
+            if verbose > 0:
+                print 'trying', h
             datalines = []
             for i, data in enumerate(fileiter(filename, h())):
                 datalines.append(data)
