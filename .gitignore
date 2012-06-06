@@ -1,0 +1,5 @@
+*.pyc
+/ctplot/data/*
+/ctplot/plots/*
+/ctplot/mplconfig
+/*
