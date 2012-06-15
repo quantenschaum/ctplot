@@ -604,24 +604,20 @@ class NeutronHandler(LineHandler):
         match = re.match(r'(?i)Day\s*=\s*\d+\s*(.*)', line)
         if match:
             self.day = dp.parse(match.group(1))
+            self.day = dt.datetime(self.day.year, self.day.month, self.day.day)
             self.day = self._timezone.localize(self.day)
-#            print '*****', 'day', self.day
             return
 
 
         if re.match(r'\d{2}:\d{2}:\d{2}\s+', line):
             time, N, HV, T, p, lat, lon = line.split()
-#            print '*****', time, N, HV, T, p, lat, lon
 
             hh, mm, ss = map(int, time.split(':'))
             timeoffset = dt.timedelta(hours = hh, minutes = mm, seconds = ss)
-#            print '*****', timeoffset
             time = self.day + timeoffset
-#            print '*****', time
 
             lat = (float(lat[:2]) + float(lat[2:-1]) / 60) * (1 if lat[-1].lower() == 'e' else -1)
             lon = (float(lon[:3]) + float(lon[3:-1]) / 60) * (1 if lon[-1].lower() == 'n' else -1)
-#            print '*****', lat, lon
 
             data = [time, int(N), float(HV), float(T), float(p), lat, lon]
 
@@ -646,7 +642,7 @@ class NeutronHandler(LineHandler):
         # 0   1  2   3  4   5    6 
         time, N, HV, T, p, lat, lon = data
         self._verify_time(time)
-        verifyrange('count', N, 0, 10000)
+        verifyrange('count', N, 0, 100)
         verifyrange('HV', HV, 1, 1e4, True)
         verifyrange('T', T, -50 , 50, True)
         verifyrange('p', p , 800, 1200, True)
@@ -656,11 +652,77 @@ class NeutronHandler(LineHandler):
     def _col_descriptor(self):
         descriptor = OrderedDict([(k, t.FloatCol(dflt = nan, pos = i)) for i, k in enumerate(self.col_names)])
         descriptor['N'] = t.IntCol(dflt = 0, pos = self.col_names.index('N'))
-        print descriptor
         return descriptor
 
 
-available_handlers = (WeatherHandler, CTEventHandler, ITTEventHandler, DWDTageswerteHandler, PolarsternHandler, PolarsternHandler2, NeutronHandler)
+class NeutronHandler2(LineHandler):
+    description = 'Neutron Monitor Data 2 [00:00:00 00004 01469  21.30 1014.680 5334.01351N 00833.41845E]'
+    table_name = 'neutron_events2'
+    table_title = 'Neutron Monitor Data 2'
+    cols_and_units = OrderedDict([('time', 's'), ('N', ''), ('T', '°C'), ('HV', 'V'), ('p', 'mbar')])
+
+    def __call__(self, line):
+        'parse line and return tuple with data or None if line was skipped (comment/empty)'
+        line = line.strip()
+        # skip comments or empty lines
+        if line.startswith('#') or line == '':
+            return
+
+        match = re.match(r'(?i)Day\s*=\s*\d+\s*(.*)', line)
+        if match:
+            self.day = dp.parse(match.group(1))
+            self.day = dt.datetime(self.day.year, self.day.month, self.day.day)
+            self.day = self._timezone.localize(self.day)
+            return
+
+
+        if re.match(r'\d{2}:\d{2}:\d{2}\s+', line):
+            fields = line.split()
+            assert len(fields) == 35
+
+            hh, mm, ss = map(int, fields[0].split(':'))
+            timeoffset = dt.timedelta(hours = hh, minutes = mm, seconds = ss)
+            time = self.day + timeoffset
+
+#            lat,lon=fields[],fields[]
+#            lat = (float(lat[:2]) + float(lat[2:-1]) / 60) * (1 if lat[-1].lower() == 'e' else -1)
+#            lon = (float(lon[:3]) + float(lon[3:-1]) / 60) * (1 if lon[-1].lower() == 'n' else -1)
+#            print '*****', lat, lon
+
+            #             count           temperature        highvoltage        pressure
+            data = [time, int(fields[1]), float(fields[13]), float(fields[16]), float(fields[31])]
+
+            self.sanitize(data) # modify data (perform cleanup, transformations, etc.)
+            self.verify(data) # verify that data fulfills certain criteria
+            data = tuple(data) # freeze data (tuples are immutable)
+
+            return data
+
+    _timezone = pytz.timezone('UTC')
+
+    def sanitize(self, data):
+        # 0   1  2   3  4  
+        time, N, T, HV, p = data
+        if not (1 <= HV <= 1e4): data[2] = NaN
+        if not (-50 <= T <= 50): data[3] = NaN
+        if not (-800 <= p <= 1200): data[4] = NaN
+
+    def verify(self, data):
+        # 0   1  2   3  4  
+        time, N, T, HV, p = data
+        self._verify_time(time)
+        verifyrange('count', N, 0, 1000)
+        verifyrange('HV', HV, 1, 1e4, True)
+        verifyrange('T', T, -50 , 50, True)
+        verifyrange('p', p , 800, 1200, True)
+
+    def _col_descriptor(self):
+        descriptor = OrderedDict([(k, t.FloatCol(dflt = nan, pos = i)) for i, k in enumerate(self.col_names)])
+        descriptor['N'] = t.IntCol(dflt = 0, pos = self.col_names.index('N'))
+        return descriptor
+
+
+available_handlers = (WeatherHandler, CTEventHandler, ITTEventHandler, DWDTageswerteHandler, PolarsternHandler, PolarsternHandler2, NeutronHandler, NeutronHandler2)
 
 
 def autodetect(filename, handlers = available_handlers):
