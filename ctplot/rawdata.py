@@ -587,7 +587,80 @@ class PolarsternHandler2(LineHandler):
         return descriptor
 
 
-available_handlers = (WeatherHandler, CTEventHandler, ITTEventHandler, DWDTageswerteHandler, PolarsternHandler, PolarsternHandler2)
+class NeutronHandler(LineHandler):
+    description = 'Neutron Monitor Data [00:00:00 00004 01469  21.30 1014.680 5334.01351N 00833.41845E]'
+    table_name = 'neutron_events'
+    table_title = 'Neutron Monitor Data'
+    cols_and_units = OrderedDict([('time', 's'), ('N', ''), ('HV', 'V'), ('T', '°C'),
+                                  ('p', 'mbar'), ('lat', ''), ('lon', '')])
+
+    def __call__(self, line):
+        'parse line and return tuple with data or None if line was skipped (comment/empty)'
+        line = line.strip()
+        # skip comments or empty lines
+        if line.startswith('#') or line == '':
+            return
+
+        match = re.match(r'(?i)Day\s*=\s*\d+\s*(.*)', line)
+        if match:
+            self.day = dp.parse(match.group(1))
+            self.day = self._timezone.localize(self.day)
+#            print '*****', 'day', self.day
+            return
+
+
+        if re.match(r'\d{2}:\d{2}:\d{2}\s+', line):
+            time, N, HV, T, p, lat, lon = line.split()
+#            print '*****', time, N, HV, T, p, lat, lon
+
+            hh, mm, ss = map(int, time.split(':'))
+            timeoffset = dt.timedelta(hours = hh, minutes = mm, seconds = ss)
+#            print '*****', timeoffset
+            time = self.day + timeoffset
+#            print '*****', time
+
+            lat = (float(lat[:2]) + float(lat[2:-1]) / 60) * (1 if lat[-1].lower() == 'e' else -1)
+            lon = (float(lon[:3]) + float(lon[3:-1]) / 60) * (1 if lon[-1].lower() == 'n' else -1)
+#            print '*****', lat, lon
+
+            data = [time, int(N), float(HV), float(T), float(p), lat, lon]
+
+            self.sanitize(data) # modify data (perform cleanup, transformations, etc.)
+            self.verify(data) # verify that data fulfills certain criteria
+            data = tuple(data) # freeze data (tuples are immutable)
+
+            return data
+
+    _timezone = pytz.timezone('UTC')
+
+    def sanitize(self, data):
+        # 0   1  2   3  4   5    6 
+        time, N, HV, T, p, lat, lon = data
+        if not (1 <= HV <= 1e4): data[2] = NaN
+        if not (-50 <= T <= 50): data[3] = NaN
+        if not (-800 <= p <= 1200): data[4] = NaN
+        if not (-90 <= lat <= 90): data[5] = NaN
+        if not (-180 <= lon <= 180): data[6] = NaN
+
+    def verify(self, data):
+        # 0   1  2   3  4   5    6 
+        time, N, HV, T, p, lat, lon = data
+        self._verify_time(time)
+        verifyrange('count', N, 0, 10000)
+        verifyrange('HV', HV, 1, 1e4, True)
+        verifyrange('T', T, -50 , 50, True)
+        verifyrange('p', p , 800, 1200, True)
+        verifyrange('lat', lat, -90, 90, True)
+        verifyrange('lon', lon, -180, 180, True)
+
+    def _col_descriptor(self):
+        descriptor = OrderedDict([(k, t.FloatCol(dflt = nan, pos = i)) for i, k in enumerate(self.col_names)])
+        descriptor['N'] = t.IntCol(dflt = 0, pos = self.col_names.index('N'))
+        print descriptor
+        return descriptor
+
+
+available_handlers = (WeatherHandler, CTEventHandler, ITTEventHandler, DWDTageswerteHandler, PolarsternHandler, PolarsternHandler2, NeutronHandler)
 
 
 def autodetect(filename, handlers = available_handlers):
