@@ -83,7 +83,7 @@ def fileiter(filename, linehandler, skip_on_assert = False, print_failures = Tru
                         raise
                     else:
                         if print_failures:
-                            print "%s:%d '%s'" % (filename, i, e)
+                            print >> sys.stderr, "%s:%d '%s'" % (filename, i, e)
 
         except Exception as e:
             raise RuntimeError("Error parsing line %d in %s" % (i, filename), e)
@@ -634,7 +634,7 @@ class NeutronHandler(LineHandler):
         time, N, HV, T, p, lat, lon = data
         if not (1 <= HV <= 1e4): data[2] = NaN
         if not (-50 <= T <= 50): data[3] = NaN
-        if not (-800 <= p <= 1200): data[4] = NaN
+        if not (800 <= p <= 1200): data[4] = NaN
         if not (-90 <= lat <= 90): data[5] = NaN
         if not (-180 <= lon <= 180): data[6] = NaN
 
@@ -642,7 +642,7 @@ class NeutronHandler(LineHandler):
         # 0   1  2   3  4   5    6 
         time, N, HV, T, p, lat, lon = data
         self._verify_time(time)
-        verifyrange('count', N, 0, 100)
+        verifyrange('count', N, 0, 500)
         verifyrange('HV', HV, 1, 1e4, True)
         verifyrange('T', T, -50 , 50, True)
         verifyrange('p', p , 800, 1200, True)
@@ -678,16 +678,11 @@ class NeutronHandler2(LineHandler):
 
         if re.match(r'\d{2}:\d{2}:\d{2}\s+', line):
             fields = line.split()
-            assert len(fields) == 35
+            assert len(fields) > 31
 
             hh, mm, ss = map(int, fields[0].split(':'))
             timeoffset = dt.timedelta(hours = hh, minutes = mm, seconds = ss)
             time = self.day + timeoffset
-
-#            lat,lon=fields[],fields[]
-#            lat = (float(lat[:2]) + float(lat[2:-1]) / 60) * (1 if lat[-1].lower() == 'e' else -1)
-#            lon = (float(lon[:3]) + float(lon[3:-1]) / 60) * (1 if lon[-1].lower() == 'n' else -1)
-#            print '*****', lat, lon
 
             #             count           temperature        highvoltage        pressure
             data = [time, int(fields[1]), float(fields[13]), float(fields[16]), float(fields[31])]
@@ -705,13 +700,13 @@ class NeutronHandler2(LineHandler):
         time, N, T, HV, p = data
         if not (1 <= HV <= 1e4): data[2] = NaN
         if not (-50 <= T <= 50): data[3] = NaN
-        if not (-800 <= p <= 1200): data[4] = NaN
+        if not (800 <= p <= 1200): data[4] = NaN
 
     def verify(self, data):
         # 0   1  2   3  4  
         time, N, T, HV, p = data
         self._verify_time(time)
-        verifyrange('count', N, 0, 1000)
+        verifyrange('count', N, 0, 5000)
         verifyrange('HV', HV, 1, 1e4, True)
         verifyrange('T', T, -50 , 50, True)
         verifyrange('p', p , 800, 1200, True)
