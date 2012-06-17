@@ -85,6 +85,7 @@ def fileiter(filename, linehandler, skip_on_assert = False, print_failures = Tru
                 except Exception as e:
                     if ignore_errors:
                         print >> sys.stderr, "%s:%d '%s'" % (filename, i, e)
+                        print >> sys.stderr, "\tline: '%s'" % (line)
                     else:
                         raise
 
