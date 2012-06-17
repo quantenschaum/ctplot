@@ -17,8 +17,6 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>. 
 #
-#    $Id$
-#
 import sys
 import utils
 import datetime as dt
@@ -84,7 +82,7 @@ def fileiter(filename, linehandler, skip_on_assert = False, print_failures = Tru
                     elif print_failures:
                         print >> sys.stderr, "%s:%d '%s'" % (filename, i, e)
 
-                except:
+                except Exception as e:
                     if ignore_errors:
                         print >> sys.stderr, "%s:%d '%s'" % (filename, i, e)
                     else:
