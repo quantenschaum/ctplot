@@ -65,7 +65,7 @@ def filescaniter(filename, validator = None):
     finally:
         datafile.close()
 
-def fileiter(filename, linehandler, skip_on_assert = False, print_failures = True):
+def fileiter(filename, linehandler, skip_on_assert = False, print_failures = True, ignore_errors = False):
     'returns iterator yielding objects created by linehandler from each line'
     if verbose > 1: print 'reading', filename
     with open(filename) as datafile:
@@ -81,9 +81,14 @@ def fileiter(filename, linehandler, skip_on_assert = False, print_failures = Tru
                 except AssertionError as e:
                     if not skip_on_assert:
                         raise
+                    elif print_failures:
+                        print >> sys.stderr, "%s:%d '%s'" % (filename, i, e)
+
+                except:
+                    if ignore_errors:
+                        print >> sys.stderr, "%s:%d '%s'" % (filename, i, e)
                     else:
-                        if print_failures:
-                            print >> sys.stderr, "%s:%d '%s'" % (filename, i, e)
+                        raise
 
         except Exception as e:
             raise RuntimeError("Error parsing line %d in %s" % (i, filename), e)
@@ -791,7 +796,7 @@ def detect_and_sort(filenames):
 
 
 def raw_to_h5(filenames, out = "out.h5", handlers = available_handlers,
-              t0 = dp.parse('2004-01-01 00:00:00 +0000'), skip_on_assert = False, show_progress = True):
+              t0 = dp.parse('2004-01-01 00:00:00 +0000'), skip_on_assert = False, show_progress = True, ignore_errors = False):
     """
     converts ASCII data to HDF5 tables
         filenames : iterable, filenames of all data files (events, weather, etc.) in any order
@@ -827,7 +832,7 @@ def raw_to_h5(filenames, out = "out.h5", handlers = available_handlers,
 
     def read_files(files, row, handler):
         for f in files:
-            for entry in fileiter(f, handler, skip_on_assert, show_progress):
+            for entry in fileiter(f, handler, skip_on_assert, show_progress, ignore_errors):
                 try:
                     for k, v in zip(handler.col_names, entry):
                         if isinstance(v, dt.datetime):
@@ -896,6 +901,7 @@ if __name__ == '__main__':
     parser.add_argument('-s', '--noskip', action = 'store_true', help = 'do not skip invalid lines, stop on error')
     parser.add_argument('-q', '--quiet', action = 'store_true', help = 'do not show progressbar, just print error messages')
     parser.add_argument('-v', '--verbose', action = 'count', help = 'show additional processing information')
+    parser.add_argument('-k', '--keepgoing', action = 'store_true', help = 'keep going, do not stop on errors')
     parser.add_argument('infiles', nargs = '+', help = 'input files, if a directory is given, all files in it and in its subdirectories are used')
 
     opts = parser.parse_args()
@@ -911,4 +917,4 @@ if __name__ == '__main__':
         raise RuntimeError('file \'{}\' already exists'.format(out))
 
 
-    raw_to_h5(opts.infiles, out = out, skip_on_assert = not opts.noskip, show_progress = not opts.quiet, t0 = opts.reftime)
+    raw_to_h5(opts.infiles, out = out, skip_on_assert = not opts.noskip, show_progress = not opts.quiet, t0 = opts.reftime, ignore_errors = opts.keepgoing)
