@@ -468,7 +468,7 @@ class PolarsternHandler(LineHandler):
     table_name = 'polarstern_events'
     table_title = 'Polarstern myon rate data'
     cols_and_units = OrderedDict([('time', 's'), ('lat', '°'), ('lon', '°'),
-                                  ('p', 'hPa'), ('T', '°C'), ('H', '%'), ('rate', '1/s')])
+                                  ('p', 'hPa'), ('T', '°C'), ('H', '%'), ('rate', '1/h')])
 
     def __call__(self, line):
         'parse line and return tuple with data or None if line was skipped (comment/empty)'
