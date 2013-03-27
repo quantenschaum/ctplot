@@ -76,7 +76,7 @@ function sourcesBox() {
 			alert(xhr['responseText']);
 		}
 	});
-	return $('<label>').attr('data-help', 'her wird der zu verwendende Datensatz ausgewählt.').append('Datensatz').append(ddbox);
+	return $('<label>').attr('data-help','her wird der zu verwendende Datensatz ausgewählt.').append('Datensatz').append(ddbox);
 }
 
 /** renumber form field names after add/del of plot */
@@ -97,68 +97,76 @@ function renumberPlots() {
 		$('#addplot').show();
 }
 
-function isExpertmode() {
-	return $(':checkbox[name="expertmode"]').prop('checked');
-}
-
 function hide(s) {
 	s = $(s);
+//	console.log('hide: '+s.html());
 	s.hide(speed).find(':input').prop('disabled', true);
 	return s;
 }
 
 function show(s) {
 	s = $(s);
+//	console.log('show: '+s.html());
 	s.show(speed).find(':input').prop('disabled', false);
 	return s;
 }
 
-/** disable/enable fields according to expertmode and plotmode */
+/** disable/enable fields according to detaillevel and plotmode */
 function updateHiddenFields() {
-	expert = isExpertmode();
-	if (!expert) // hide expert fields
-		hide('.expert');
-	else {
-		// options
-		show('option.expert')
-		// twin axes global fields
-		$.each([ 'x', 'y' ], function(i, v) {
-			if ($(':input[name^="tw"][value="' + v + '"]').size() > 0)
-				show('.twin' + v);
-			else
-				hide('.twin' + v);
-		});
+	mode = $(':input[name="detaillevel"]').val();
+	console.log('detaillevel='+mode);
+	 if (mode=='expert') {
+		tohide = 'nothing';
+        } else if (mode=='advanced') {
+		tohide = '.expert';
+	} else {
+		tohide = '.expert, .advanced';
 	}
+	console.log('tohide='+tohide);
+
+	visible = $('.expert,.advanced');
+	hidden = $(tohide);
+
+	// twin axes global fields
+	$.each([ 'x', 'y' ], function(i, v) {
+		twinv = $('.twin'+v);
+		visible = visible.add(twinv);
+		if ($(':input[name^="tw"] option:selected[value="' + v + '"]').size() == 0) {
+			hidden = hidden.add(twinv);
+		}
+	});
 
 	// field in individual plot settings
 	$('.plot').each(function() {
 		plot = $(this);
 		// mode dependant fields
-		plotmode = '.t-' + plot.find(':input[name^="m"]').val();
-		opts = plot.find('.opt');
-		hide(opts.not(plotmode));
-		if (expert) {
-			show(opts.filter(plotmode));
-		} else {
-			show(opts.filter(plotmode).not('.expert'));
-		}
+		options = plot.find('[class*="t-"]'); // selects all options
+		plotmode = '.t-'+plot.find(':input[name^="m"]').val();
+		console.log('plotmode='+plotmode);
+		visible = visible.add(options);
+		hidden = hidden.add(options.not(plotmode));
+
 		// shift and weight
 		r = plot.find(':input[name^="rs"], :input[name^="rc"]').parents('label');
-		if ($(':input[name^="rw"]').val().replace(/\s+/, '') == '') { // no
-			// window
-			// given
-			hide(r);
-		} else if (expert) {
-			show(r);
+		windowempty = plot.find(':input[name^="rw"]').val().replace(/\s+/, '') == '';
+		visible = visible.add(r);
+		if (windowempty) {
+			hidden = hidden.add(r);
 		}
 	});
+
+	visible = visible.not(hidden);
+	console.log('visible='+visible.size()+' hidden='+hidden.size());
+	show(visible);
+	hide(hidden);
 }
 
 /** add interactive handlers */
 function addHandlers(plot) {
 	// display available vars on certain input fields
 	plot.find(':input[name^="x"],:input[name^="y"],:input[name^="z"],:input[name^="c"]').focusin(function() {
-		p = $(this).parents('.plot');
+		
+p = $(this).parents('.plot');
 		k = p.find('select[name^="s"]').val();
 		$.each(tables_and_vars, function(kk, vv) {
 			if (kk == k) {
@@ -211,10 +219,9 @@ function initHelp(el) {
 	$(el).find('label[data-help]').each(function() {
 		help = $(this).attr('data-help');
 		if (help != '')
-			// $('<img>').attr('src', 'img/help.png').attr('title',
-			// help).addClass('help').prependTo(this).hide();
+//			$('<img>').attr('src', 'img/help.png').attr('title', help).addClass('help').prependTo(this).hide();
 			$(this).find(':input').attr('title', help);
-
+		
 	}).hover(function() {
 		$(this).find('.help').show();
 	}, function() {
@@ -267,7 +274,7 @@ function initSettingsLoader() {
 
 function initExpertMode() {
 	// add handler to expertmode checkbox
-	$(':checkbox[name="expertmode"]').click(updateHiddenFields);
+	$('select[name="detaillevel"]').click(updateHiddenFields);
 	updateHiddenFields();
 }
 
@@ -561,8 +568,5 @@ $(function() {
 	initSubmit();
 	initSettingsLoader();
 	initSavedPlots();
-	$('img.lightbox').each(function() {
-		$(this).attr('href', $(this).attr('src'));
-	});
 	$('.lightbox').lightBox();
 });
