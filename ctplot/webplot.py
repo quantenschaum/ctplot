@@ -1,7 +1,5 @@
-#!c:\Program Files (x86)\Python27\python.exe
-# -*- coding: utf-8 -*-
 #!/opt/python/bin/python
-#!/usr/bin/python
+# -*- coding: utf-8 -*-
 #    pyplot - python based data plotting tools
 #    created for DESY Zeuthen
 #    Copyright (C) 2012  Adam Lucke  software@louisenhof2.de
