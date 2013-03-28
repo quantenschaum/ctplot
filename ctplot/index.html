@@ -66,25 +66,25 @@ $Id$
 		<a href="http://www.teilchenwelt.de/"><img title="Netzwerk Teilchenwelt" id="logo-tw" src="img/logo-tw2.png" /></a>
 	</header>
 	<nav>
-		<ul>
-			<li><a href="#settings">Einstellungen</a></li>
-            <li><a href="#output">Plot</a></li>
+	  <ul>
+	    <li><a href="#settings">Einstellungen</a></li>
+            <li><a href="#output">Plot erstellen</a></li>
             <li><a href="#saved">gespeicherte Plots</a></li>
-		</ul>
+	  </ul>
 	</nav>
-<div id="content">
+	<div id="content">
 
 
 
 <div id="settings">
-<h1>Ploteinstellungen</h1>
+<h2>Plot-Einstellungen</h2>
 <form>
 <fieldset class="global">
     <legend>globale Einstellungen</legend>
    
     <!-- label data-help="wenn aktiviert werden zusätzliche Eingabefelder angezeigt (für fortgeschrittene Benutzer)">
             Expertenmodus<input type="checkbox" name="expertmode"></label -->
-    <label data-help="legt den Modus fest, dies bestimmt, wie viele Details eingestellt werden können und soll dem Anwender die Bedienung erleichtern">Detaillevel
+    <label data-help="legt fest, wie viele Details eingestellt werden können und soll dem Anwender die Bedienung erleichtern">Detail-Level
       <select name="detaillevel">
 	<option value="minimal">minimal</option>
 	<option value="advanced">fortgeschritten</option>
@@ -93,14 +93,15 @@ $Id$
     </label>
     
     <br />
-    <label data-help="Titel des Plots, wird über dem Plot als Ãœberschift angezeigt">Titel<input type="text" name="t"></label>
+    <label data-help="Titel des Plots, wird über dem Plot als Überschrift angezeigt">Plot-Titel<input type="text" name="t"></label>
+<!-- UMSTELLEN VON INCH AUF CM !!!!!!!!!!!------------------->
     <label  class="advanced" data-help="Breite des Plots in inch (default=10)">Breite<input type="text" name="w"></label>
     <label  class="advanced" data-help="Höhe des Plots in inch (default=7)">Höhe<input type="text" name="h"></label>
     <!-- label data-help="Schriftgröße in ???">Schriftgröße<input type="text" name="f" /></label -->
   
     <!-- X -->
-    <label class="advanced" data-help="Anzeigebereich der x-Achse, anzugeben in der Form 'von, bis', Beipsiel: '-12.3, 102.8' (ohne ')">x-Range<input type="text" name="xr"></label>
-    <label class="advanced" data-help="Skalierung der x-Achse">x-Scale
+    <label class="advanced" data-help="Anzeigebereich der x-Achse, anzugeben in der Form 'von, bis', Beispiel: '-12.3, 102.8' (ohne ')">x-Wertebereich<input type="text" name="xr"></label>
+    <label class="advanced" data-help="Skalierung der x-Achse">x-Skalierung
         <select name="xs">
             <option value=""></option>
             <option value="linear">linear</option>
@@ -108,11 +109,11 @@ $Id$
             <option value="symlog">symmetrisch-logarithmisch</option>
         </select>
     </label>
-    <label  class="advanced" data-help="Beschriftung der x-Achse">x-Label<input type="text" name="xl"></label>
+    <label  class="advanced" data-help="Beschriftung der x-Achse">x-Bezeichnung<input type="text" name="xl"></label>
 
     <!-- X2 -->
-    <label data-help="Anzeigebereich der x2-Achse, anzugeben in der Form 'von, bis', Beipsiel: '-12.3, 102.8' (ohne ')" class="twinx expert">x2-Range<input type="text" name="xrtw"></label>
-    <label data-help="Skalierung der x2-Achse" class="twinx expert">x2-Scale
+    <label data-help="Anzeigebereich der x2-Achse, anzugeben in der Form 'von, bis', Beispiel: '-12.3, 102.8' (ohne ')" class="twinx expert">x2-Wertebereich<input type="text" name="xrtw"></label>
+    <label data-help="Skalierung der x2-Achse" class="twinx expert">x2-Skalierung
         <select name="xstw">
             <option value=""></option>
             <option value="linear">linear</option>
@@ -120,11 +121,11 @@ $Id$
             <option value="symlog">symmetrisch-logarithmisch</option>
         </select>
     </label>
-    <label data-help="Beschriftung der x2-Achse" class="twinx expert">x2-Label<input type="text" name="xltw"></label>
+    <label data-help="Beschriftung der x2-Achse" class="twinx expert">x2-Bezeichnug<input type="text" name="xltw"></label>
  
     <!-- Y -->
-    <label class="advanced" data-help="Anzeigebereich der y-Achse, anzugeben in der Form 'von, bis', Beipsiel: '-12.3, 102.8' (ohne ')">y-Range<input type="text" name="yr"></label>
-    <label class="advanced" data-help="Skalierung der y-Achse">y-Scale        
+    <label class="advanced" data-help="Anzeigebereich der y-Achse, anzugeben in der Form 'von, bis', Beispiel: '-12.3, 102.8' (ohne ')">y-Wertebereich<input type="text" name="yr"></label>
+    <label class="advanced" data-help="Skalierung der y-Achse">y-Skalierung        
         <select name="ys">
             <option value=""></option>
             <option value="linear">linear</option>
@@ -132,11 +133,11 @@ $Id$
             <option value="symlog">symmetrisch-logarithmisch</option>
         </select>
     </label>
-    <label class="advanced" data-help="Beschriftung der y-Achse">y-Label<input type="text" name="yl"></label>
+    <label class="advanced" data-help="Beschriftung der y-Achse">y-Bezeichnung<input type="text" name="yl"></label>
 
     <!-- Y2 -->
-    <label data-help="Anzeigebereich der y2-Achse, anzugeben in der Form 'von, bis', Beipsiel: '-12.3, 102.8' (ohne ')" class="twiny expert">y2-Range<input type="text" name="yrtw"></label>
-    <label data-help="Skalierung der y2-Achse" class="twiny expert">y2-Scale        
+    <label data-help="Anzeigebereich der y2-Achse, anzugeben in der Form 'von, bis', Beipsiel: '-12.3, 102.8' (ohne ')" class="twiny expert">y2-Wertebereich<input type="text" name="yrtw"></label>
+    <label data-help="Skalierung der y2-Achse" class="twiny expert">y2-Skalierung
         <select name="ystw">
             <option value=""></option>
             <option value="linear">linear</option>
@@ -144,11 +145,11 @@ $Id$
             <option value="symlog">symmetrisch-logarithmisch</option>
         </select>
     </label>
-    <label data-help="Beschriftung der y2-Achse" class="twiny expert">y2-Label<input type="text" name="yltw"></label>
+    <label data-help="Beschriftung der y2-Achse" class="twiny expert">y2-Bezeichnung<input type="text" name="yltw"></label>
 
     <!-- Z -->
-    <label class="advanced" data-help="Anzeigebereich der z-Achse, anzugeben in der Form 'von, bis', Beipsiel: '-12.3, 102.8' (ohne ')">z-Range<input type="text" name="zr"></label>
-    <label class="advanced" data-help="Skalierung der z-Achse (Farb-Achse)">z-Scale
+    <label class="advanced" data-help="Anzeigebereich der z-Achse, anzugeben in der Form 'von, bis', Beispiel: '-12.3, 102.8' (ohne ')">z-Wertebereich<input type="text" name="zr"></label>
+    <label class="advanced" data-help="Skalierung der z-Achse (Farb-Achse)">z-Skalierung
         <select name="zs">
             <option value=""></option>
             <option value="linear">linear</option>
@@ -156,7 +157,7 @@ $Id$
             <option value="symlog">symmetrisch-logarithmisch</option>
         </select>
     </label>
-    <label class="advanced" data-help="Beschriftung der z-Achse (Farbe)">z-Label<input type="text" name="zl"></label>
+    <label class="advanced" data-help="Beschriftung der z-Achse (Farbe)">z-Bezeichnung<input type="text" name="zl"></label>
    
 
     <label data-help="legt fest, ob und wo die Legende angezeigt wird. Bei nur einem Plot wird keine Legende angezeigt.">Legende
@@ -184,29 +185,24 @@ $Id$
         <legend>Plot *</legend>
         <img src="img/cross.png" class="delplot" title="hier klicken, um diese Ploteinstellungen zu entfernen">
         
-		<label data-help="legt fest, in welcher Form die Daten dargestellt werden. Nähere Informationen zu den Plottypen gibt es in der Anleitung">Plottyp<select name="m*">
-          <option value="xy">xy-Plot</option>
+		<label data-help="legt fest, in welcher Form die Daten dargestellt werden. Nähere Informationen zu den Plottypen gibt es in der Anleitung">Plot-Typ<select name="m*">
           <option value="h1">1D-Histogram</option>
+          <option value="xy">xy-Plot</option>
           <option value="h2">2D-Histogram</option>
           <option value="p">Profil</option>
           <option value="map">Plot auf Karte</option>
 		</select></label> 
         
-        <label class="advanced" data-help="Name des Plots, wird in der Legende angezeigt">Name<input type="text" name="n*"></label> 
+        <label class="advanced" data-help="Name des Plots, wird in der Legende angezeigt">Plot-Name<input type="text" name="n*"></label> 
         
-        <h2 class="advanced" >Ratenberechnung</h2>
-        <label  class="advanced" data-help="Fenster in Sekunden zur Ratenberechnung, die Rate wird durch Zählen von Events in einen festen Zeitfenster berechnet, dies hier legt die Größe dieses Fensters in Sekunden fest, weitere Erklärungen in der Anleitung">Fenster (Ratenberechnung)<input type="text" name="rw*"></label> 
-        <label  class="advanced" data-help="Anteil des Fensters, um welcher dieses verschoben wird, mögliche Werte aus: (0,1], Standardwert: 1, bei Schub=1 beginnt das jeweils nächste Zeitfenster direkt im Anschluss an der vorhergehende, die Fenster überlappen nicht, bei Schub&lt;1 überlappen die Fenster, des Zeitfenster wird jeweils nur um den angegebenen Anteil weitergeschoben, das Zeitfenster ist gleitend und Events werden mehrfach gezählt" >Schub<input type="text" name="rs*"></label> 
-        <label  class="advanced" data-help="Ausdruck (Formel), der innerhalb des Zeitfensters gemittelt wird, die Rate ist mittleres Gewicht * Anzahl Events / Zeitfenster, dies erlaubt die Bestimmung der Rate von Event eines bestimmten Typs (z.B. Events mit genau 3 getriggerten Segmenten) oder die Ermittlung von mittleren Größen (z.B. mittlere Multiplizität)" >Gewicht<input type="text" name="rc*"></label>
-        
-        <h2>Achsen und Daten</h2>
+        <h4>Achsen und Variable</h4>
         <label  data-help="Wert, der auf der x-Achse dargestellt werden soll. Hier kann ein Variablenname eingegeben werden (z.B. time) oder eine Formel, die Variablen umrechnet oder miteinander verknüpft (z.B. T_a-T_i oder log(p))">
-            x<input type="text" name="x*"></label> 
+            x-Variable<input type="text" name="x*"></label> 
         <label data-help="Unterteilung der x-Achse in Bins. Angabe einer Zahl n bedeutet, dass automatisch n Bins gewählt werden, die die Daten enthalten (z.B. 10 erzeugt 10 Bins). Angabe von drei durch Komma getrennten Zahlen a,b,n erzeugt n Bins mit linker Kante a und rechter Kante b. Angabe von mehr als drei durch Komma getrennten Zahlen erzeugt Bins mit den Binkanten auf den angegebenen Werten" class="t-h1 t-h2 t-p advanced">
-            x-Bins<input type="text" name="x*b"></label> 
-        <label data-help="aktiviert die Anzeige von x-Fehlerbalken" class="t-h1 t-p advanced">x-Fehlerbalken<input type="checkbox" name="o*xerr"></label>
+	  x-Bins<input type="text" name="x*b"></label> 
+        <label data-help="aktiviert die Anzeige von x-Fehlerbalken" class="t-p advanced">x-Fehlerbalken<input type="checkbox" name="o*xerr"></label>
         
-        <label data-help="Wert, der auf der y-Achse dargestellt werden soll, analog zu x" class="t-xy t-h2 t-p t-map">y<input type="text" name="y*"></label> 
+        <label data-help="Wert, der auf der y-Achse dargestellt werden soll, analog zu x" class="t-xy t-h2 t-p t-map">y-Variable<input type="text" name="y*"></label> 
         <label data-help="Unterteilung der y-Achse in Bins, analog zu x-Bins" class="t-h2 advanced">y-Bins<input type="text" name="y*b"></label> 
         <label data-help="aktiviert die Anzeige von y-Fehlerbalken" class="t-h1 t-p advanced">y-Fehlerbalken<input type="checkbox" name="o*yerr"></label>
 
@@ -220,22 +216,45 @@ $Id$
         
         <label data-help="Wert, der auf der z-Achse dargestellt werden soll, analog zu x, die Werte werden als Farbe der Datenpunkte dargestellt" class="t-xy t-map">z (Farbe)<input type="text" name="z*"></label> 
 	    
-	    <label class="advanced" data-help="Hier wird ein boolscher Ausdruck eingegeben. Nur Datentupel, bei denen dieser Ausdruck zu wahr evaluiert, werden in den Plot aufgenommen. z.B. T_a&gt;20 bedeutet, dass nur Daten (Tabellenzeilen), bei denen T_a&gt;20 ist in den Plot aufgenommen werden. Alle anderen sind sozusagen weggeschnitten (gefiltert).">
-	       Schnitt (Filter)<input type="text" name="c*"></label>
+
+        <h4 class="advanced" >Daten-Filter (Schnitt)</h4>	    
+<!-- WIE WIRD DER FILTER FUER MEHRERE VARIABLE DEFINIERT ???????? ------------------------> 
+	<label class="advanced" data-help="Hier wird ein boolscher Ausdruck eingegeben. Nur Datentupel, bei denen dieser Ausdruck wahr ist, werden in den Plot aufgenommen. z.B. T_a>20 bedeutet, dass nur Daten, bei denen T_a>20 ist, in den Plot aufgenommen werden. Alle anderen werden weggeschnitten (gefiltert).">
+	  <input type="text" name="c*"></label>
+
 	    
-	    <h2  class="expert" >Plotoptionen</h2>
-        <label data-help="Art der Darstellung des Histograms" class="t-h1 expert">Stil
-            <select name="o*style">
-	            <option value=""></option>
-	            <option value="hist">Histogram</option>
-	            <option value="fill">Histogram, gefüllt</option>
-	            <option value="histline">Linie</option>
-	            <option value="linefill">Linie, gefüllt</option>
-	            <option value="scat">Scatter</option>
-            </select>
+	<!-- fit options -->
+	<h4 class="t-xy t-h1 t-p advanced">Fit-Optionen</h4>
+        <label data-help="Fitfuntion, unabhängige Variable ist x, Parameter sind p[0], p[1], ... Beispiel: p[0]+p[1]*x" class="t-xy t-h1 t-p advanced">Fit-Funktion<input type="text" name="ff*"></label>
+        <label data-help="Startwerte für die Fit-Parameter, durch Komma getrennt" class="t-xy t-h1 t-p advanced">Startparameter<input type="text" name="fp*"></label>
+        <label data-help="Linienfarbe- und Stil für Fitresultat, Beispiel 'r-' = rot, durchgezogen" class="t-xy t-h1 t-p expert">Linienoptionen<input type="text" name="fl*"></label>
+
+
+        <h4 class="advanced" >Raten-Berechnung</h4>
+<!-- TEXT KLARER ---SCHUB UND GEWICHT WERDEN NICHT ANGEZEIGT------------------------------>
+        <label class="advanced" data-help="Fenster in Sekunden zur Ratenberechnung, die Rate wird durch Zählen von Events in einen festen Zeitfenster berechnet, dies hier legt die Größe dieses Fensters in Sekunden fest, weitere Erklärungen in der Anleitung">Zeit-Fenster
+	  <input type="text" name="rw*"></label> 
+
+        <label class="advanced" data-help="Anteil des Fensters, um welcher dieses verschoben wird, mögliche Werte aus: (0,1], Standardwert: 1, bei Schub=1 beginnt das jeweils nächste Zeitfenster direkt im Anschluss an der vorhergehende, die Fenster überlappen nicht, bei Schub&lt;1 überlappen die Fenster, das Zeitfenster wird jeweils nur um den angegebenen Anteil weitergeschoben, das Zeitfenster ist gleitend und Events werden mehrfach gezählt">Schub
+	  <input type="text" name="rs*"></label> 
+
+        <label class="advanced" data-help="Ausdruck (Formel), der innerhalb des Zeitfensters gemittelt wird, die Rate ist mittleres Gewicht * Anzahl Events / Zeitfenster, dies erlaubt die Bestimmung der Rate von Event eines bestimmten Typs (z.B. Events mit genau 3 getriggerten Segmenten) oder die Ermittlung von mittleren Größen (z.B. mittlere Multiplizität)">Gewicht
+	  <input type="text" name="rc*"></label>
+
+        
+	<h4  class="expert" >Plot-Optionen</h4>
+        <label data-help="Art der Darstellung des 1D-Histograms" class="t-h1 expert">Darstellung 1-dim.
+          <select name="o*style">
+	    <option value=""></option>
+	    <option value="hist">Histogram</option>
+	    <option value="fill">Histogram, gefüllt</option>
+	    <option value="histline">Linie</option>
+	    <option value="linefill">Linie, gefüllt</option>
+	    <option value="scat">Scatter</option>
+          </select>
         </label>
      
-        <label data-help="Art der Darstellung des Histograms" class="t-h2 expert">Stil<select name="o*style">
+        <label data-help="Art der Darstellung des 2D-Histograms" class="t-h2 expert">Darstellung 2-dim.<select name="o*style">
             <option value=""></option>
             <option value="color">Farbe</option>
             <option value="contour">Kontur</option>
@@ -245,7 +264,7 @@ $Id$
         </label>
   
         <label data-help="gibt an, welche Werte in der Infobox für das Histogram angegeben werden, es bedeuten: n=Anzahl der Einträge, u=underflow, o=overflow, 
-                          m=Mittelwert, s=Standardabweichung, bei 1D: [p=Mode (häufigster Wert), e=Median, w=Skew, k=Kurtosis, x=Excess], bei 2D: [c=Kovarianz]" class="t-h1 t-h2 expert">Statsbox<input type="text" name="sb*"></label>
+                        m=Mittelwert, s=Standardabweichung, bei 1D: [p=Mode (häufigster Wert), e=Median, w=Skew, k=Kurtosis, x=Excess], bei 2D: [c=Kovarianz]" class="t-h1 t-h2 expert">Statistik-Box<input type="text" name="sb*"></label>
         
         <label data-help="Anzahl der Konturlinien" class="t-h2 expert">Konturlinien<input type="text" name="o*levels"></label>
         
@@ -261,9 +280,9 @@ $Id$
         
         <label data-help="Farbe der Linie/Datenpunkte (r=rot, g=grün, b=blau, y=gelb, m=magenta, c=cyan, k=schwarz oder Angabe als Hex-RGB-Tupel: #rrggbb)" class="t-xy t-h1 t-p t-map expert">Farbe<input type="text" name="o*color"></label>
       
-        <label data-help="Durchsichtigkeit der Linie/Datenpunke (0=transparent, 1=opak)" class="t-xy t-h1 t-h2 t-p t-map expert">Alpha<input type="text" name="o*alpha"></label>
+        <label data-help="Durchsichtigkeit der Linie/Datenpunke (0=transparent, 1=opak)" class="t-xy t-h1 t-h2 t-p t-map expert">Transparenz<input type="text" name="o*alpha"></label>
       
-        <label data-help="Darstellung der Linie" class="t-xy t-h1 t-p t-map expert">Linientyp
+        <label data-help="Darstellung der Linie" class="t-xy t-h1 t-p t-map expert">Linien-Typ
             <select name="o*linestyle">
                 <option value=""></option>
                 <option value="none">keine Linie</option>
@@ -274,9 +293,9 @@ $Id$
             </select>
         </label>
       
-        <label data-help="Dicke der Linie" class="t-xy t-h1 t-p t-map expert">Liniendicke<input type="text" name="o*linewidth"></label>
+        <label data-help="Dicke der Linie" class="t-xy t-h1 t-p t-map expert">Linien-Dicke<input type="text" name="o*linewidth"></label>
       
-        <label data-help="Darstellung der Datenunkte" class="t-xy t-h1 t-p t-map expert">Markertyp
+        <label data-help="Darstellung der Datenunkte" class="t-xy t-h1 t-p t-map expert">Marker-Typ
             <select name="o*marker">
                 <option value=""></option>
                 <option value="none">kein Marker</option>
@@ -290,9 +309,9 @@ $Id$
                 <option value="^">Dreieck</option>
             </select>
         </label>
-        <label data-help="Größe der Datenpunkte" class="t-xy t-h1 t-p t-map expert">Markergröße<input type="text" name="o*markersize"></label>
+        <label data-help="Größe der Datenpunkte" class="t-xy t-h1 t-p t-map expert">Marker-Größe<input type="text" name="o*markersize"></label>
         <!-- label data-help="" class="t-xy t-h1 t-h2 t-p t-map expert">Farbtabelle<input type="text" name="o*cmap" /></label -->
-        <label data-help="legt die Zeichenreihenfolge fest, kleine Werte (&lt;0) verschieben den Plot nach hinten, große Werte (&gt;0)" class="t-xy t-h1 t-p t-map expert">z-Order<input type="text" name="o*zorder"></label>
+        <label data-help="legt die Zeichenreihenfolge fest, kleine Werte (<0) verschieben den Plot nach hinten, große Werte (>0)" class="t-xy t-h1 t-p t-map expert">z-Anordnung<input type="text" name="o*zorder"></label>
         
         <!-- 
         <label data-help="" class="t-xy t-h1 t-p t-map">Randfarbe<input type="text" name="o*edgecolor" /></label>
@@ -303,7 +322,7 @@ $Id$
         <label data-help="" class="t-h1 t-p">Endkappengröße<input type="text" name="o*capsize" /></label>
 	    -->
         
-        <h2 class="t-map expert">Kartenoptionen</h2>
+        <h4 class="t-map expert">Karten-Optionen</h4>
         <label data-help="wählt die Kartenprjektion aus" class="t-map expert">Projektion
             <select name="o*projection">
                 <option value=""></option>
@@ -327,33 +346,28 @@ $Id$
         <label data-help="" class="t-map expert">Grenzbreite für (N/S-polar) [°]<input type="text" name="o*boundarylat"></label>
         <!-- label data-help="" class="t-map expert">Bluemarble<input type="checkbox" name="o*bluemarble" /></label -->
         <label data-help="" class="t-map expert">Landesgrenzen<input type="checkbox" name="o*drawcountries"></label>
-	    
-	    <!-- fit options -->
-	    <h2 class="t-xy t-h1 t-p advanced">Fit-Optionen</h2>
-        <label data-help="Fitfuntion, unabhängige Variable ist x, Parameter sind p[0], p[1], ... Beispiel: p[0]+p[1]*x" class="t-xy t-h1 t-p advanced">Fit-Funktion<input type="text" name="ff*"></label>
-        <label data-help="Startwerte für die Fit-Parameter, durch Komma getrennt" class="t-xy t-h1 t-p advanced">Startparameter<input type="text" name="fp*"></label>
-        <label data-help="Linienfarbe- und Stil für Fitresultat, Beispiel 'r-' = rot, durchgezogen" class="t-xy t-h1 t-p expert">Fit-Linienoptionen<input type="text" name="fl*"></label>
+
 	    
     </fieldset>
-	<button type="button" id="addplot" title="hier klicken, um einen weiteren, unabhängigen Plot hinzuzufügen"><img src="img/add.png"> Plot hinzufügen</button>
+    <button type="button" id="addplot" title="hier klicken, um einen weiteren, unabhängigen Plot hinzuzufügen"><img src="img/add.png"> Plot hinzufügen</button>
 </div>
 <div class="buttons">
-    <input type="hidden" name="a" value="plot">
-    <button type="reset" title="hier klicken, um alle Ploteinstellungen zurückzusetzen"><img src="img/arrow_undo.png"> Reset</button>
-    <button type="submit"><img src="img/chart_line.png"> Plot erstellen</button>
+  <input type="hidden" name="a" value="plot">
+  <button type="reset" title="hier klicken, um alle Ploteinstellungen zurückzusetzen"><img src="img/arrow_undo.png"> Reset</button>
+  <button type="submit"><img src="img/chart_line.png"> Plot erstellen</button>
 </div>
 </form>
 </div>
 
 <div id="output">
-<h1>Plot</h1>
+<h2>Plot</h2>
 <div id="result">Bitte unter <a href="#settings">Einstellungen</a> einen Plot konfigurieren und auf "Plot erstellen" klicken.</div>
 <div id="error"></div>
 </div>
 
 
 <div id="saved">
-<h1>gespeicherte Plots</h1>
+<h2>gespeicherte Plots</h2>
 <div id="loadsettings">
     Zum Laden von gespeicherten Settings, die Settings in dieses Feld kopieren und laden.<br>
     <textarea name="settingstoload"></textarea>
