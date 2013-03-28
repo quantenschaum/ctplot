@@ -16,8 +16,6 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>. 
 #
-#    $Id: webplot.py 38 2012-02-24 18:52:20Z al $
-#
 # configuration ###############################################################
 
 h5dir = 'data'

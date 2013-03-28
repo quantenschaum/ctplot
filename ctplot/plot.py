@@ -17,8 +17,6 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>. 
 #
-#    $Id$
-#
 import os, sys, re, json, tables, ticks, time, logging
 from collections import OrderedDict, namedtuple
 from itertools import chain

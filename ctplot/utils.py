@@ -16,8 +16,6 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>. 
 #
-#    $Id$
-#
 import pytz, json, time, re, os
 import dateutil.parser as dp
 import datetime as dt
