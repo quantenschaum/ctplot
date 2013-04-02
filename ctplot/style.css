@@ -216,7 +216,11 @@ label:hover {
 }
 
 .expert {
-	background: #ddf;
+	background: #ffefef;
+}
+
+.advanced {
+	background: #efefff;
 }
 
 input[type="text"]:focus,select:focus {
