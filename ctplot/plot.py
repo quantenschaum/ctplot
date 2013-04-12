@@ -18,6 +18,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 import os, sys, re, json, tables, ticks, time, logging
+from os import path
 from collections import OrderedDict, namedtuple
 from itertools import chain
 import numpy as np
@@ -37,10 +38,13 @@ eval = safeeval()
 TableSpecs = namedtuple('TableSpecs', ('title', 'colnames', 'units', 'rows'))
 
 def available_tables(d = os.path.dirname(__file__) + '/data'):
-    files = os.listdir(d)
+    files = []
+    for p, d, f in os.walk(d):
+        for ff in f:
+            files.append(path.join(p, ff))
+    files = map(lambda f:f.replace('\\', '/'), files)
+    files = filter(lambda f:f.lower().endswith('.h5'), files)
     files.sort()
-    files = map(lambda f:os.path.join(d, f).replace('\\', '/'), files)
-    files = filter(lambda f:os.path.isfile(f) and f.endswith('.h5'), files)
 
     tabs = OrderedDict()
 
