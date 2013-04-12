@@ -15,20 +15,18 @@
 #    GNU General Public License for more details.
 #
 #    You should have received a copy of the GNU General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>. 
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 import os, sys, re, json, tables, ticks, time, logging
 from collections import OrderedDict, namedtuple
 from itertools import chain
 import numpy as np
 import numpy.ma as ma
-from scipy.optimize import *
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from utils import get_args_from, isseq, set_defaults, number_mathformat, number_format, hashargs, noop
 from itertools import product
 from safeeval import safeeval
-from config import *
 
 log = logging.getLogger('plot')
 
@@ -161,7 +159,7 @@ class Plot(object):
             # z = expression plotted on z-axis (as color of line/markers)
             # c = cut expression, discard data point for which this is False (if given)
             # s = HDF5 sourcefile and table
-            # n = name of the plot, used in legend 
+            # n = name of the plot, used in legend
             for v in 'xyzcmsn':
                 self._append(v, _get(kwargs, v + n))
 
@@ -211,7 +209,7 @@ class Plot(object):
         self.legend = []
         self.textboxes = []
 
-        self.progress = 0 # reaching from 0 to 1
+        self.progress = 0  # reaching from 0 to 1
 
         self.axes = OrderedDict()
 
@@ -238,14 +236,14 @@ class Plot(object):
         # create dict: source --> all expr for this source
         # prefilled with empty lists
         expr_data = {}
-        joined_cuts = {} # OR of all cuts
+        joined_cuts = {}  # OR of all cuts
         log.debug('self.sr={}'.format(self.sr))
         for n, s in enumerate(self.sr):
             if s:
                 if s not in expr_data:
-                    expr_data[s] = {} #  add dict for every unique source s (plot n)
+                    expr_data[s] = {}  #  add dict for every unique source s (plot n)
                 for v in 'xyzc':
-                    expr = getattr(self, v)[n] # x/y/z/c expression for source s (plot n)
+                    expr = getattr(self, v)[n]  # x/y/z/c expression for source s (plot n)
                     if expr:
                         expr_data[s][expr] = []
                     if v == 'c':
@@ -317,7 +315,7 @@ class Plot(object):
                     fields.add('rate')
                     fields.add('count')
                     fields.add('weight')
-                    for v in fields: # map T_a --> row['T_a'], etc.
+                    for v in fields:  # map T_a --> row['T_a'], etc.
                         x = re.sub('(?<!\\w)' + re.escape(v) + '(?!\\w)',
                                     'row["' + v + '"]', x)
                     return eval('lambda row: ({})'.format(x))
@@ -330,7 +328,7 @@ class Plot(object):
                     # look if there is data for this source in the cache
                     cachefile = os.path.join(cachedir, 'avg{}.h5'.format(hashargs(s)))
 
-                    try: # use data from cache
+                    try:  # use data from cache
                         if not usecache: raise
                         with tables.openFile(cachefile) as cacheh5:
                             cachetable = cacheh5.getNode('/data')
@@ -340,20 +338,20 @@ class Plot(object):
                                 self.progress = progr_prev + row.nrow * progr_factor
                                 yield row
 
-                    except: # if data not available/in use/corrupt...
+                    except:  # if data not available/in use/corrupt...
                         try:
                             cacheh5 = tables.openFile(cachefile, 'w')
                         except:
-                            try: os.remove(cachefile) # if it can be deleted, it was not in use and probably corrupt
+                            try: os.remove(cachefile)  # if it can be deleted, it was not in use and probably corrupt
                             except: pass
                             raise RuntimeError('cache for {} in use or corrupt, try again in a few seconds'.format(s))
 
                         with cacheh5:
                             # use tables col descriptor and append fields rate and count
-                            coldesc = OrderedDict() # keep the order 
+                            coldesc = OrderedDict()  # keep the order
                             for k in table.colnames:
                                 d = table.coldescrs[k]
-                                if isinstance(d, tables.BoolCol): # make bool to float for averaging
+                                if isinstance(d, tables.BoolCol):  # make bool to float for averaging
                                     coldesc[k] = tables.FloatCol(pos = len(coldesc))
                                 else:
                                     coldesc[k] = d
@@ -366,10 +364,10 @@ class Plot(object):
                             log.debug('caching average {}'.format(cachefile))
 
                             assert 0 < shift <= 1
-                            it = table.colnames.index('time') # index of time column
-                            ta = table[0][it] # window left edge
-                            tb = ta + window # window right edge
-                            wd = [] # window data
+                            it = table.colnames.index('time')  # index of time column
+                            ta = table[0][it]  # window left edge
+                            tb = ta + window  # window right edge
+                            wd = []  # window data
                             cols = table.colnames
                             wdlen = len(cols) + 1
                             fweight = compile_function(weight)
@@ -380,15 +378,15 @@ class Plot(object):
                             progr_factor = 1.0 / table.nrows / len(expr_data)
 
                             for row in table.iterrows():
-                                if row[it] < tb: # add row if in window
+                                if row[it] < tb:  # add row if in window
                                     append(row)
-                                else: # calculate av and shift window
+                                else:  # calculate av and shift window
                                     n = len(wd)
                                     if n > 0:
                                         wdsum = reduce(lambda a, b: a + b, wd)
                                         for i, c in enumerate(cols):
                                             cacherow[c] = wdsum[i] / n
-                                        cacherow['time'] = (ta + tb) * 0.5 # overwrite with interval center
+                                        cacherow['time'] = (ta + tb) * 0.5  # overwrite with interval center
                                         cacherow['count'] = n
                                         cacherow['weight'] = wdsum[-1] / n
                                         cacherow['rate'] = n / window
@@ -396,15 +394,15 @@ class Plot(object):
                                         yield cacherow
                                         cacherow.append()
 
-                                    ta += shift * window # shift window
+                                    ta += shift * window  # shift window
                                     tb = ta + window
                                     if row[it] >= tb:
-                                        ta = row[it] # shift window
+                                        ta = row[it]  # shift window
                                         tb = ta + window
 
-                                    if shift == 1: # windows must be empty 
+                                    if shift == 1:  # windows must be empty
                                         wd = []
-                                    else: # remove data outside new window
+                                    else:  # remove data outside new window
                                         wd = filter(lambda x: ta <= x[it] < tb, wd)
                                     append(row)
 
@@ -422,7 +420,7 @@ class Plot(object):
 
                 if window:
                     tableiter = average()
-                    updateProgress = noop # progress update is done inside average()
+                    updateProgress = noop  # progress update is done inside average()
                 else:
                     tableiter = table.iterrows()
 
@@ -449,9 +447,9 @@ class Plot(object):
     def _configure_pre(self):
         # configure plotlib
         self.f = self._get('f', 10, float)
-        if 'map' in self.m: self.f *= 0.8 # smaller font if plotting map
+        if 'map' in self.m: self.f *= 0.8  # smaller font if plotting map
         plt.rc('font', **{'family':'sans-serif', 'sans-serif':['Dejavu Sans'], 'size':self.f})
-        #plt.rc('axes', grid = True)
+        # plt.rc('axes', grid = True)
         plt.rc('lines', markeredgewidth = 0)
         w = self._get('w', 10, float)
         h = self._get('h', w / np.sqrt(2), float)
@@ -466,7 +464,7 @@ class Plot(object):
 
 
     def _configure_post(self):
-        plt.axes(self.axes['']) # activate main axes
+        plt.axes(self.axes[''])  # activate main axes
 
         # title
         if self.t: plt.title(self.t, fontsize = 1.4 * self.f)
@@ -481,19 +479,19 @@ class Plot(object):
             plt.grid(which = 'major', axis = v or 'both', linestyle = '--' if v else '-', color = 'k', alpha = 0.4)
             plt.grid(which = 'minor', axis = v or 'both', linestyle = '-.' if v else ':', color = 'k', alpha = 0.4)
 
-            #set labels, scales and ranges
+            # set labels, scales and ranges
             for a in 'xy':
-                if v and a != v: continue # on twins, set only axis
-                getattr(plt, '{}label'.format(a))(self.alabel(a, v)) # label
+                if v and a != v: continue  # on twins, set only axis
+                getattr(plt, '{}label'.format(a))(self.alabel(a, v))  # label
                 s = getattr(self, a + 's' + ('tw' if a == v else ''))
-                if s: # scale
+                if s:  # scale
                     getattr(plt, '{}scale'.format(a))(s)
                 r = getattr(self, a + 'r' + ('tw' if a == v else ''))
-                if r: # range (limits)
+                if r:  # range (limits)
                     getattr(plt, '{}lim'.format(a))(eval(r))
 
         # legend
-        plt.axes(self.axes.values()[-1]) # activate last added axes
+        plt.axes(self.axes.values()[-1])  # activate last added axes
         if self.l != 'none' and len(self.legend) > 1 and 'map' not in self.m :
             lines = [v[0] for v in self.legend]
             labels = [v[1] for v in self.legend]
@@ -614,14 +612,14 @@ class Plot(object):
     __twin = {'x':plt.twiny, 'y':plt.twinx}
 
     def selectAxes(self, i):
-        plt.axes(self.axes['']) # activate main axes
+        plt.axes(self.axes[''])  # activate main axes
         v = self.tw[i]
         if v and v in 'xy':
             if v in self.axes:
-                plt.axes(self.axes[v]) # activate twin x/y axes
+                plt.axes(self.axes[v])  # activate twin x/y axes
             else:
-                self.axes[v] = self.__twin[v]() # create twin x/y axes
-                ticks.set_extended_locator(self.__tick_density) # add tick locator
+                self.axes[v] = self.__twin[v]()  # create twin x/y axes
+                ticks.set_extended_locator(self.__tick_density)  # add tick locator
             return
 
 
@@ -721,7 +719,7 @@ class Plot(object):
 
         o = get_args_from(kwargs, density = False, cumulative = 0)
         o.update(get_args_from(kwargs, style = 'histline' if o.density else 'hist'))
-        err = 0 #o.style.startswith('s')
+        err = 0  # o.style.startswith('s')
         o.update(get_args_from(kwargs, xerr = err, yerr = err, capsize = 3 if err else 0))
 
         bins = self.bins(i, 'x')
@@ -734,7 +732,7 @@ class Plot(object):
         binerrors = np.sqrt(bincontents)
         binerrors[binerrors == 0] = 1
 
-        # statsbox    
+        # statsbox
         self.stats_fields1d(i, x, bincontents, binerrors, binedges)
 
         if o.density:
@@ -928,7 +926,7 @@ class Plot(object):
         bc, be = get_cumulative(bc, be, 1, widths)
         median_i = np.searchsorted(bc, 0.5, side = 'right')
         stats['median'] = median = centers[median_i]
-        if len(centers) % 2 == 0: # even # of s
+        if len(centers) % 2 == 0:  # even # of s
             stats['median'] = median = (median + centers[median_i - 1]) / 2
         stats['skew'] = np.sum(((centers - mean) / std) ** 3 * contents) / N
         stats['kurtos'] = kurtosis = np.sum(((centers - mean) / std) ** 4 * contents) / N
@@ -998,5 +996,5 @@ if __name__ == '__main__':
     t.daemon = True
     t.start()
 
-    #p.save()
+    # p.save()
     p.show()
