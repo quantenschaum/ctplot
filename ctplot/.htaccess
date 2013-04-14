@@ -1,4 +1,0 @@
-Options +ExecCGI
-AddHandler cgi-script .py
-SetEnv MPLCONFIGDIR mplconfig/
-#SetEnv LD_LIBRARY_PATH /opt/atlas/lib/:/opt/hdf5/lib/:/opt/zlib/lib/:/opt/jpeg/lib/:/opt/freetype/lib/
