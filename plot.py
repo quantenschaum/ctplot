@@ -29,6 +29,8 @@ from utils import get_args_from, isseq, set_defaults, number_mathformat, number_
 from itertools import product
 from safeeval import safeeval
 
+from config import *
+
 log = logging.getLogger('plot')
 
 # override eval by safe version
