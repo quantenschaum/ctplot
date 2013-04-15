@@ -46,9 +46,9 @@ function supportsSvg() {
 
 var tables_and_vars = null;
 
-/** get available HDF5 from server */
+/** get available HDF5 from server and return new DOM element */
 function sourcesBox() {
-    var ddbox;
+    var datasetbox, experimentbox;
     $.ajax({
         async : false,
         data : {
@@ -56,26 +56,50 @@ function sourcesBox() {
         },
         success : function(data) {
             // console.debug(data);
-            ddbox = $('<select>').attr('name', 's*');
-            $('<option>').text('').val('').appendTo(ddbox);
-            tables_and_vars = data;
             // store HDF5- infos globally
+            tables_and_vars = data;
 
-            $.each(data, function(k, v) {
-                coi = k.indexOf(':');
-                file = k.substr(0, coi);
-                tab = k.substr(coi + 1, k.length);
-                opt = $('<option>').text(k.replace(/.*\/(.*)\.h5:(.*)/, '$1: ' + v[0])).val(k);
+            experimentbox = $('<select>').attr('name', 'experiment*');
+            $('<option>').text('(bitte Experiment auswählen)').appendTo(experimentbox);
+            datasetbox = $('<select>').attr('name', 's*');
+            $('<option>').text('(bitte Datensatz auswählen)').appendTo(datasetbox);
+
+            $.each(data, function(id, info) {
+                // console.debug(id+' -- '+info);
+                var m = id.match(/(.*):(.*)/);
+                // filename incl. path
+                var file = m[1];
+                // filename only, w/o path and extension
+                var filename = file.match(/(.*)\/(.+)\.h5/i)[2];
+                // name of the table
+                var tabname = m[2];
+
+                // add a selectable option for this dataset and table
+                var opt = $('<option>').text(filename + ' - ' + info[0]).val(id).appendTo(datasetbox);
+
+                var experiment = file.match(/(.+?\/)*(.*?)\/.+?/)[2];
+                console.debug('experiment = ' + experiment + ' / ' + id);
+                opt.addClass('ex-' + experiment);
+                if (experimentbox.find('option').filter(function() {
+                    return $(this).text() == experiment;
+                }).size() < 1) {
+                    var ex = $('<option>').text(experiment).val(experiment).appendTo(experimentbox);
+                    if (experiment.startsWith('x'))
+                        ex.addClass('expert');
+                }
+
                 if (opt.text().startsWith('x'))
-                    opt.addClass('expert')
-                opt.appendTo(ddbox);
+                    opt.addClass('expert');
             });
         },
         error : function(xhr, text, error) {
             alert(xhr['responseText']);
         }
     });
-    return $('<label>').attr('data-help', 'her wird der zu verwendende Datensatz ausgewählt.').append('Datensatz').append(ddbox);
+
+    var experimentlabel = $('<label>').attr('data-help', 'Hier wird der zu verwendende Experiment ausgewählt.').append('Experiment').append(experimentbox);
+    var datasetlabel = $('<label>').attr('data-help', 'Hier wird der zu verwendende Datensatz ausgewählt.').append('Datensatz').append(datasetbox);
+    return $('<div class="datasetselector">').append(experimentlabel).append(datasetlabel);
 }
 
 /** renumber form field names after add/del of plot */
@@ -139,20 +163,26 @@ function updateHiddenFields() {
     $('.plot').each(function() {
         plot = $(this);
         // mode dependant fields
-        options = plot.find('[class*="t-"]');
+        var options = plot.find('[class*="t-"]');
         // selects all options
-        plotmode = '.t-' + plot.find(':input[name^="m"]').val();
+        var plotmode = '.t-' + plot.find(':input[name^="m"]').val();
         console.debug('plotmode=' + plotmode);
         visible = visible.add(options);
         hidden = hidden.add(options.not(plotmode));
 
         // shift and weight
         r = plot.find(':input[name^="rs"], :input[name^="rc"]').parents('label');
-        windowempty = plot.find(':input[name^="rw"]').val().replace(/\s+/, '') == '';
+        var windowempty = plot.find(':input[name^="rw"]').val().replace(/\s+/, '') == '';
         visible = visible.add(r);
         if (windowempty) {
             hidden = hidden.add(r);
         }
+
+        // experiment/dataset
+        var experiment = plot.find(':input[name^="experiment"]').val();
+        var datasets = plot.find('option[class*="ex-"]');
+        visible = visible.add(datasets);
+        hidden = hidden.add(datasets.not('.ex-' + experiment));
     });
 
     visible = visible.not(hidden);
@@ -207,6 +237,12 @@ function addHandlers(plot) {
     // twin axes dropdown box
     plot.find(':input[name^="tw"]').change(function() {
         updateHiddenFields();
+    });
+
+    // experiment/datasets
+    plot.find(':input[name^="experiment"]').change(function() {
+        updateHiddenFields();
+        $(this).parents('div').find(':input[name^="s"] option:first').prop('selected', true);
     });
 
     updateHiddenFields();
