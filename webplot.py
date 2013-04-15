@@ -15,7 +15,7 @@
 #    GNU General Public License for more details.
 #
 #    You should have received a copy of the GNU General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>. 
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 import matplotlib
 matplotlib.use('Agg')
@@ -40,8 +40,8 @@ def make_plot(settings):
         if usecache and os.path.isfile(name + '.png'):
             return dict([(e, name + '.' + e) for e in ['png', 'svg', 'pdf']])
         time.sleep(random.random())
-        #if getCpuLoad() < .8: break # cpu usage <80%
-        if getRunning('webplot') <= 2: break # max 3 processes
+        # if getCpuLoad() < .8: break # cpu usage <80%
+        if getRunning('webplot') <= 2: break  # max 3 processes
 
 
     # lower priority and create the plot

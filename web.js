@@ -1,7 +1,7 @@
 /*
 pyplot - python based data plotting tools
 created for DESY Zeuthen
-Copyright (C) 2012  Adam Lucke  
+Copyright (C) 2012  Adam Lucke
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -14,559 +14,548 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>. 
-
-$Id$
- */
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 /** ajax default settings */
 $.ajaxSetup({
-	url : 'webplot.py',
-	dataType : 'json',
-	type : 'post'
+    url : 'webplot.py',
+    dataType : 'json',
+    type : 'post'
 });
 
 var speed = 'fast';
 
 /** add .startsWith() function to string */
-if (typeof String.prototype.startsWith != 'function') {
-	String.prototype.startsWith = function(str) {
-		return this.indexOf(str) == 0;
-	};
+if ( typeof String.prototype.startsWith != 'function') {
+    String.prototype.startsWith = function(str) {
+        return this.indexOf(str) == 0;
+    };
 }
 
 /** add .foreach() to arrays */
 Array.prototype.foreach = function(callback) {
-	for ( var k = 0; k < this.length; k++) {
-		callback(k, this[k]);
-	}
+    for (var k = 0; k < this.length; k++) {
+        callback(k, this[k]);
+    }
 }
-
 /** does browser support svg? */
 function supportsSvg() {
-	return document.implementation.hasFeature("http://www.w3.org/TR/SVG11/feature#Shape", "1.0")
+    return document.implementation.hasFeature("http://www.w3.org/TR/SVG11/feature#Shape", "1.0")
 }
 
 var tables_and_vars = null;
 
 /** get available HDF5 from server */
 function sourcesBox() {
-	var ddbox;
-	$.ajax({
-		async : false,
-		data : {
-			a : 'list'
-		},
-		success : function(data) {
-			f = '';
-			ddbox = $('<select>').attr('name', 's*');
-			$('<option>').text('').val('').appendTo(ddbox);
-			tables_and_vars = data;
-			$.each(data, function(k, v) { // radiobutton for each
-				coi = k.indexOf(':');
-				file = k.substr(0, coi);
-				tab = k.substr(coi + 1, k.length);
-				opt = $('<option>').text(k.replace(/.*\/(.*)\.h5:(.*)/, '$1: ' + v[0])).val(k);
-				if (opt.text().startsWith('x'))
-					opt.addClass('expert')
-				opt.appendTo(ddbox);
-			});
-		},
-		error : function(xhr, text, error) {
-			alert(xhr['responseText']);
-		}
-	});
-	return $('<label>').attr('data-help','her wird der zu verwendende Datensatz ausgewählt.').append('Datensatz').append(ddbox);
+    var ddbox;
+    $.ajax({
+        async : false,
+        data : {
+            a : 'list'
+        },
+        success : function(data) {
+            // console.debug(data);
+            ddbox = $('<select>').attr('name', 's*');
+            $('<option>').text('').val('').appendTo(ddbox);
+            tables_and_vars = data;
+            // store HDF5- infos globally
+
+            $.each(data, function(k, v) {
+                coi = k.indexOf(':');
+                file = k.substr(0, coi);
+                tab = k.substr(coi + 1, k.length);
+                opt = $('<option>').text(k.replace(/.*\/(.*)\.h5:(.*)/, '$1: ' + v[0])).val(k);
+                if (opt.text().startsWith('x'))
+                    opt.addClass('expert')
+                opt.appendTo(ddbox);
+            });
+        },
+        error : function(xhr, text, error) {
+            alert(xhr['responseText']);
+        }
+    });
+    return $('<label>').attr('data-help', 'her wird der zu verwendende Datensatz ausgewählt.').append('Datensatz').append(ddbox);
 }
 
 /** renumber form field names after add/del of plot */
 function renumberPlots() {
-	ch = $('#plots').children('.plot');
-	ch.each(function(i) {
-		plot = $(this);
-		plot.find('legend').text('Plot ' + (i + 1));
-		plot.find('[name]').each(function() {
-			e = $(this);
-			e.attr('name', e.attr('name').replace(/\*|\d/, '' + i));
-		});
-		// plot.find('.delplot').prop('disabled', ch.length <= 1);
-	});
-	if (ch.length >= 4)
-		$('#addplot').hide();
-	else
-		$('#addplot').show();
+    ch = $('#plots').children('.plot');
+    ch.each(function(i) {
+        plot = $(this);
+        plot.find('legend').text('Plot ' + (i + 1));
+        plot.find('[name]').each(function() {
+            e = $(this);
+            e.attr('name', e.attr('name').replace(/\*|\d/, '' + i));
+        });
+        // plot.find('.delplot').prop('disabled', ch.length <= 1);
+    });
+    if (ch.length >= 4)
+        $('#addplot').hide();
+    else
+        $('#addplot').show();
 }
 
 function hide(s) {
-	s = $(s);
-//	console.log('hide: '+s.html());
-	s.hide(speed).find(':input').prop('disabled', true);
-	return s;
+    s = $(s);
+    //	console.debug('hide: '+s.html());
+    s.hide(speed).find(':input').prop('disabled', true);
+    return s;
 }
 
 function show(s) {
-	s = $(s);
-//	console.log('show: '+s.html());
-	s.show(speed).find(':input').prop('disabled', false);
-	return s;
+    s = $(s);
+    //	console.debug('show: '+s.html());
+    s.show(speed).find(':input').prop('disabled', false);
+    return s;
 }
 
 /** disable/enable fields according to detaillevel and plotmode */
 function updateHiddenFields() {
-	mode = $(':input[name="detaillevel"]').val();
-	console.log('detaillevel='+mode);
-	 if (mode=='expert') {
-		tohide = 'nothing';
-        } else if (mode=='advanced') {
-		tohide = '.expert';
-	} else {
-		tohide = '.expert, .advanced';
-	}
-	console.log('tohide='+tohide);
+    mode = $(':input[name="detaillevel"]').val();
+    console.debug('detaillevel=' + mode);
+    if (mode == 'expert') {
+        tohide = 'nothing';
+    } else if (mode == 'advanced') {
+        tohide = '.expert';
+    } else {
+        tohide = '.expert, .advanced';
+    }
+    console.debug('tohide=' + tohide);
 
-	visible = $('.expert,.advanced');
-	hidden = $(tohide);
+    visible = $('.expert,.advanced');
+    hidden = $(tohide);
 
-	// twin axes global fields
-	$.each([ 'x', 'y' ], function(i, v) {
-		twinv = $('.twin'+v);
-		visible = visible.add(twinv);
-		if ($(':input[name^="tw"] option:selected[value="' + v + '"]').size() == 0) {
-			hidden = hidden.add(twinv);
-		}
-	});
+    // twin axes global fields
+    $.each(['x', 'y'], function(i, v) {
+        twinv = $('.twin' + v);
+        visible = visible.add(twinv);
+        if ($(':input[name^="tw"] option:selected[value="' + v + '"]').size() == 0) {
+            hidden = hidden.add(twinv);
+        }
+    });
 
-	// field in individual plot settings
-	$('.plot').each(function() {
-		plot = $(this);
-		// mode dependant fields
-		options = plot.find('[class*="t-"]'); // selects all options
-		plotmode = '.t-'+plot.find(':input[name^="m"]').val();
-		console.log('plotmode='+plotmode);
-		visible = visible.add(options);
-		hidden = hidden.add(options.not(plotmode));
+    // field in individual plot settings
+    $('.plot').each(function() {
+        plot = $(this);
+        // mode dependant fields
+        options = plot.find('[class*="t-"]');
+        // selects all options
+        plotmode = '.t-' + plot.find(':input[name^="m"]').val();
+        console.debug('plotmode=' + plotmode);
+        visible = visible.add(options);
+        hidden = hidden.add(options.not(plotmode));
 
-		// shift and weight
-		r = plot.find(':input[name^="rs"], :input[name^="rc"]').parents('label');
-		windowempty = plot.find(':input[name^="rw"]').val().replace(/\s+/, '') == '';
-		visible = visible.add(r);
-		if (windowempty) {
-			hidden = hidden.add(r);
-		}
-	});
+        // shift and weight
+        r = plot.find(':input[name^="rs"], :input[name^="rc"]').parents('label');
+        windowempty = plot.find(':input[name^="rw"]').val().replace(/\s+/, '') == '';
+        visible = visible.add(r);
+        if (windowempty) {
+            hidden = hidden.add(r);
+        }
+    });
 
-	visible = visible.not(hidden);
-	console.log('visible='+visible.size()+' hidden='+hidden.size());
-	show(visible);
-	hide(hidden);
+    visible = visible.not(hidden);
+    console.debug('visible=' + visible.size() + ' hidden=' + hidden.size());
+    show(visible);
+    hide(hidden);
 }
 
 /** add interactive handlers */
 function addHandlers(plot) {
-	// display available vars on certain input fields
-	plot.find(':input[name^="x"],:input[name^="y"],:input[name^="z"],:input[name^="c"]').focusin(function() {
-		
-p = $(this).parents('.plot');
-		k = p.find('select[name^="s"]').val();
-		$.each(tables_and_vars, function(kk, vv) {
-			if (kk == k) {
-				vars = $('#vars').empty();
-				for (i = 0; i < vv[1].length; ++i) {
-					if (i > 0)
-						vars.append(', ');
-					vars.append('' + vv[1][i]);
-					if (vv[2][i].length > 0)
-						vars.append(' [' + vv[2][i] + ']');
-				}
-				if (p.find(':input[name^="rw"]').val().replace(/\s+/, '') != '')
-					vars.append(', rate, count, weight');
-				$('#varsbox').show();
-				return false;
-			}
-		});
-	}).focusout(function() {
-		$('#varsbox').hide();
-	});
+    // display available vars on certain input fields
+    plot.find(':input[name^="x"],:input[name^="y"],:input[name^="z"],:input[name^="c"]').focusin(function() {
 
-	// delete plot button
-	plot.find('.delplot').click(function() {
-		$(this).parents('.plot').remove();
-		renumberPlots();
-	});
+        p = $(this).parents('.plot');
+        k = p.find('select[name^="s"]').val();
+        $.each(tables_and_vars, function(kk, vv) {
+            if (kk == k) {
+                vars = $('#vars').empty();
+                for ( i = 0; i < vv[1].length; ++i) {
+                    if (i > 0)
+                        vars.append(', ');
+                    vars.append('' + vv[1][i]);
+                    if (vv[2][i].length > 0)
+                        vars.append(' [' + vv[2][i] + ']');
+                }
+                if (p.find(':input[name^="rw"]').val().replace(/\s+/, '') != '')
+                    vars.append(', rate, count, weight');
+                $('#varsbox').show();
+                return false;
+            }
+        });
+    }).focusout(function() {
+        $('#varsbox').hide();
+    });
 
-	// plot mode dropdown box
-	plot.find(':input[name^="m"]').change(function() {
-		updateHiddenFields();
-	});
+    // delete plot button
+    plot.find('.delplot').click(function() {
+        $(this).parents('.plot').remove();
+        renumberPlots();
+    });
 
-	// rate window field
-	plot.find(':input[name^="rw"]').keyup(function() {
-		updateHiddenFields();
-	});
+    // plot mode dropdown box
+    plot.find(':input[name^="m"]').change(function() {
+        updateHiddenFields();
+    });
 
-	// twin axes dropdown box
-	plot.find(':input[name^="tw"]').change(function() {
-		updateHiddenFields();
-	});
+    // rate window field
+    plot.find(':input[name^="rw"]').keyup(function() {
+        updateHiddenFields();
+    });
 
-	updateHiddenFields();
+    // twin axes dropdown box
+    plot.find(':input[name^="tw"]').change(function() {
+        updateHiddenFields();
+    });
 
-	return plot;
+    updateHiddenFields();
+
+    return plot;
 }
 
 /** Hilfe initialisieren */
 function initHelp(el) {
-	$(el).find('label[data-help]').each(function() {
-		help = $(this).attr('data-help');
-		if (help != '')
-//			$('<img>').attr('src', 'img/help.png').attr('title', help).addClass('help').prependTo(this).hide();
-			$(this).find(':input').attr('title', help);
-		
-	}).hover(function() {
-		$(this).find('.help').show();
-	}, function() {
-		$(this).find('.help').hide();
-	});
+    $(el).find('label[data-help]').each(function() {
+        help = $(this).attr('data-help');
+        if (help != '')
+            //			$('<img>').attr('src', 'img/help.png').attr('title', help).addClass('help').prependTo(this).hide();
+            $(this).find(':input').attr('title', help);
+
+    }).hover(function() {
+        $(this).find('.help').show();
+    }, function() {
+        $(this).find('.help').hide();
+    });
 }
 
 function getSettings() {
-	s = new Object();
-	$('form :input:enabled:not(:button):not(:reset):not(:submit)[name]').each(function() {
-		field = $(this);
-		name = field.attr('name');
-		if (field.is(':checkbox')) {
-			s[name] = field.prop('checked');
-		} else {
-			val = field.val();
-			s[name] = field.val();
-		}
-	});
-	s['plots'] = $('.plot').size();
-	return s;
+    s = new Object();
+    $('form :input:enabled:not(:button):not(:reset):not(:submit)[name]').each(function() {
+        field = $(this);
+        name = field.attr('name');
+        if (field.is(':checkbox')) {
+            s[name] = field.prop('checked');
+        } else {
+            val = field.val();
+            s[name] = field.val();
+        }
+    });
+    s['plots'] = $('.plot').size();
+    return s;
 }
 
 function setSettings(s) {
-	$('.plot').remove();
-	for ( var i = 0; i < s.plots; ++i)
-		addPlot();
-	$.each(s, function(k, v) {
-		field = $(':input[name="' + k + '"]');
-		if (field.is(':checkbox'))
-			field.prop('checked', v);
-		else
-			field.val(v);
-	});
-	updateHiddenFields();
+    $('.plot').remove();
+    for (var i = 0; i < s.plots; ++i)
+        addPlot();
+    $.each(s, function(k, v) {
+        field = $(':input[name="' + k + '"]');
+        if (field.is(':checkbox'))
+            field.prop('checked', v);
+        else
+            field.val(v);
+    });
+    updateHiddenFields();
 }
 
 function initSettingsLoader() {
-	$(':button[name="load"]').click(function() {
-		try {
-			s = JSON.parse($(':input[name="settingstoload"]').val());
-			$('nav a[href="#settings"]').click();
-			setSettings(s);
-			// $('form').submit();
-		} catch (e) {
-			alert('Fehler beim Laden der Einstellungen: ' + e);
-		}
-	});
+    $(':button[name="load"]').click(function() {
+        try {
+            s = JSON.parse($(':input[name="settingstoload"]').val());
+            $('nav a[href="#settings"]').click();
+            setSettings(s);
+            // $('form').submit();
+        } catch (e) {
+            alert('Fehler beim Laden der Einstellungen: ' + e);
+        }
+    });
 }
 
 function initExpertMode() {
-	// add handler to expertmode checkbox
-	$('select[name="detaillevel"]').click(updateHiddenFields);
-	updateHiddenFields();
+    // add handler to expertmode checkbox
+    $('select[name="detaillevel"]').click(updateHiddenFields);
+    updateHiddenFields();
 }
 
 var templatePlot;
 
 function initPlots() {
-	// add source dropdown box to plot template, filled with available hdf5 data
-	// files
-	sourcesBox().prependTo('.plot');
-	// detach the plot template (to be added by pressing 'add plot' button)
-	templatePlot = $('.plot').detach();
+    // add source dropdown box to plot template, filled with available hdf5 data
+    // files
+    sourcesBox().prependTo('.plot');
+    // detach the plot template (to be added by pressing 'add plot' button)
+    templatePlot = $('.plot').detach();
 
-	$('#varsbox').hide();
+    $('#varsbox').hide();
 
-	$('#addplot').click(addPlot);
+    $('#addplot').click(addPlot);
 
-	try {
-		setSettings(JSON.parse($.cookie('lastsettings')));
-	} catch (e) {
-		addPlot();
-	}
+    try {
+        setSettings(JSON.parse($.cookie('lastsettings')));
+    } catch (e) {
+        addPlot();
+    }
 }
 
 function addPlot() {
-	if ($('.plot').size() == 0)
-		newplot = templatePlot.clone()
-	else
-		newplot = $('.plot:first').clone();
-	newplot.appendTo('#plots');
-	$('#addplot').appendTo('#plots');
-	renumberPlots();
-	addHandlers(newplot);
-	initHelp(newplot);
-	updateHiddenFields();
+    if ($('.plot').size() == 0)
+        newplot = templatePlot.clone()
+    else
+        newplot = $('.plot:first').clone();
+    newplot.appendTo('#plots');
+    $('#addplot').appendTo('#plots');
+    renumberPlots();
+    addHandlers(newplot);
+    initHelp(newplot);
+    updateHiddenFields();
 }
 
 function initScroll() {
-	$.localScroll({
-		hash : true
-	});
+    $.localScroll({
+        hash : true
+    });
 
-	// detach navbar on scroll down
-	$(window).scroll(function() {
-		scroll = $(this).scrollTop();
-		nav = $('nav:not(.fixed)');
-		if (nav.size() > 0)
-			navoffset = nav.offset();
-		if (scroll > navoffset.top) {
-			$('nav').addClass('fixed').next().css('margin-top', $('nav').height());
-		} else {
-			$('nav').removeClass('fixed').next().css('margin-top', '0');
-		}
+    // detach navbar on scroll down
+    $(window).scroll(function() {
+        scroll = $(this).scrollTop();
+        nav = $('nav:not(.fixed)');
+        if (nav.size() > 0)
+            navoffset = nav.offset();
+        if (scroll > navoffset.top) {
+            $('nav').addClass('fixed').next().css('margin-top', $('nav').height());
+        } else {
+            $('nav').removeClass('fixed').next().css('margin-top', '0');
+        }
 
-		pos = scroll + $('nav').height();
-		$('nav a').removeClass('active').each(function() {
-			target = $(this).attr('href');
-			offset = $(target).offset();
-			height = $(target).height();
+        pos = scroll + $('nav').height();
+        $('nav a').removeClass('active').each(function() {
+            target = $(this).attr('href');
+            offset = $(target).offset();
+            height = $(target).height();
 
-			if (offset.top <= pos && pos < offset.top + height) {
-				$(this).addClass('active');
-				return false;
-			}
-		})
-	}).scroll();
+            if (offset.top <= pos && pos < offset.top + height) {
+                $(this).addClass('active');
+                return false;
+            }
+        })
+    }).scroll();
 
-	// set section size to viewport size
-	$(window).resize(function() {
-		$('#content > div').css('min-height', $(this).height());
-	}).resize();
+    // set section size to viewport size
+    $(window).resize(function() {
+        $('#content > div').css('min-height', $(this).height());
+    }).resize();
 }
 
 function getSessionID() {
-	id = $.cookie('session');
-	if (id != null)
-		$('#sessionid').val(id);
-	else
-		newSessionID();
-	return $('#sessionid').val();
+    id = $.cookie('session');
+    if (id != null)
+        $('#sessionid').val(id);
+    else
+        newSessionID();
+    return $('#sessionid').val();
 }
 
 function newSessionID() {
-	$.ajax({
-		async : false,
-		data : {
-			a : 'newid',
-		},
-		dataType : 'text',
-		success : function(data, status, xhr) {
-			$('#sessionid').val(data);
-			$.cookie('session', data);
-		}
-	});
+    $.ajax({
+        async : false,
+        data : {
+            a : 'newid',
+        },
+        dataType : 'text',
+        success : function(data, status, xhr) {
+            $('#sessionid').val(data);
+            $.cookie('session', data);
+        }
+    });
 }
 
 function initSavedPlots() {
-	getSessionID();
-	$('#newid').click(function() {
-		newSessionID();
-		loadPlots();
-	});
-	$('#loadid').click(function() {
-		id = $('#sessionid').val();
-		if (id.length < 8) {
-			alert('Die Session-ID muss mindestens 8 Zeichen lang sein.');
-			return;
-		}
-		$.cookie('session', id);
-		loadPlots();
-	});
-	$('#sessionid').keyup(function(e) {
-		if (e.keyCode == 13) {
-			$('#loadid').click();
-		}
-	});
-	loadPlots();
+    getSessionID();
+    $('#newid').click(function() {
+        newSessionID();
+        loadPlots();
+    });
+    $('#loadid').click(function() {
+        id = $('#sessionid').val();
+        if (id.length < 8) {
+            alert('Die Session-ID muss mindestens 8 Zeichen lang sein.');
+            return;
+        }
+        $.cookie('session', id);
+        loadPlots();
+    });
+    $('#sessionid').keyup(function(e) {
+        if (e.keyCode == 13) {
+            $('#loadid').click();
+        }
+    });
+    loadPlots();
 }
 
 function savePlots() {
-	o = new Object();
-	o.savedPlots = [];
-	$('.savedplot').each(function() {
-		o.savedPlots.push($(this).data('settings'));
-	});
-	$.ajax({
-		async : false,
-		data : {
-			a : 'save',
-			id : getSessionID(),
-			data : JSON.stringify(o)
-		},
-		// success : function(data, status, xhr) {
-		// $('#debug').empty().append('' +
-		// o).append('<br>').append(''+status).append('<br>').append(''+xhr);
-		// },
-		error : function(xhr, text, error) {
-			alert('saving plots failed ' + xhr['responseText']);
-		}
-	});
+    o = new Object();
+    o.savedPlots = [];
+    $('.savedplot').each(function() {
+        o.savedPlots.push($(this).data('settings'));
+    });
+    $.ajax({
+        async : false,
+        data : {
+            a : 'save',
+            id : getSessionID(),
+            data : JSON.stringify(o)
+        },
+        // success : function(data, status, xhr) {
+        // $('#debug').empty().append('' +
+        // o).append('<br>').append(''+status).append('<br>').append(''+xhr);
+        // },
+        error : function(xhr, text, error) {
+            alert('saving plots failed ' + xhr['responseText']);
+        }
+    });
 }
 
 function loadPlots() {
-	$('#savedplots').empty();
-	$.ajax({
-		async : false,
-		data : {
-			a : 'load',
-			id : getSessionID(),
-		},
-		success : function(o, status, xhr) {
-			// $('#debug').empty().append('' + o).append('<br>').append('' +
-			// status).append('<br>').append('' + xhr);
-			$.each(o.savedPlots, function(i, s) {
-				addPlotToSaved(s);
-			});
-		},
-	// error : function(xhr, text, error) {
-	// alert('loading plots failed ' + xhr['responseText'] + ' ' + text + ' ' +
-	// error);
-	// }
-	});
+    $('#savedplots').empty();
+    $.ajax({
+        async : false,
+        data : {
+            a : 'load',
+            id : getSessionID(),
+        },
+        success : function(o, status, xhr) {
+            // $('#debug').empty().append('' + o).append('<br>').append('' +
+            // status).append('<br>').append('' + xhr);
+            $.each(o.savedPlots, function(i, s) {
+                addPlotToSaved(s);
+            });
+        },
+        // error : function(xhr, text, error) {
+        // alert('loading plots failed ' + xhr['responseText'] + ' ' + text + ' ' +
+        // error);
+        // }
+    });
 }
 
 function addPlotToSaved(settings) {
-	$('<div>').appendTo('#savedplots').append(
-			$('<img>').attr('src', settings.url).attr('href', settings.url).attr('alt', 'Plot ' + $('.savedplot').size() + ' wird geladen...').attr('title',
-					settings.t).data('settings', settings).addClass('savedplot'))
+    $('<div>').appendTo('#savedplots').append($('<img>').attr('src', settings.url).attr('href', settings.url).attr('alt', 'Plot ' + $('.savedplot').size() + ' wird geladen...').attr('title', settings.t).data('settings', settings).addClass('savedplot')).append($('<img>').attr('src', 'img/cross.png').attr('title', 'Plot löschen').addClass('delete').click(function() {
+        $(this).parent().remove();
+        $('.savedplot').unbind().lightBox();
+        savePlots();
+    })).append($('<img>').attr('src', 'img/arrow_redo.png').attr('title', 'Plot laden').addClass('loadplot').click(function() {
+        setSettings($(this).parent().find('.savedplot').data('settings'));
+        // $('nav a[href="#settings"]').click();
+        $('form').submit();
+    }));
 
-	.append($('<img>').attr('src', 'img/cross.png').attr('title', 'Plot löschen').addClass('delete').click(function() {
-		$(this).parent().remove();
-		$('.savedplot').unbind().lightBox();
-		savePlots();
-	}))
-
-	.append($('<img>').attr('src', 'img/arrow_redo.png').attr('title', 'Plot laden').addClass('loadplot').click(function() {
-		setSettings($(this).parent().find('.savedplot').data('settings'));
-		// $('nav a[href="#settings"]').click();
-		$('form').submit();
-	}));
-
-	$('.savedplot').unbind().lightBox();
-	//
-	// $.ajax({
-	// url : settings.png,
-	// type : 'HEAD',
-	// error : function() {
-	// settings['a'] = 'plot';
-	// $.ajax({
-	// data : settings,
-	// success : function() {
-	//
-	// }
-	// });
-	// }
-	// });
+    $('.savedplot').unbind().lightBox();
+    //
+    // $.ajax({
+    // url : settings.png,
+    // type : 'HEAD',
+    // error : function() {
+    // settings['a'] = 'plot';
+    // $.ajax({
+    // data : settings,
+    // success : function() {
+    //
+    // }
+    // });
+    // }
+    // });
 }
 
 var xhr;
 
 function initSubmit() {
-	// hand submission of plot request and reception of the plot
-	$('form').submit(
-			function() {
-				try { // abort previous request
-					xhr.abort();
-				} catch (e) {
-					// if there was no previous request, ignore errors
-				}
+    // hand submission of plot request and reception of the plot
+    $('form').submit(function() {
+        try {// abort previous request
+            xhr.abort();
+        } catch (e) {
+            // if there was no previous request, ignore errors
+        }
 
-				// the form (all input fields) as url query string
-				query = $('form').serialize();
-				settings = getSettings();
-				$.cookie('lastsettings', JSON.stringify(settings));
+        // the form (all input fields) as url query string
+        query = $('form').serialize();
+        settings = getSettings();
+        $.cookie('lastsettings', JSON.stringify(settings));
 
-				// store current plot settings (all input fields) into
-				// settings object
+        // store current plot settings (all input fields) into
+        // settings object
 
-				result = $('#result');
-				// print status information
-				result.empty().append('<p>Plot wird erstellt, bitte warten&hellip;</p><img src="img/bar90.gif">')
-				// .append('<p>' + query + '</p>')
-				;
+        result = $('#result');
+        // print status information
+        result.empty().append('<p>Plot wird erstellt, bitte warten&hellip;</p><img src="img/bar90.gif">');
 
-				// scroll to plot section
-				$('nav a[href="#output"]').click();
+        // scroll to plot section
+        $('nav a[href="#output"]').click();
 
-				// perform ajax request to get the plot (created on
-				// server)
-				$('#error').empty();
-				xhr = $.ajax({
-					data : query,
-					success : function(data) {
-						result.empty();
-						$('<img>').attr('src', data.png + '?' + new Date().getTime())
-						// add query string to prevent browser
-						// from showing cached image
-						.attr('alt', query).appendTo(result);
+        // perform ajax request to get the plot (created on
+        // server)
+        $('#error').empty();
+        xhr = $.ajax({
+            data : query,
+            success : function(data) {
+                result.empty();
+                $('<img>').attr('src', data.png + '?' + new Date().getTime())
+                // add query string to prevent browser
+                // from showing cached image
+                .attr('alt', query).appendTo(result);
 
-						// links to pdf and svg
-						p = $('<p>').appendTo(result);
-						p.append('Download als ');
-						$('<a>').attr('href', data.pdf).text('PDF').appendTo(p);
-						p.append(', ');
-						$('<a>').attr('href', data.svg).text('SVG').appendTo(p);
+                // links to pdf and svg
+                p = $('<p>').appendTo(result);
+                p.append('Download als ');
+                $('<a>').attr('href', data.pdf).text('PDF').appendTo(p);
+                p.append(', ');
+                $('<a>').attr('href', data.svg).text('SVG').appendTo(p);
 
-						// plot settings
-						result.append('<br>Einstellungen dieses Plots:<br>');
-						jsonsettings = JSON.stringify(settings);
-						result.append($('<textarea id="plotsettings">').text(jsonsettings));
+                // plot settings
+                result.append('<br>Einstellungen dieses Plots:<br>');
+                jsonsettings = JSON.stringify(settings);
+                result.append($('<textarea id="plotsettings">').text(jsonsettings));
 
-						// plot url
-						result.append('<br>Diesen Plot auf einer Webseite einbinden:<br>');
-						ploturl = $(location).attr('href').replace(/[#?].*/, '') + 'webplot.py?' + query.replace(/a=plot/, 'a=png');
-						result.append($('<textarea id="ploturl">').text('<img src="' + ploturl + '" />'));
+                // plot url
+                result.append('<br>Diesen Plot auf einer Webseite einbinden:<br>');
+                ploturl = $(location).attr('href').replace(/[#?].*/, '') + 'webplot.py?' + query.replace(/a=plot/, 'a=png');
+                result.append($('<textarea id="ploturl">').text('<img src="' + ploturl + '" />'));
 
-						// store settings in cookie
-						$.extend(settings, data); // append plot image urls to
-						settings['url'] = ploturl;
-						// save plot button
-						p.append(', ');
-						$('<input>').attr('type', 'image').attr('src', 'img/disk.png').attr('title', 'Plot speichern').attr('value', 'Plot speichern').click(
-								function() {
-									addPlotToSaved(settings);
-									$(this).hide(speed);
-									savePlots();
-								}).appendTo(p);
+                // store settings in cookie
+                $.extend(settings, data);
+                // append plot image urls to
+                settings['url'] = ploturl;
+                // save plot button
+                p.append(', ');
+                $('<input>').attr('type', 'image').attr('src', 'img/disk.png').attr('title', 'Plot speichern').attr('value', 'Plot speichern').click(function() {
+                    addPlotToSaved(settings);
+                    $(this).hide(speed);
+                    savePlots();
+                }).appendTo(p);
 
-						// scroll to plot section
-						$('nav a[href="#output"]').click();
-					},
-					error : function(xhr, text, error) {
-						$('#result').empty();
-						$('#error').html(
-								'<p>plot error, check input values!</p>' + '<p>"' + text + '"</p><p>"' + error + '"</p>'
-										+ '<p style="color: red;">responseText:</p>' + xhr['responseText']);
-						// scroll to plot section
-						$('nav a[href="#output"]').click();
-					}
-				});
+                // scroll to plot section
+                $('nav a[href="#output"]').click();
+            },
+            error : function(xhr, text, error) {
+                $('#result').empty();
+                $('#error').html('<p>plot error, check input values!</p>' + '<p>"' + text + '"</p><p>"' + error + '"</p>' + '<p style="color: red;">responseText:</p>' + xhr['responseText']);
+                // scroll to plot section
+                $('nav a[href="#output"]').click();
+            }
+        });
 
-				return false;
-			});
+        return false;
+    });
 }
 
 /** on page load... */
 $(function() {
-	initScroll();
-	initHelp('fieldset.global');
-	initExpertMode();
-	initPlots();
-	initSubmit();
-	initSettingsLoader();
-	initSavedPlots();
-	$('.lightbox').lightBox();
+    initScroll();
+    initHelp('fieldset.global');
+    initExpertMode();
+    initPlots();
+    initSubmit();
+    initSettingsLoader();
+    initSavedPlots();
+    $('.lightbox').lightBox();
 });

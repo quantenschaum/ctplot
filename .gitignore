@@ -9,3 +9,4 @@ doc/*.sync*
 doc/*.bak
 doc/*.sav
 doc/*.toc
+/xampp
