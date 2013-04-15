@@ -1,4 +1,4 @@
-#!/bin/env python
+#!/opt/bin/python
 # -*- coding: utf-8 -*-
 #    pyplot - python based data plotting tools
 #    created for DESY Zeuthen

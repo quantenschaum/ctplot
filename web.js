@@ -242,7 +242,7 @@ function addHandlers(plot) {
     // experiment/datasets
     plot.find(':input[name^="experiment"]').change(function() {
         updateHiddenFields();
-        $(this).parents('div').find(':input[name^="s"] option:first').prop('selected', true);
+        $(this).parents('.datasetselector').find(':input[name^="s"] option:first').prop('selected',true);
     });
 
     updateHiddenFields();
