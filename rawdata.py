@@ -15,7 +15,7 @@
 #    GNU General Public License for more details.
 #
 #    You should have received a copy of the GNU General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>. 
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 import sys
 import utils
@@ -117,7 +117,7 @@ class LineHandler:
 
     def _parse_time(self, line):
         'find a datetime stamp at the beginning of line, return (time as datetime, line with timestamp removed)'
-        # find datetime stamp 
+        # find datetime stamp
         match = re.match(datetime_re, line)
         assert match
         dt = match.group(0)
@@ -148,13 +148,13 @@ class LineHandler:
         for x in parts:
             try:
                 data.append(float(x))
-            except: # skip everything that is not parsable as float
+            except:  # skip everything that is not parsable as float
                 pass
 
-        self.sanitize(data) # modify data (perform cleanup, transformations, etc.)
-        data = tuple(data) # freeze data (tuples are immutable)
+        self.sanitize(data)  # modify data (perform cleanup, transformations, etc.)
+        data = tuple(data)  # freeze data (tuples are immutable)
 
-        self.verify(data) # verify that data fulfills certain criteria
+        self.verify(data)  # verify that data fulfills certain criteria
         return data
 
     def _verify_time(self, time):
@@ -193,7 +193,7 @@ class WeatherHandler(LineHandler):
 
     def sanitize(self, data):
         time = data[0]
-        data.append(nan) # clouds, only present in pre 2006 weather data
+        data.append(nan)  # clouds, only present in pre 2006 weather data
 
         # replace -1 by nan, -1 means 'no data'
         for i in [4, 5, 6, 7, 8, 9, 10, 11]:
@@ -214,8 +214,8 @@ class WeatherHandler(LineHandler):
             for i in [1, 3]:
                 if data[i] == -1.0:
                     data[i] = nan
-            data[12] = data[5] # set clouds if < 2006
-            data[4] = data[5] = nan # clear humidity
+            data[12] = data[5]  # set clouds if < 2006
+            data[4] = data[5] = nan  # clear humidity
 
     def verify(self, data):
         # 0    1    2     3     4    5      6       7     8      9     10   11   12
@@ -292,7 +292,7 @@ class ITTEventHandler(LineHandler):
         # extract leading int
         m = self._leading_int.match(line)
         i = int(m.group(1))
-        line = m.group(2)# line w/o leading int
+        line = m.group(2)  # line w/o leading int
         if i <= 0:
             if i == 0:
                 parts = line.split()
@@ -313,7 +313,7 @@ class ITTEventHandler(LineHandler):
         for x in parts:
             try:
                 data.append(float(x))
-            except: # skip everything that is not parsable as float
+            except:  # skip everything that is not parsable as float
                 pass
 
         if self.expecting_second_part:
@@ -332,10 +332,10 @@ class ITTEventHandler(LineHandler):
             return
 
 
-        self.sanitize(data) # modify data (perform cleanup, transformations, etc.)
-        data = tuple(data) # freeze data (tuples are immutable)
+        self.sanitize(data)  # modify data (perform cleanup, transformations, etc.)
+        data = tuple(data)  # freeze data (tuples are immutable)
 
-        self.verify(data) # verify that data fulfills certain criteria
+        self.verify(data)  # verify that data fulfills certain criteria
         return data
 
     _timezone = pytz.timezone('Europe/Berlin')
@@ -430,13 +430,13 @@ class DWDTageswerteHandler(LineHandler):
 
         stat = data[1]
         pos = self.stations[stat][0:3] if stat in self.stations else 3 * [nan]
-        data.extend(pos) # append height, lat, lon
+        data.extend(pos)  # append height, lat, lon
 
 
-        self.sanitize(data) # modify data (perform cleanup, transformations, etc.)
-        data = tuple(data) # freeze data (tuples are immutable)
+        self.sanitize(data)  # modify data (perform cleanup, transformations, etc.)
+        data = tuple(data)  # freeze data (tuples are immutable)
 
-        self.verify(data) # verify that data fulfills certain criteria
+        self.verify(data)  # verify that data fulfills certain criteria
         return data
 
     _timezone = pytz.timezone('Europe/Berlin')
@@ -491,10 +491,10 @@ class PolarsternHandler(LineHandler):
 
         data = [time, lat, lon, ff[0], ff[1], ff[5], ff[8]]
 
-        self.sanitize(data) # modify data (perform cleanup, transformations, etc.)
-        data = tuple(data) # freeze data (tuples are immutable)
+        self.sanitize(data)  # modify data (perform cleanup, transformations, etc.)
+        data = tuple(data)  # freeze data (tuples are immutable)
 
-        self.verify(data) # verify that data fulfills certain criteria
+        self.verify(data)  # verify that data fulfills certain criteria
         return data
 
     _timezone = pytz.timezone('UTC')
@@ -534,7 +534,7 @@ class PolarsternHandler2(LineHandler):
             return
 
         fields = line.split()
-        #assert len(fields) == 19, 'invalid number of fields'
+        # assert len(fields) == 19, 'invalid number of fields'
 
         yy, mm, dd, hh = map(int, fields[:4])
         time = dt.datetime(yy, mm, dd, hh)
@@ -547,10 +547,10 @@ class PolarsternHandler2(LineHandler):
         data = [time, mjd, Ts, ps, lat, lon]
         data.extend(map(float, fields[11:]))
 
-        self.sanitize(data) # modify data (perform cleanup, transformations, etc.)
-        self.verify(data) # verify that data fulfills certain criteria
-        data.pop(1) # pop MJD
-        data = tuple(data) # freeze data (tuples are immutable)
+        self.sanitize(data)  # modify data (perform cleanup, transformations, etc.)
+        self.verify(data)  # verify that data fulfills certain criteria
+        data.pop(1)  # pop MJD
+        data = tuple(data)  # freeze data (tuples are immutable)
 
         return data
 
@@ -577,7 +577,7 @@ class PolarsternHandler2(LineHandler):
     def verify(self, data):
         # 0    1   2   3    4    5    6  7   8     9     10   11  12    13
         time, mjd, Ts, ps , lat, lon, p, T, ceil, radi, rain, H, visi, events = data
-        assert abs((time - mjd_epoch).total_seconds() / 3600 - 24 * mjd) < 1. / 60, "MJD does not match time" # mjd-time < 1 minute
+        assert abs((time - mjd_epoch).total_seconds() / 3600 - 24 * mjd) < 1. / 60, "MJD does not match time"  # mjd-time < 1 minute
         self._verify_time(time)
         verifyrange('lat', lat, -90, 90, True)
         verifyrange('lon', lon, -180, 180, True)
@@ -625,16 +625,16 @@ class NeutronHandler(LineHandler):
 
             data = [time, int(N), float(HV), float(T), float(p), lat, lon]
 
-            self.sanitize(data) # modify data (perform cleanup, transformations, etc.)
-            self.verify(data) # verify that data fulfills certain criteria
-            data = tuple(data) # freeze data (tuples are immutable)
+            self.sanitize(data)  # modify data (perform cleanup, transformations, etc.)
+            self.verify(data)  # verify that data fulfills certain criteria
+            data = tuple(data)  # freeze data (tuples are immutable)
 
             return data
 
     _timezone = pytz.timezone('UTC')
 
     def sanitize(self, data):
-        # 0   1  2   3  4   5    6 
+        # 0   1  2   3  4   5    6
         time, N, HV, T, p, lat, lon = data
         if not (1 <= HV <= 1e4): data[2] = NaN
         if not (-50 <= T <= 50): data[3] = NaN
@@ -643,7 +643,7 @@ class NeutronHandler(LineHandler):
         if not (-180 <= lon <= 180): data[6] = NaN
 
     def verify(self, data):
-        # 0   1  2   3  4   5    6 
+        # 0   1  2   3  4   5    6
         time, N, HV, T, p, lat, lon = data
         self._verify_time(time)
         verifyrange('count', N, 0, 500)
@@ -691,23 +691,23 @@ class NeutronHandler2(LineHandler):
             #             count           temperature        highvoltage        pressure
             data = [time, int(fields[1]), float(fields[13]), float(fields[16]), float(fields[31])]
 
-            self.sanitize(data) # modify data (perform cleanup, transformations, etc.)
-            self.verify(data) # verify that data fulfills certain criteria
-            data = tuple(data) # freeze data (tuples are immutable)
+            self.sanitize(data)  # modify data (perform cleanup, transformations, etc.)
+            self.verify(data)  # verify that data fulfills certain criteria
+            data = tuple(data)  # freeze data (tuples are immutable)
 
             return data
 
     _timezone = pytz.timezone('UTC')
 
     def sanitize(self, data):
-        # 0   1  2   3  4  
+        # 0   1  2   3  4
         time, N, T, HV, p = data
         if not (1 <= HV <= 1e4): data[2] = NaN
         if not (-50 <= T <= 50): data[3] = NaN
         if not (800 <= p <= 1200): data[4] = NaN
 
     def verify(self, data):
-        # 0   1  2   3  4  
+        # 0   1  2   3  4
         time, N, T, HV, p = data
         self._verify_time(time)
         verifyrange('count', N, 0, 5000)
@@ -735,19 +735,19 @@ def autodetect(filename, handlers = available_handlers):
     matched_handlers = []
     # try each handler
     for h in handlers:
-        try: # try to parse the file
+        try:  # try to parse the file
             if verbose > 0:
                 print 'trying', h
             datalines = []
             for i, data in enumerate(fileiter(filename, h())):
                 datalines.append(data)
-                if i > 10: break # stop after 10 lines
+                if i > 10: break  # stop after 10 lines
 
             # if parsing was successful (no exception), add this handler
-            if len(datalines) > 5: # require at least 5 table rows to be read
+            if len(datalines) > 5:  # require at least 5 table rows to be read
                 matched_handlers.append(h)
 
-        except Exception as e: # ignore errors, try next handler
+        except Exception as e:  # ignore errors, try next handler
             if verbose > 0:
                 print '{0} failed to read {1}'.format(h, filename)
                 print e
@@ -756,7 +756,7 @@ def autodetect(filename, handlers = available_handlers):
     # return a unique match...
     if len(matched_handlers) == 1:
         return matched_handlers[0]
-    else: # ...or raise
+    else:  # ...or raise
         raise RuntimeError(('could not autodetect handler for {0} \nmatching handlers: \n{1}'.format(filename, matched_handlers)))
 
 
@@ -863,7 +863,7 @@ def raw_to_h5(filenames, out = "out.h5", handlers = available_handlers,
 
         # create and fill raw data tables
         for handler, files in files_dict.iteritems():
-            handler = handler() # instanciate the LineHandler
+            handler = handler()  # instanciate the LineHandler
             title = handler.table_title
             if show_progress:
                 print 'creating table: %s (%s)' % (handler.table_name, title)

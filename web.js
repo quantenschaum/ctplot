@@ -195,7 +195,6 @@ function updateHiddenFields() {
 function addHandlers(plot) {
     // display available vars on certain input fields
     plot.find(':input[name^="x"],:input[name^="y"],:input[name^="z"],:input[name^="c"]').focusin(function() {
-
         p = $(this).parents('.plot');
         k = p.find('select[name^="s"]').val();
         $.each(tables_and_vars, function(kk, vv) {

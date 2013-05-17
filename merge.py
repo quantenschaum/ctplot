@@ -15,7 +15,7 @@
 #    GNU General Public License for more details.
 #
 #    You should have received a copy of the GNU General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>. 
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 import tables as t
 from progressbar import ProgressBar, Bar, ETA, Percentage
@@ -31,9 +31,9 @@ def _interpolate(t, w0, w1, idx):
     'interpolate w0 and w1 at t, using tw=w[idx]'
     assert len(w0) == len(w1)
 
-    tw0 = w0[idx] # time of w0
-    tw1 = w1[idx] # time of w1
-    dt = tw1 - tw0 # time interval length
+    tw0 = w0[idx]  # time of w0
+    tw1 = w1[idx]  # time of w1
+    dt = tw1 - tw0  # time interval length
 
     # interpolate (if else to minimize roundoff error)
     a = (t - tw0) / dt
@@ -52,7 +52,7 @@ def _printinfo(t):
 
 
 def merge(primary_file, secondary_file = None, outfile = None, primary_table = None, secondary_table = None, merge_on = 'time', max_inter = 4 * 3600, quiet = False):
-    #open data file(s)
+    # open data file(s)
     if outfile is None:
         h5pri = h5out = t.openFile(primary_file, 'r+')
     else:
@@ -99,14 +99,14 @@ def merge(primary_file, secondary_file = None, outfile = None, primary_table = N
         wtime = sec_table.colnames.index(merge_on)
 
         # build column descriptors for table of merged data
-        merged_descriptor = OrderedDict() # keep the order
+        merged_descriptor = OrderedDict()  # keep the order
         for k in pri_table.colnames:
             merged_descriptor[k] = pri_table.coldescrs[k]
 
         # add cols of weather table
-        weather_colnames = list(sec_table.colnames) # work on copy
-        weather_colnames.pop(wtime) # remove 'time' column
-        for k in weather_colnames: # add remaining cols
+        weather_colnames = list(sec_table.colnames)  # work on copy
+        weather_colnames.pop(wtime)  # remove 'time' column
+        for k in weather_colnames:  # add remaining cols
             merged_descriptor[k] = sec_table.coldescrs[k].copy()
 
         # adjust position fields (column order in descriptors)
@@ -127,7 +127,7 @@ def merge(primary_file, secondary_file = None, outfile = None, primary_table = N
         merged_table = h5out.createTable(merged, os.path.basename(primary_table), merged_descriptor,
                                        pri_table._v_title + ' merged with ' + sec_table._v_title ,
                                        expectedrows = pri_table.nrows)
-        set_attrs(merged_table, t0, tuple(merged_units)) # store new global t0 with this table
+        set_attrs(merged_table, t0, tuple(merged_units))  # store new global t0 with this table
         row = merged_table.row
 
         _printinfo(merged_table)
@@ -150,22 +150,22 @@ def merge(primary_file, secondary_file = None, outfile = None, primary_table = N
         event_counter = 0
         for event in pri_table:
             if not quiet:
-                pb.update(pb.currval + 1) # update progress bar
+                pb.update(pb.currval + 1)  # update progress bar
 
             # skip to next event if weather too new
-            te = event[etime] + toffe # adjust for global t0, apply offset
-            if te < tw0: # if eventime < start of weather interval...
+            te = event[etime] + toffe  # adjust for global t0, apply offset
+            if te < tw0:  # if eventime < start of weather interval...
                 continue
 
-            try: # skip to next pair of weather data until the event is contained
+            try:  # skip to next pair of weather data until the event is contained
                 while not (tw0 <= te <= tw1):
-                    weather_0 = weather_1 # shift 1 -> 0
-                    tw0 = weather_0[wtime] + toffw # adjust for global t0, apply offset
-                    weather_1 = weather_iterator.next()[:] # get next weather row as tuple (do [:])
-                    tw1 = weather_1[wtime] + toffw # adjust for global t0, apply offset
+                    weather_0 = weather_1  # shift 1 -> 0
+                    tw0 = weather_0[wtime] + toffw  # adjust for global t0, apply offset
+                    weather_1 = weather_iterator.next()[:]  # get next weather row as tuple (do [:])
+                    tw1 = weather_1[wtime] + toffw  # adjust for global t0, apply offset
 
             except StopIteration:
-                break # exit event loop if there are no more weather rows
+                break  # exit event loop if there are no more weather rows
 
             # skip event if weather interval too long (weather regarded as invalid)
             if (tw1 - tw0) > max_inter:
@@ -173,14 +173,14 @@ def merge(primary_file, secondary_file = None, outfile = None, primary_table = N
 
             # interpolate weather data to event time
             winterp = _interpolate(te, weather_0, weather_1, wtime)
-            winterp.pop(wtime) # remove 'time' col from interpolated weather
+            winterp.pop(wtime)  # remove 'time' col from interpolated weather
 
             # merged data: event with weather data
-            ew = list(event[:]) # copy event data
-            ew[etime] = te; # update event time (because of offset)
-            ew.extend(winterp) # add interpolated weather data
+            ew = list(event[:])  # copy event data
+            ew[etime] = te;  # update event time (because of offset)
+            ew.extend(winterp)  # add interpolated weather data
 
-            assert len(merged_descriptor) == len(ew) # length must match
+            assert len(merged_descriptor) == len(ew)  # length must match
 
             # write newly merged data into row
             for k, v in zip(merged_descriptor.keys(), ew):
@@ -188,14 +188,14 @@ def merge(primary_file, secondary_file = None, outfile = None, primary_table = N
 
             # append row
             row.append()
-            event_counter += 1 # count merged events
+            event_counter += 1  # count merged events
 
         if not quiet:
-            pb.finish() # finish progress bar
+            pb.finish()  # finish progress bar
 
-        merged_table.flush() # force writing the table
+        merged_table.flush()  # force writing the table
 
-        # output status information 
+        # output status information
         print "merged %d of %d events, skipped %d" % (event_counter, pri_table.nrows, pri_table.nrows - event_counter)
         print "first merged record", seconds2datetime(t0, merged_table[0][etime])
         print " last merged record", seconds2datetime(t0, merged_table[-1][etime])
