@@ -219,12 +219,20 @@ label:hover {
     background: #ffa;
 }
 
-.expert {
-    background: #ffefef;
+/*label.required:before {
+    content: "\2666\2009";
 }
 
-.advanced {
-    background: #efefff;
+label.expert:before {
+   content: "\2663\2009";
+}
+
+label.advanced:before {
+    content: "\2660\2009";
+}*/
+
+.symbol {
+    color: gray;
 }
 
 input[type="text"]:focus, select:focus {

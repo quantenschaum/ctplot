@@ -39,6 +39,11 @@ Array.prototype.foreach = function(callback) {
         callback(k, this[k]);
     }
 }
+
+/** add trim() to String */
+String.prototype.trim=function(){return this.replace(/^\s+|\s+$/g, '');};
+
+
 /** does browser support svg? */
 function supportsSvg() {
     return document.implementation.hasFeature("http://www.w3.org/TR/SVG11/feature#Shape", "1.0")
@@ -97,8 +102,8 @@ function sourcesBox() {
         }
     });
 
-    var experimentlabel = $('<label>').attr('data-help', 'Hier wird der zu verwendende Experiment ausgewählt.').append('Experiment').append(experimentbox);
-    var datasetlabel = $('<label>').attr('data-help', 'Hier wird der zu verwendende Datensatz ausgewählt.').append('Datensatz').append(datasetbox);
+    var experimentlabel = $('<label>').addClass('required').attr('data-help', 'Hier wird der zu verwendende Experiment ausgewählt.').append('Experiment').append(experimentbox);
+    var datasetlabel = $('<label>').addClass('required').attr('data-help', 'Hier wird der zu verwendende Datensatz ausgewählt.').append('Datensatz').append(datasetbox);
     return $('<div class="datasetselector">').append(experimentlabel).append(datasetlabel);
 }
 
@@ -583,6 +588,21 @@ function initSubmit() {
     });
 }
 
+function appendSymbol(selector, symbol) {
+    $(selector).each(function(){
+        var t = $(this).contents().first()
+        if (t.get(0).nodeType != 3) // if it's not a text node
+            return;
+        t.after(' <span class="symbol">'+symbol+'</span>');
+    });
+}
+
+function initSymbols() {
+    appendSymbol('label.required', '&diams;');
+    appendSymbol('label.advanced', '&dagger;');
+    appendSymbol('label.expert', '&Dagger;');
+}
+
 /** on page load... */
 $(function() {
     initScroll();
@@ -592,5 +612,6 @@ $(function() {
     initSubmit();
     initSettingsLoader();
     initSavedPlots();
+    initSymbols();
     $('.lightbox').lightBox();
 });

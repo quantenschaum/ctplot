@@ -205,7 +205,7 @@
                                 Diagramm *
                             </legend>
                             <img src="img/cross.png" class="delplot" title="hier klicken, um diese Diagrammeinstellungen zu entfernen">
-                            <label data-help="legt fest, in welcher Form die Daten dargestellt werden. Nähere Informationen zu den Diagrammtypen gibt es in der Anleitung">Diagramm-Typ
+                            <label class="required" data-help="legt fest, in welcher Form die Daten dargestellt werden. Nähere Informationen zu den Diagrammtypen gibt es in der Anleitung">Diagramm-Typ
                                 <select name="m*">
                                     <option value="h1">1D-Histogram</option>
                                     <option value="xy">xy-Diagramm</option>
@@ -232,7 +232,7 @@
                                 <input type="text" name="rc*">
                             </label>
                             <h4>Achsen und Variablen</h4>
-                            <label  data-help="Wert, der auf der x-Achse dargestellt werden soll. Hier kann ein Variablenname eingegeben werden (z.B. time) oder eine Formel, die Variablen umrechnet oder miteinander verknüpft (z.B. T_a-T_i oder log(p))"> x-Variable
+                            <label class="required" data-help="Wert, der auf der x-Achse dargestellt werden soll. Hier kann ein Variablenname eingegeben werden (z.B. time) oder eine Formel, die Variablen umrechnet oder miteinander verknüpft (z.B. T_a-T_i oder log(p))"> x-Variable
                                 <input type="text" name="x*">
                             </label>
                             <label data-help="Unterteilung der x-Achse in Bins. Angabe einer Zahl n bedeutet, dass automatisch n Bins gewählt werden, die die Daten enthalten (z.B. 10 erzeugt 10 Bins). Angabe von drei durch Komma getrennten Zahlen a,b,n erzeugt n Bins mit linker Kante a und rechter Kante b. Angabe von mehr als drei durch Komma getrennten Zahlen erzeugt Bins mit den Binkanten auf den angegebenen Werten" class="t-h1 t-h2 t-p advanced"> x-Bins
@@ -241,7 +241,7 @@
                             <label data-help="aktiviert die Anzeige von x-Fehlerbalken" class="t-h1 t-p advanced">x-Fehlerbalken
                                 <input type="checkbox" name="o*xerr">
                             </label>
-                            <label data-help="Wert, der auf der y-Achse dargestellt werden soll, analog zu x" class="t-xy t-h2 t-p t-map">y-Variable
+                            <label data-help="Wert, der auf der y-Achse dargestellt werden soll, analog zu x" class="required t-xy t-h2 t-p t-map">y-Variable
                                 <input type="text" name="y*">
                             </label>
                             <label data-help="Unterteilung der y-Achse in Bins, analog zu x-Bins" class="t-h2 advanced">y-Bins
@@ -264,6 +264,7 @@
                             Ein Schnitt ist ein boolscher Ausdruck (siehe Hilfetext). Mehrere Bedingungen können durch and und or miteinander kombiniert werden. Es muss auch nicht auch direkt auf die Inputvariablen geschnitten werden, es kann ein bliebiger Ausdruck eingegeben werden.
                             -->
                             <label class="advanced" data-help="Hier wird ein boolscher Ausdruck eingegeben. Nur Datentupel, bei denen dieser Ausdruck wahr ist, werden in das Diagramm aufgenommen. z.B. T_a&gt;20 bedeutet, dass nur Daten, bei denen T_a&gt;20 ist, in das Diagramm aufgenommen werden. Alle anderen werden weggeschnitten (gefiltert).">
+                                Filterausdruck
                                 <input type="text" name="c*">
                             </label>
 
@@ -296,7 +297,7 @@
                                     <option value="contourfilled">Kontur, gefüllt</option>
                                     <option value="box">Box</option>
                                 </select> </label>
-                            <label data-help="gibt an, welche Werte in der Infobox für das Histogram angegeben werden, es bedeuten: n=Anzahl der Einträge, u=underflow, o=overflow, m=Mittelwert, s=Standardabweichung, bei 1D: [p=Mode (häufigster Wert), e=Median, w=Skew, k=Kurtosis, x=Excess], bei 2D: [c=Kovarianz]" class="t-h1 t-h2 expert">Statistik-Box
+                            <label data-help="gibt an, welche Werte in der Infobox für das Histogram angegeben werden, es bedeuten: n=Anzahl der Einträge, u=underflow, o=overflow, m=Mittelwert, s=Standardabweichung, bei 1D: [p=Mode (häufigster Wert), e=Median, w=Skew, k=Kurtosis, x=Excess], bei 2D: [c=Kovarianz], a = alles" class="t-h1 t-h2 expert">Statistik-Box
                                 <input type="text" name="sb*">
                             </label>
                             <label data-help="Anzahl der Konturlinien" class="t-h2 expert">Konturlinien
@@ -395,6 +396,11 @@
                         </fieldset>
                         <button type="button" id="addplot" title="hier klicken, um einen weiteres, unabhängiges Diagramm hinzuzufügen"><img src="img/add.png"> Diagramm hinzufügen
                         </button>
+                    </div>
+                    <div id="symbollegend">
+                        <span><span class="symbol">&diams;</span> Pflichtfeld</span>
+                        <span class="advanced">, <span class="symbol">&dagger;</span> Forgeschrittenenfeld</span>
+                        <span class="expert">, <span class="symbol">&Dagger;</span> Expertenfeld</span>
                     </div>
                     <div class="buttons">
                         <input type="hidden" name="a" value="plot">
