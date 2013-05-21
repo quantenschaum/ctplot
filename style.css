@@ -89,9 +89,7 @@ legend {
 
 nav {
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-    font-weight: 900;
-    font-stretch: condensed;
-    text-transform: uppercase;
+    font-weight: bold;
     font-size: 120%;
     width: 100%;
     box-shadow: 0 0 12px 6px rgba(0, 0, 0, 0.5);
@@ -114,6 +112,7 @@ nav a {
 }
 
 nav a:hover {
+    color: #e89700;
     text-decoration: none;
 }
 
@@ -129,14 +128,7 @@ nav ul li {
     color: #fff;
 }
 
-nav ul li:hover {
-    color: #e89700;
-    text-decoration: none;
-}
 
-nav .active {
-    color: #e89700;
-}
 
 #content {
     padding: 0 1em;

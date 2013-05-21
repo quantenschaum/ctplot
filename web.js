@@ -39,16 +39,6 @@ Array.prototype.foreach = function(callback) {
         callback(k, this[k]);
     }
 }
-
-/** add trim() to String */
-String.prototype.trim=function(){return this.replace(/^\s+|\s+$/g, '');};
-
-
-/** does browser support svg? */
-function supportsSvg() {
-    return document.implementation.hasFeature("http://www.w3.org/TR/SVG11/feature#Shape", "1.0")
-}
-
 var tables_and_vars = null;
 
 /** get available HDF5 from server and return new DOM element */
@@ -184,7 +174,11 @@ function updateHiddenFields() {
         }
 
         // experiment/dataset
-        var experiment = plot.find(':input[name^="experiment"]').val();
+        var experiment = '' + plot.find(':input[name^="experiment"]').val();
+        console.debug('experiment=' + experiment);
+        if (experiment.match(/\s+/))
+            experiment = '';
+        console.debug('experiment=' + experiment);
         var datasets = plot.find('option[class*="ex-"]');
         visible = visible.add(datasets);
         hidden = hidden.add(datasets.not('.ex-' + experiment));
@@ -246,7 +240,7 @@ function addHandlers(plot) {
     // experiment/datasets
     plot.find(':input[name^="experiment"]').change(function() {
         updateHiddenFields();
-        $(this).parents('.datasetselector').find(':input[name^="s"] option:first').prop('selected',true);
+        $(this).parents('.datasetselector').find(':input[name^="s"] option:first').prop('selected', true);
     });
 
     updateHiddenFields();
@@ -352,8 +346,9 @@ function addPlot() {
 }
 
 function initScroll() {
-    $.localScroll({
-        hash : true
+    // let navbar smoothscroll
+    $('nav a').smoothScroll({
+        offset : -15
     });
 
     // detach navbar on scroll down
@@ -478,32 +473,31 @@ function loadPlots() {
     });
 }
 
+function bindColorbox() {
+    $('#savedplots .savedplot').unbind().colorbox({
+        photo : true,
+        maxWidth : '90%',
+        maxHeight : '90%',
+        rel : 'plots',
+        title : 'gespeichertes Diagramm'
+    });
+}
+
 function addPlotToSaved(settings) {
-    $('<div>').appendTo('#savedplots').append($('<img>').attr('src', settings.url).attr('href', settings.url).attr('alt', 'Plot ' + $('.savedplot').size() + ' wird geladen...').attr('title', settings.t).data('settings', settings).addClass('savedplot')).append($('<img>').attr('src', 'img/cross.png').attr('title', 'Plot löschen').addClass('delete').click(function() {
-        $(this).parent().remove();
-        $('.savedplot').unbind().lightBox();
+    $('<div>').appendTo('#savedplots').append($('<img src="' + settings.url + '" href="' + settings.url + '" title="' + settings.t + '">').addClass('savedplot').data('settings', settings))
+    // add delete button
+    .append($('<img>').attr('src', 'img/cross.png').attr('title', 'Plot löschen').addClass('delete').click(function() {
+        $(this).parents('.savedplot').remove();
+        bindColorbox();
         savePlots();
-    })).append($('<img>').attr('src', 'img/arrow_redo.png').attr('title', 'Plot laden').addClass('loadplot').click(function() {
+    }))
+    // add load button
+    .append($('<img>').attr('src', 'img/arrow_redo.png').attr('title', 'Plot laden').addClass('loadplot').click(function() {
         setSettings($(this).parent().find('.savedplot').data('settings'));
-        // $('nav a[href="#settings"]').click();
         $('form').submit();
     }));
 
-    $('.savedplot').unbind().lightBox();
-    //
-    // $.ajax({
-    // url : settings.png,
-    // type : 'HEAD',
-    // error : function() {
-    // settings['a'] = 'plot';
-    // $.ajax({
-    // data : settings,
-    // success : function() {
-    //
-    // }
-    // });
-    // }
-    // });
+    bindColorbox();
 }
 
 var xhr;
@@ -539,7 +533,13 @@ function initSubmit() {
             data : query,
             success : function(data) {
                 result.empty();
-                $('<img>').attr('src', data.png + '?' + new Date().getTime())
+                var img;
+                if (Modernizr.svg) {
+                    img = data.svg;
+                } else {
+                    img = data.png;
+                }
+                $('<img>').attr('src', img + '?' + new Date().getTime())
                 // add query string to prevent browser
                 // from showing cached image
                 .attr('alt', query).appendTo(result);
@@ -567,7 +567,7 @@ function initSubmit() {
                 settings['url'] = ploturl;
                 // save plot button
                 p.append(', ');
-                $('<input>').attr('type', 'image').attr('src', 'img/disk.png').attr('title', 'Plot speichern').attr('value', 'Plot speichern').click(function() {
+                $('<input>').attr('type', 'image').attr('src', 'img/disk.png').attr('title', 'Diagramm speichern').attr('value', 'Diagramm speichern').click(function() {
                     addPlotToSaved(settings);
                     $(this).hide(speed);
                     savePlots();
@@ -589,11 +589,11 @@ function initSubmit() {
 }
 
 function appendSymbol(selector, symbol) {
-    $(selector).each(function(){
+    $(selector).each(function() {
         var t = $(this).contents().first()
-        if (t.get(0).nodeType != 3) // if it's not a text node
+        if (t.get(0).nodeType != 3)// if it's not a text node
             return;
-        t.after(' <span class="symbol">'+symbol+'</span>');
+        t.after(' <span class="symbol">' + symbol + '</span>');
     });
 }
 
@@ -613,5 +613,4 @@ $(function() {
     initSettingsLoader();
     initSavedPlots();
     initSymbols();
-    $('.lightbox').lightBox();
 });
