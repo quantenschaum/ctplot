@@ -462,6 +462,8 @@ class Plot(object):
         # convert cm to inches
         w = w / 2.54
         h = h / 2.54
+        self.w = w
+        self.h = h
         plt.gcf().set_size_inches([w, h], forward = True);
 #        f = 0.09
 #        if 'map' in self.m: f = 0.06 # more margin if plotting map
@@ -830,7 +832,7 @@ class Plot(object):
             pargs = set_defaults(kwargs, color = (1, 1, 1, 0), marker = 's', edgecolor = 'k')
             n = bincontents.size
             s = bincontents.reshape(n)
-            s = s / np.nanmax(s) * (72. / 2. * self.plotwidth / max(len(xcenters), len(ycenters))) ** 2
+            s = s / np.nanmax(s) * (72. / 2. * self.w / max(len(xcenters), len(ycenters))) ** 2
             xcenters, ycenters = np.meshgrid(xcenters, ycenters)
             plt.scatter(xcenters.reshape(n), ycenters.reshape(n), s = s, **pargs)
 
