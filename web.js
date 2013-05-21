@@ -107,7 +107,7 @@ function renumberPlots() {
     ch = $('#plots').children('.plot');
     ch.each(function(i) {
         plot = $(this);
-        plot.find('legend').text('Plot ' + (i + 1));
+        plot.find('legend').text('Diagramm ' + (i + 1));
         plot.find('[name]').each(function() {
             e = $(this);
             e.attr('name', e.attr('name').replace(/\*|\d/, '' + i));

@@ -69,16 +69,16 @@
                     <a href="#settings">Einstellungen</a>
                 </li>
                 <li>
-                    <a href="#output">Plot</a>
+                    <a href="#output">Diagramm</a>
                 </li>
                 <li>
-                    <a href="#saved">gespeicherte Plots</a>
+                    <a href="#saved">gespeicherte Diagramme</a>
                 </li>
             </ul>
         </nav>
         <div id="content">
             <div id="settings">
-                <h2>Plot-Einstellungen</h2>
+                <h2>Diagramm-Einstellungen</h2>
                 <form>
                     <fieldset class="global">
                         <legend>
@@ -94,15 +94,15 @@
                                 <option value="expert">Experte</option>
                             </select> </label>
                         <br />
-                        <label data-help="Titel des Plots, wird über dem Plot als Überschrift angezeigt">Plot-Titel
+                        <label data-help="Titel des Diagramms, wird über dem Diagramm als Überschrift angezeigt">Diagramm-Titel
                             <input type="text" name="t">
                         </label>
 
                         <!-- UMSTELLEN VON INCH AUF CM !!!!!!!!!!!------------------->
-                        <label  class="advanced" data-help="Breite des Plots in cm (ungefähr, default=25)">Breite
+                        <label  class="advanced" data-help="Breite des Diagramms in cm (ungefähr, default=25)">Breite
                             <input type="text" name="w">
                         </label>
-                        <label  class="advanced" data-help="Höhe des Plots in cm (ungefähr)">Höhe
+                        <label  class="advanced" data-help="Höhe des Diagramms in cm (ungefähr)">Höhe
                             <input type="text" name="h">
                         </label>
                         <!-- label data-help="Schriftgröße in ???">Schriftgröße<input type="text" name="f" /></label -->
@@ -181,7 +181,7 @@
                         <label class="advanced" data-help="Beschriftung der z-Achse (Farbe)">z-Bezeichnung
                             <input type="text" name="zl">
                         </label>
-                        <label data-help="legt fest, ob und wo die Legende angezeigt wird. Bei nur einem Plot wird keine Legende angezeigt.">Legende
+                        <label data-help="legt fest, ob und wo die Legende angezeigt wird. Bei nur einem Diagramm wird keine Legende angezeigt.">Legende
                             <select name="l">
                                 <option value="">automatisch</option>
                                 <option value="none">keine Legende</option>
@@ -202,18 +202,18 @@
                         </div>
                         <fieldset class="plot">
                             <legend>
-                                Plot *
+                                Diagramm *
                             </legend>
-                            <img src="img/cross.png" class="delplot" title="hier klicken, um diese Ploteinstellungen zu entfernen">
-                            <label data-help="legt fest, in welcher Form die Daten dargestellt werden. Nähere Informationen zu den Plottypen gibt es in der Anleitung">Plot-Typ
+                            <img src="img/cross.png" class="delplot" title="hier klicken, um diese Diagrammeinstellungen zu entfernen">
+                            <label data-help="legt fest, in welcher Form die Daten dargestellt werden. Nähere Informationen zu den Diagrammtypen gibt es in der Anleitung">Diagramm-Typ
                                 <select name="m*">
                                     <option value="h1">1D-Histogram</option>
-                                    <option value="xy">xy-Plot</option>
+                                    <option value="xy">xy-Diagramm</option>
                                     <option value="h2">2D-Histogram</option>
                                     <option value="p">Profil</option>
-                                    <option value="map">Plot auf Karte</option>
+                                    <option value="map">Karte</option>
                                 </select> </label>
-                            <label class="advanced" data-help="Name des Plots, wird in der Legende angezeigt">Plot-Name
+                            <label class="advanced" data-help="Name des Diagramms, wird in der Legende angezeigt">Diagramm-Name
                                 <input type="text" name="n*">
                             </label>
                             <h4 class="advanced" >Raten-Berechnung</h4>
@@ -250,7 +250,7 @@
                             <label data-help="aktiviert die Anzeige von y-Fehlerbalken" class="t-h1 t-p advanced">y-Fehlerbalken
                                 <input type="checkbox" name="o*yerr">
                             </label>
-                            <label data-help="legt fest, ob eine zweite x- oder y-Achse für diesen Plot verwendet werden soll. die x-/y-Werte werden dann unabhängig auf einer eigenen Achse, mit eigener Skalierung oben/rechts dargestellt" class="t-xy t-h1 t-p expert">zweite Achse
+                            <label data-help="legt fest, ob eine zweite x- oder y-Achse für dieses Diagramm verwendet werden soll. die x-/y-Werte werden dann unabhängig auf einer eigenen Achse, mit eigener Skalierung oben/rechts dargestellt" class="t-xy t-h1 t-p expert">zweite Achse
                                 <select name="tw*">
                                     <option value=""></option>
                                     <option value="x">x-Achse</option>
@@ -263,7 +263,7 @@
                             <!--
                             Ein Schnitt ist ein boolscher Ausdruck (siehe Hilfetext). Mehrere Bedingungen können durch and und or miteinander kombiniert werden. Es muss auch nicht auch direkt auf die Inputvariablen geschnitten werden, es kann ein bliebiger Ausdruck eingegeben werden.
                             -->
-                            <label class="advanced" data-help="Hier wird ein boolscher Ausdruck eingegeben. Nur Datentupel, bei denen dieser Ausdruck wahr ist, werden in den Plot aufgenommen. z.B. T_a&gt;20 bedeutet, dass nur Daten, bei denen T_a&gt;20 ist, in den Plot aufgenommen werden. Alle anderen werden weggeschnitten (gefiltert).">
+                            <label class="advanced" data-help="Hier wird ein boolscher Ausdruck eingegeben. Nur Datentupel, bei denen dieser Ausdruck wahr ist, werden in das Diagramm aufgenommen. z.B. T_a&gt;20 bedeutet, dass nur Daten, bei denen T_a&gt;20 ist, in das Diagramm aufgenommen werden. Alle anderen werden weggeschnitten (gefiltert).">
                                 <input type="text" name="c*">
                             </label>
 
@@ -278,7 +278,7 @@
                             <label data-help="Linienfarbe- und Stil für Fitresultat, Beispiel 'r-' = rot, durchgezogen" class="t-xy t-h1 t-p expert">Linienoptionen
                                 <input type="text" name="fl*">
                             </label>
-                            <h4  class="expert" >Plot-Optionen</h4>
+                            <h4  class="expert" >Diagramm-Optionen</h4>
                             <label data-help="Art der Darstellung des 1D-Histograms" class="t-h1 expert">Darstellung 1-dim.
                                 <select name="o*style">
                                     <option value=""></option>
@@ -348,7 +348,7 @@
                             <!-- label data-help="" class="t-xy t-h1 t-h2 t-p t-map expert">Farbtabelle<input type="text" name="o*cmap" /></label -->
 
                             <!-- ACHTUNG, die Größer/Kleiner-Zeichen müssen in HTML als &gt;/&lt; geschrieben werden, da die spitzen Klammern Tag öffnen/schließen! -->
-                            <label data-help="legt die Zeichenreihenfolge fest, kleine Werte (&lt;0) verschieben den Plot nach hinten, große Werte (&gt;0)" class="t-xy t-h1 t-p t-map expert">z-Anordnung
+                            <label data-help="legt die Zeichenreihenfolge fest, kleine Werte (&lt;0) verschieben das Diagramm nach hinten, große Werte (&gt;0)" class="t-xy t-h1 t-p t-map expert">z-Anordnung
                                 <input type="text" name="o*zorder">
                             </label>
 
@@ -393,27 +393,27 @@
                                 <input type="checkbox" name="o*drawcountries">
                             </label>
                         </fieldset>
-                        <button type="button" id="addplot" title="hier klicken, um einen weiteren, unabhängigen Plot hinzuzufügen"><img src="img/add.png"> Plot hinzufügen
+                        <button type="button" id="addplot" title="hier klicken, um einen weiteres, unabhängiges Diagramm hinzuzufügen"><img src="img/add.png"> Diagramm hinzufügen
                         </button>
                     </div>
                     <div class="buttons">
                         <input type="hidden" name="a" value="plot">
-                        <button type="reset" title="hier klicken, um alle Ploteinstellungen zurückzusetzen"><img src="img/arrow_undo.png"> Reset
+                        <button type="reset" title="hier klicken, um alle Diagrammeinstellungen zurückzusetzen"><img src="img/arrow_undo.png"> Reset
                         </button>
-                        <button type="submit"><img src="img/chart_line.png"> Plot erstellen
+                        <button type="submit"><img src="img/chart_line.png"> Diagramm erstellen
                         </button>
                     </div>
                 </form>
             </div>
             <div id="output">
-                <h2>Plot</h2>
+                <h2>Diagramm</h2>
                 <div id="result">
-                    Bitte unter <a href="#settings">Einstellungen</a> einen Plot konfigurieren und auf "Plot erstellen" klicken.
+                    Bitte unter <a href="#settings">Einstellungen</a> ein Diagramm konfigurieren und auf "Diagramm erstellen" klicken.
                 </div>
                 <div id="error"></div>
             </div>
             <div id="saved">
-                <h2>gespeicherte Plots</h2>
+                <h2>gespeicherte Diagramme</h2>
                 <div id="loadsettings">
                     Zum Laden von gespeicherten Settings, die Settings in dieses Feld kopieren und laden.
                     <br>
@@ -423,10 +423,10 @@
                     </button>
                 </div>
                 <div>
-                    Die in der Session gespeicherten Plots werden unter der angegebenen Session-ID auf dem Server gespeichert. Durch Klick auf "neue ID" wird eine neue, zufällige ID erzeugt.
+                    Die in der Session gespeicherten Diagramme werden unter der angegebenen Session-ID auf dem Server gespeichert. Durch Klick auf "neue ID" wird eine neue, zufällige ID erzeugt.
                     Es kann aber auch eine selbst gewählte (mind. 8 Zeichen) Session-ID verwendet werden. Zum Anlegen/Laden einer eigenen Session-ID diese eingeben und die "Session laden".
-                    Existiert diese Session nicht, so ist sie leer und enthält keine gespeicherten Plots. Die Session-ID, unter der man seine Plots speichert, notiert man sich
-                    und kann damit die Plots inklusive ihrer Einstellungen zu einem späteren Zeitpunkt (oder anderen Rechner) wieder laden.
+                    Existiert diese Session nicht, so ist sie leer und enthält keine gespeicherten Diagramme. Die Session-ID, unter der man seine Diagramme speichert, notiert man sich
+                    und kann damit die Diagramme inklusive ihrer Einstellungen zu einem späteren Zeitpunkt (oder anderen Rechner) wieder laden.
                     <br>
                     <label>Session-ID
                         <input type="text" id="sessionid">
@@ -438,7 +438,7 @@
                         Session laden
                     </button>
                 </div>
-                Gespeicherte Plots und ihre Einstellungen können mit einem Klick auf <img src="img/arrow_redo.png"> geladen und auf <img src="img/cross.png"> gelöscht werden.
+                Gespeicherte Diagramme und ihre Einstellungen können mit einem Klick auf <img src="img/arrow_redo.png"> geladen und auf <img src="img/cross.png"> gelöscht werden.
                 Ein Klick auf das Bild, vergrößert es.
                 <br>
                 <div id="savedplots"></div>
