@@ -19,14 +19,15 @@
 
 /* @import url(http://fonts.googleapis.com/css?family=Droid+Sans:400,700); */
 @import url(http://fonts.googleapis.com/css?family=Droid+Sans+Mono);
-@import url(http://fonts.googleapis.com/css?family=Droid+Serif);
+/*@import url(http://fonts.googleapis.com/css?family=Droid+Serif);*/
 
 /* ie {
  display: none;
  }*/
 
 body {
-    font-family: "Droid Serif", serif;
+    /*font-family: "Droid Serif", serif;*/
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 90%;
     margin: 0;
     padding: 0;
@@ -40,7 +41,7 @@ noscript {
 }
 
 header {
-    font-family: "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-weight: bold;
     font-size: 400%;
     color: #007acc;
@@ -72,7 +73,7 @@ footer {
 }
 
 nav {
-    font-family: "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-weight: bold;
     font-size: 120%;
     width: 100%;
@@ -151,7 +152,7 @@ a:hover {
 }
 
 h1, h2, h3, h4, h5, h6 {
-    font-family: "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-weight: bold;
     color: #007acc;
     margin: 0;
@@ -169,7 +170,7 @@ legend {
 }
 
 button {
-    font-family: "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     padding: .2em;
 }
 
@@ -260,7 +261,7 @@ label .help {
 
 #addplot {
     display: inline-block;
-    margin: 20em 0 20em 3em;
+    margin: 10em 0em 0em 3em;
 }
 
 .plot h2 {
@@ -282,7 +283,7 @@ label .help {
 .buttons {
     clear: both;
     text-align: center;
-    padding: 2em 0;
+    padding: 1em 0;
 }
 
 #varsbox {

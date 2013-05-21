@@ -457,8 +457,11 @@ class Plot(object):
         plt.rc('font', **{'family':'sans-serif', 'sans-serif':['Dejavu Sans'], 'size':self.f})
         # plt.rc('axes', grid = True)
         plt.rc('lines', markeredgewidth = 0)
-        w = self._get('w', 10, float)
+        w = self._get('w', 25, float)
         h = self._get('h', w / np.sqrt(2), float)
+        # convert cm to inches
+        w = w / 2.54
+        h = h / 2.54
         plt.gcf().set_size_inches([w, h], forward = True);
 #        f = 0.09
 #        if 'map' in self.m: f = 0.06 # more margin if plotting map
