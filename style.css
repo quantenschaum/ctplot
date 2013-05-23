@@ -17,20 +17,17 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* @import url(http://fonts.googleapis.com/css?family=Droid+Sans:400,700); */
-@import url(http://fonts.googleapis.com/css?family=Droid+Sans+Mono);
-/*@import url(http://fonts.googleapis.com/css?family=Droid+Serif);*/
-
-/* ie {
- display: none;
- }*/
+html {
+    font-size: 100.01%;
+}
 
 body {
     /*font-family: "Droid Serif", serif;*/
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-    font-size: 90%;
+    font-family: Arial, sans-serif;
+    font-size: 77%;
     margin: 0;
     padding: 0;
+    background: url("http://www.desy.de/++resource++desy/images/bg.jpg");
 }
 
 noscript {
@@ -40,62 +37,49 @@ noscript {
     padding: 2em;
 }
 
-header {
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-    font-weight: bold;
-    font-size: 400%;
-    color: #007acc;
-    padding: 0.5em;
-    background: white;
-    position: relative;
-    z-index: 10;
-    text-align: center;
-}
-
-header #logo-desy {
-    float: left;
-    position: relative;
-    top: -8px;
-}
-
-header #logo-tw {
-    float: right;
-    position: relative;
-    top: -11px;
-}
-
 .orange {
-    color: #e89700;
+    color: rgb(232, 151, 0);
 }
 
 footer {
     margin-top: 10em;
+    border-top: 1px solid rgb(105, 105, 105);
+    font-size: 90%;
+    text-align: right;
+    padding: 1em 0;
+    color: rgb(105, 105, 105);
 }
 
 h1, h2, h3, h4, h5, h6 {
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-weight: bold;
-    /*font-stretch: condensed;*/
-    /*text-transform: uppercase;*/
-    color: #007acc;
+    color: rgb(0, 122, 204);
     margin: 0;
     padding: 1.3em 0 .2em 0;
 }
 
+h2 {
+    font-size: 1.5em;
+}
+
 legend {
     font-weight: bold;
-    color: #007acc;
+    color: rgb(0, 122, 204);
+}
+
+header {
+    width: 1000px;
+    margin: 0 auto;
+    padding: 20px 0;
+    background: white;
 }
 
 nav {
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-weight: bold;
-    font-size: 120%;
-    width: 100%;
-    box-shadow: 0 0 12px 6px rgba(0, 0, 0, 0.5);
-    background: #007acc;
+    font-size: 1.5em;
+    width: 1000px;
+    margin: 0 -20px;
+    background: rgb(0, 122, 204);
     color: white;
-    width: 100%;
     position: relative;
     z-index: 5;
 }
@@ -103,7 +87,7 @@ nav {
 nav.fixed {
     position: fixed;
     top: 0;
-    left: 0;
+    /*     left: 0;*/
 }
 
 nav a {
@@ -112,7 +96,7 @@ nav a {
 }
 
 nav a:hover {
-    color: #e89700;
+    color: rgb(232, 151, 0);
     text-decoration: none;
 }
 
@@ -124,21 +108,27 @@ nav ul {
 nav ul li {
     display: inline-block;
     margin: 0;
-    padding: .3em 0 .3em .8em;
+    padding: .4em 3em ;
     color: #fff;
+    border-right: 2px solid white;
+}
+
+nav ul li:last-child {
+     border: none;
 }
 
 
 
 #content {
-    padding: 0 1em;
-    background: #fdfdfd;
-    box-shadow: 0 0 48px rgba(0, 0, 0, 0.15) inset;
+    width: 960px;
+    margin: 0 auto;
+    padding: 0 20px;
+    background: white;
 }
 
 a {
     text-decoration: none;
-    color: #007acc;
+    color: rgb(0, 122, 204);
 }
 
 a:hover {
@@ -169,11 +159,10 @@ a:hover {
 fieldset {
     padding: .5em;
     margin: .25em;
-    border: 1px solid #aaa
+    border: 1px dotted rgb(105, 105, 105)
 }
 
 button {
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     padding: .2em;
 }
 
@@ -182,8 +171,8 @@ button img {
 }
 
 input[type="text"], select, textarea {
-    font-family: "Droid Sans Mono", monospace;
-    font-size: 90%;
+    font-family: monospace;
+    font-size: 115%;
     border: 1px solid #aaa;
     background: white;
     height: 1.7em;
@@ -197,6 +186,11 @@ input[type="text"], select, textarea {
     box-sizing: border-box;
 }
 
+#vars {
+    font-family: monospace;
+    font-size: 115%;
+}
+
 textarea {
     height: 6em;
     width: 40em;
@@ -207,28 +201,33 @@ select {
     padding: 0;
 }
 
+label {
+    margin: .2em 0 0 0;
+    padding: .2em;
+}
+
 label:hover {
     background: #ffa;
 }
 
 /*label.required:before {
-    content: "\2666\2009";
-}
+ content: "\2666\2009";
+ }
 
-label.expert:before {
-   content: "\2663\2009";
-}
+ label.expert:before {
+ content: "\2663\2009";
+ }
 
-label.advanced:before {
-    content: "\2660\2009";
-}*/
+ label.advanced:before {
+ content: "\2660\2009";
+ }*/
 
 .symbol {
     color: gray;
 }
 
 input[type="text"]:focus, select:focus {
-    border: 1px solid #007acc;
+    border: 1px solid rgb(0, 122, 204);
 }
 
 label .help {
@@ -237,14 +236,12 @@ label .help {
 }
 
 .global {
-    max-width: 60em;
+    max-width: 94.1%;
     vertical-align: top;
 }
 
 .global label {
     display: inline-block;
-    padding: .2em;
-    margin: 0;
     width: 32.5%;
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
@@ -275,15 +272,8 @@ label .help {
     margin: 10em 0em 0em 3em;
 }
 
-.plot h2 {
-    font-size: 100%;
-    margin: 0;
-    padding: .5em 0 0 .2em;
-}
-
 .plot label {
     display: block;
-    padding: .2em;
 }
 
 .plot label input, .plot label select {
@@ -308,11 +298,6 @@ label .help {
     border-top: 1px solid #aaa;
     box-shadow: 0 0 6px 3px rgba(0, 0, 0, 0.2);
     z-index: 5;
-}
-
-#vars {
-    font-family: "Droid Sans Mono", monospace;
-    font-size: 90%;
 }
 
 #result {
@@ -360,8 +345,18 @@ label .help {
     right: 22px;
 }
 
-@media all and (max-width: 30em) {
-    .global label, .plot {
+@media all and (max-width: 1000px) {
+    #content {
+        width: 100%;
+        padding: 0 10px;
+    }
+}
+
+@media all and (max-width: 600px) {
+    fieldset.global, fieldset.plot {
+        width: 90%;
+    }
+    .global label {
         width: 100%;
     }
 }

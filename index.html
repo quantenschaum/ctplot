@@ -60,23 +60,23 @@
                 href="http://www.mozilla.com/firefox/">Firefox</a>).
             </p>
         </noscript>
-        <!--header>
-            <a href="https://physik-begreifen-zeuthen.desy.de/"><img title="DESY, Physik begreifen." id="logo-desy" src="img/logo-desy.png" /></a> DATENANALYSE<span class="orange">.</span><a href="http://www.teilchenwelt.de/"><img title="Netzwerk Teilchenwelt" id="logo-tw" src="img/logo-tw2.png" /></a>
-        </header-->
-        <nav>
-            <ul>
-                <li>
-                    <a href="#settings">Einstellungen</a>
-                </li>
-                <li>
-                    <a href="#output">Diagramm</a>
-                </li>
-                <li>
-                    <a href="#saved">gespeicherte Diagramme</a>
-                </li>
-            </ul>
-        </nav>
+        <header>
+            <img src="img/cosmiclab.png" alt="COSMICLAB" />
+        </header>
         <div id="content">
+            <nav>
+                <ul>
+                    <li>
+                        <a href="#settings">Einstellungen</a>
+                    </li>
+                    <li>
+                        <a href="#output">Diagramm</a>
+                    </li>
+                    <li>
+                        <a href="#saved">gespeicherte Diagramme</a>
+                    </li>
+                </ul>
+            </nav>
             <div id="settings">
                 <h2>Diagramm-Einstellungen</h2>
                 <form>
@@ -263,8 +263,7 @@
                             <!--
                             Ein Schnitt ist ein boolscher Ausdruck (siehe Hilfetext). Mehrere Bedingungen können durch and und or miteinander kombiniert werden. Es muss auch nicht auch direkt auf die Inputvariablen geschnitten werden, es kann ein bliebiger Ausdruck eingegeben werden.
                             -->
-                            <label class="advanced" data-help="Hier wird ein boolscher Ausdruck eingegeben. Nur Datentupel, bei denen dieser Ausdruck wahr ist, werden in das Diagramm aufgenommen. z.B. T_a&gt;20 bedeutet, dass nur Daten, bei denen T_a&gt;20 ist, in das Diagramm aufgenommen werden. Alle anderen werden weggeschnitten (gefiltert).">
-                                Filterausdruck
+                            <label class="advanced" data-help="Hier wird ein boolscher Ausdruck eingegeben. Nur Datentupel, bei denen dieser Ausdruck wahr ist, werden in das Diagramm aufgenommen. z.B. T_a&gt;20 bedeutet, dass nur Daten, bei denen T_a&gt;20 ist, in das Diagramm aufgenommen werden. Alle anderen werden weggeschnitten (gefiltert)."> Filterausdruck
                                 <input type="text" name="c*">
                             </label>
 
@@ -449,9 +448,9 @@
                 <br>
                 <div id="savedplots"></div>
             </div>
+            <footer>
+                &copy; 2010, Deutsches Elektronen-Synchrotron
+            </footer>
         </div>
-        <footer>
-            Cosmic Trigger, Zeuthen, 2012
-        </footer>
     </body>
 </html>
