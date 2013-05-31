@@ -533,12 +533,7 @@ function initSubmit() {
             data : query,
             success : function(data) {
                 result.empty();
-                var img;
-                // if (Modernizr.svg) {
-                    // img = data.svg;
-                // } else {
-                    img = data.png;
-                // }
+                var img = data.png;
                 $('<img>').attr('src', img + '?' + new Date().getTime())
                 // add query string to prevent browser
                 // from showing cached image
