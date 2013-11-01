@@ -23,8 +23,8 @@ html {
 
 body {
     /*font-family: "Droid Serif", serif;*/
-    font-family: Arial, sans-serif;
-    font-size: 77%;
+    font-family: Arial,Helvetica,sans-serif;
+    font-size: 12px;
     margin: 0;
     padding: 0;
     background: url("http://www.desy.de/++resource++desy/images/bg.jpg");
@@ -57,9 +57,21 @@ h1, h2, h3, h4, h5, h6 {
     padding: 1.3em 0 .2em 0;
 }
 
-h2 {
-    font-size: 1.5em;
+h1 {
+    font-size: 18px;
+    font-weight: normal;
 }
+
+h2 {
+    font-size: 14.4px;
+    font-weight: normal;
+}
+
+h3 {
+    font-size: 12px;
+    font-weight: bold;
+}
+
 
 legend {
     font-weight: bold;
@@ -108,16 +120,17 @@ nav ul {
 nav ul li {
     display: inline-block;
     margin: 0;
-    padding: .4em 3em ;
+    padding: .4em 0;
     color: #fff;
     border-right: 2px solid white;
+    width: 32%;
+    text-align: center;
+    text-transform: uppercase;
 }
 
 nav ul li:last-child {
-     border: none;
+    border: none;
 }
-
-
 
 #content {
     width: 960px;
@@ -172,11 +185,11 @@ button img {
 
 input[type="text"], select, textarea {
     font-family: monospace;
-    font-size: 115%;
+    font-size: 100%;
     border: 1px solid #aaa;
     background: white;
     height: 1.7em;
-    padding: 0 .4em;
+    padding: 0 0.4em;
     vertical-align: middle;
     -webkit-box-shadow: inset 0.75em 0.75em 0.75em -0.75em #ccc;
     -moz-box-shadow: inset 0.75em 0.75em 0.75em -0.75em #ccc;
@@ -188,7 +201,7 @@ input[type="text"], select, textarea {
 
 #vars {
     font-family: monospace;
-    font-size: 115%;
+    font-size: 100%;
 }
 
 textarea {
@@ -243,10 +256,13 @@ label .help {
 .global label {
     display: inline-block;
     width: 32.5%;
+    box-sizing: border-box;
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
-    box-sizing: border-box;
-    width: 32.5%;
+}
+
+.global2 label {
+    width: 24.5%;
 }
 
 .global label input, .global label select {

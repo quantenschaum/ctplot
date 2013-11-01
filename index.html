@@ -56,7 +56,7 @@
             <p>
                 Diese Seite erfordert jedoch JavaScript. Aktivieren Sie JavaScript
                 oder verwenden Sie einen aktuellen Browser (z.B. <a
-                href="http://www.mozilla.com/firefox/">Firefox</a>).
+                href="http://www.google.com/chrome" target="_blank">Chrome</a>).
             </p>
         </noscript>
         <header>
@@ -77,7 +77,7 @@
                 </ul>
             </nav>
             <div id="settings">
-                <h2>Diagramm-Einstellungen</h2>
+                <h1>Diagramm-Einstellungen</h2>
                 <form>
                     <fieldset class="global">
                         <legend>
@@ -92,108 +92,17 @@
                                 <option value="advanced">fortgeschritten</option>
                                 <option value="expert">Experte</option>
                             </select> </label>
-                        <br />
                         <label data-help="Titel des Diagramms, wird über dem Diagramm als Überschrift angezeigt">Diagramm-Titel
                             <input type="text" name="t">
                         </label>
+                        <br />
 
-                        <!-- UMSTELLEN VON INCH AUF CM !!!!!!!!!!!------------------->
                         <label  class="advanced" data-help="Breite des Diagramms in cm (ungefähr, default=25)">Breite
                             <input type="text" name="w">
                         </label>
                         <label  class="advanced" data-help="Höhe des Diagramms in cm (ungefähr)">Höhe
                             <input type="text" name="h">
                         </label>
-                        <!-- label data-help="Schriftgröße in ???">Schriftgröße<input type="text" name="f" /></label -->
-
-                        <!-- X -->
-                        <label class="advanced" data-help="Anzeigebereich der x-Achse, anzugeben in der Form 'von, bis', Beispiel: '-12.3, 102.8' (ohne ')">x-Wertebereich
-                            <input type="text" name="xr">
-                        </label>
-                        <label class="advanced" data-help="Skalierung der x-Achse">x-Skalierung
-                            <select name="xs">
-                                <option value=""></option>
-                                <option value="linear">linear</option>
-                                <option value="log">logarithmisch</option>
-                                <option value="symlog">symmetrisch-logarithmisch</option>
-                            </select> </label>
-                        <label  class="advanced" data-help="Beschriftung der x-Achse">x-Bezeichnung
-                            <input type="text" name="xl">
-                        </label>
-
-                        <!-- X2 -->
-                        <label data-help="Anzeigebereich der x2-Achse, anzugeben in der Form 'von, bis', Beispiel: '-12.3, 102.8' (ohne ')" class="twinx expert">x2-Wertebereich
-                            <input type="text" name="xrtw">
-                        </label>
-                        <label data-help="Skalierung der x2-Achse" class="twinx expert">x2-Skalierung
-                            <select name="xstw">
-                                <option value=""></option>
-                                <option value="linear">linear</option>
-                                <option value="log">logarithmisch</option>
-                                <option value="symlog">symmetrisch-logarithmisch</option>
-                            </select> </label>
-                        <label data-help="Beschriftung der x2-Achse" class="twinx expert">x2-Bezeichnug
-                            <input type="text" name="xltw">
-                        </label>
-
-                        <!-- Y -->
-                        <label class="advanced" data-help="Anzeigebereich der y-Achse, anzugeben in der Form 'von, bis', Beispiel: '-12.3, 102.8' (ohne ')">y-Wertebereich
-                            <input type="text" name="yr">
-                        </label>
-                        <label class="advanced" data-help="Skalierung der y-Achse">y-Skalierung
-                            <select name="ys">
-                                <option value=""></option>
-                                <option value="linear">linear</option>
-                                <option value="log">logarithmisch</option>
-                                <option value="symlog">symmetrisch-logarithmisch</option>
-                            </select> </label>
-                        <label class="advanced" data-help="Beschriftung der y-Achse">y-Bezeichnung
-                            <input type="text" name="yl">
-                        </label>
-
-                        <!-- Y2 -->
-                        <label data-help="Anzeigebereich der y2-Achse, anzugeben in der Form 'von, bis', Beipsiel: '-12.3, 102.8' (ohne ')" class="twiny expert">y2-Wertebereich
-                            <input type="text" name="yrtw">
-                        </label>
-                        <label data-help="Skalierung der y2-Achse" class="twiny expert">y2-Skalierung
-                            <select name="ystw">
-                                <option value=""></option>
-                                <option value="linear">linear</option>
-                                <option value="log">logarithmisch</option>
-                                <option value="symlog">symmetrisch-logarithmisch</option>
-                            </select> </label>
-                        <label data-help="Beschriftung der y2-Achse" class="twiny expert">y2-Bezeichnung
-                            <input type="text" name="yltw">
-                        </label>
-
-                        <!-- Z -->
-                        <label class="advanced" data-help="Anzeigebereich der z-Achse, anzugeben in der Form 'von, bis', Beispiel: '-12.3, 102.8' (ohne ')">z-Wertebereich
-                            <input type="text" name="zr">
-                        </label>
-                        <label class="advanced" data-help="Skalierung der z-Achse (Farb-Achse)">z-Skalierung
-                            <select name="zs">
-                                <option value=""></option>
-                                <option value="linear">linear</option>
-                                <option value="log">logarithmisch</option>
-                                <option value="symlog">symmetrisch-logarithmisch</option>
-                            </select> </label>
-                        <label class="advanced" data-help="Beschriftung der z-Achse (Farbe)">z-Bezeichnung
-                            <input type="text" name="zl">
-                        </label>
-                        <label data-help="legt fest, ob und wo die Legende angezeigt wird. Bei nur einem Diagramm wird keine Legende angezeigt.">Legendenposition
-                            <select name="l">
-                                <option value="">automatisch</option>
-                                <option value="none">keine Legende</option>
-                                <option value="upper left">oben links</option>
-                                <option value="upper center">oben mitte</option>
-                                <option value="upper right">oben rechts</option>
-                                <option value="center left">mitte links</option>
-                                <option value="center">mitte</option>
-                                <option value="center right">mitte rechts</option>
-                                <option value="lower left">unten links</option>
-                                <option value="lower center">unten mitte</option>
-                                <option value="lower right">unten rechts</option>
-                            </select> </label>
                     </fieldset>
                     <div id="plots">
                         <div id="varsbox">
@@ -215,7 +124,7 @@
                             <label class="advanced" data-help="Name des Diagramms, wird in der Legende angezeigt">Diagramm-Name
                                 <input type="text" name="n*">
                             </label>
-                            <h4 class="advanced" >Raten-Berechnung</h4>
+                            <h2 class="advanced" >Raten-Berechnung</h4>
                             <!--
                             * TEXT KLARER
                             * Die Ratenberechnung sollte VOR den Achsen und Variablen erscheinen, da zuerst eine Rate berechnet werden muss, welche anschließend in Achsen und Variablen verwendet werden kann.
@@ -230,7 +139,7 @@
                             <label class="advanced" data-help="Ausdruck (Formel), der innerhalb des Zeitfensters gemittelt wird, die Rate ist mittleres Gewicht * Anzahl Events / Zeitfenster, dies erlaubt die Bestimmung der Rate von Event eines bestimmten Typs (z.B. Events mit genau 3 getriggerten Segmenten) oder die Ermittlung von mittleren Größen (z.B. mittlere Multiplizität)">Gewicht
                                 <input type="text" name="rc*">
                             </label>
-                            <h4>Achsen und Variablen</h4>
+                            <h2>Achsen und Variablen</h4>
                             <label class="required" data-help="Wert, der auf der x-Achse dargestellt werden soll. Hier kann ein Variablenname eingegeben werden (z.B. time) oder eine Formel, die Variablen umrechnet oder miteinander verknüpft (z.B. T_a-T_i oder log(p))"> x-Variable
                                 <input type="text" name="x*">
                             </label>
@@ -258,7 +167,7 @@
                             <label data-help="Wert, der auf der z-Achse dargestellt werden soll, analog zu x, die Werte werden als Farbe der Datenpunkte dargestellt" class="t-xy t-map">z-Variable
                                 <input type="text" name="z*">
                             </label>
-                            <h4 class="advanced" >Daten-Filter (Schnitt)</h4>
+                            <h2 class="advanced" >Daten-Filter (Schnitt)</h4>
                             <!--
                             Ein Schnitt ist ein boolscher Ausdruck (siehe Hilfetext). Mehrere Bedingungen können durch and und or miteinander kombiniert werden. Es muss auch nicht auch direkt auf die Inputvariablen geschnitten werden, es kann ein bliebiger Ausdruck eingegeben werden.
                             -->
@@ -267,7 +176,7 @@
                             </label>
 
                             <!-- fit options -->
-                            <h4 class="t-xy t-h1 t-p advanced">Fit-Optionen</h4>
+                            <h2 class="t-xy t-h1 t-p advanced">Fit-Optionen</h4>
                             <label data-help="Fitfuntion, unabhängige Variable ist x, Parameter sind p[0], p[1], ... Beispiel: p[0]+p[1]*x" class="t-xy t-h1 t-p advanced">Fit-Funktion
                                 <input type="text" name="ff*">
                             </label>
@@ -277,7 +186,7 @@
                             <label data-help="Linienfarbe- und Stil für Fitresultat, Beispiel 'r-' = rot, durchgezogen" class="t-xy t-h1 t-p expert">Linienoptionen
                                 <input type="text" name="fl*">
                             </label>
-                            <h4  class="expert" >Diagramm-Optionen</h4>
+                            <h2  class="expert" >Diagramm-Optionen</h4>
                             <label data-help="Art der Darstellung des 1D-Histograms" class="t-h1 expert">Darstellung 1-dim.
                                 <select name="o*style">
                                     <option value=""></option>
@@ -360,7 +269,7 @@
                             <label data-help="" class="t-h1 t-p">Endkappengröße<input type="text" name="o*capsize" /></label>
                             -->
 
-                            <h4 class="t-map expert">Karten-Optionen</h4>
+                            <h2 class="t-map expert">Karten-Optionen</h4>
                             <label data-help="wählt die Kartenprjektion aus" class="t-map expert">Projektion
                                 <select name="o*projection">
                                     <option value=""></option>
@@ -395,6 +304,125 @@
                         <button type="button" id="addplot" title="hier klicken, um einen weiteres, unabhängiges Diagramm hinzuzufügen"><img src="img/add.png"> Diagramm hinzufügen
                         </button>
                     </div>
+
+                    <fieldset class="global global2">
+                        <legend>
+                            Achsen-Einstellungen
+                        </legend>
+
+                        <!-- X -->
+                        <label  class="advanced" data-help="Beschriftung der x-Achse">x-Bezeichnung
+                            <input type="text" name="xl">
+                        </label>
+                        <label class="advanced" data-help="Anzeigebereich der x-Achse, Minimum">x-Min
+                            <input type="text" name="xr-min">
+                        </label>
+                        <label class="advanced" data-help="Anzeigebereich der x-Achse, Maximum">x-Max
+                            <input type="text" name="xr-max">
+                        </label>
+                        <input type="hidden" name="xr">
+                        <label class="advanced" data-help="Skalierung der x-Achse">x-Skalierung
+                            <select name="xs">
+                                <option value=""></option>
+                                <option value="linear">linear</option>
+                                <option value="log">logarithmisch</option>
+                                <option value="symlog">symmetrisch-logarithmisch</option>
+                            </select> </label>
+
+                        <!-- X2 -->
+                        <label data-help="Beschriftung der x2-Achse" class="twinx expert">x2-Bezeichnug
+                            <input type="text" name="xltw">
+                        </label>
+                        <label data-help="Anzeigebereich der x2-Achse, Minimum" class="twinx expert">x2-Min
+                            <input type="text" name="xrtw-min">
+                        </label>
+                        <label data-help="Anzeigebereich der x2-Achse, Maximum" class="twinx expert">x2-Max
+                            <input type="text" name="xrtw-max">
+                        </label>
+                        <input type="hidden" name="xrtw">
+                        <label data-help="Skalierung der x2-Achse" class="twinx expert">x2-Skalierung
+                            <select name="xstw">
+                                <option value=""></option>
+                                <option value="linear">linear</option>
+                                <option value="log">logarithmisch</option>
+                                <option value="symlog">symmetrisch-logarithmisch</option>
+                            </select> </label>
+
+
+                        <!-- y -->
+                        <label  class="advanced" data-help="Beschriftung der y-Achse">y-Bezeichnung
+                            <input type="text" name="yl">
+                        </label>
+                        <label class="advanced" data-help="Anzeigebereich der y-Achse, Minimum">y-Min
+                            <input type="text" name="yr-min">
+                        </label>
+                        <label class="advanced" data-help="Anzeigebereich der y-Achse, Maximum">y-Max
+                            <input type="text" name="yr-max">
+                        </label>
+                        <input type="hidden" name="yr">
+                        <label class="advanced" data-help="Skalierung der y-Achse">y-Skalierung
+                            <select name="ys">
+                                <option value=""></option>
+                                <option value="linear">linear</option>
+                                <option value="log">logarithmisch</option>
+                                <option value="symlog">symmetrisch-logarithmisch</option>
+                            </select> </label>
+
+                        <!-- y2 -->
+                        <label data-help="Beschriftung der y2-Achse" class="twiny expert">y2-Bezeichnug
+                            <input type="text" name="yltw">
+                        </label>
+                        <label data-help="Anzeigebereich der y2-Achse, Minimum" class="twiny expert">y2-Min
+                            <input type="text" name="yrtw-min">
+                        </label>
+                        <label data-help="Anzeigebereich der y2-Achse, Maximum" class="twiny expert">y2-Max
+                            <input type="text" name="yrtw-max">
+                        </label>
+                        <input type="hidden" name="yrtw">
+                        <label data-help="Skalierung der y2-Achse" class="twiny expert">y2-Skalierung
+                            <select name="ystw">
+                                <option value=""></option>
+                                <option value="linear">linear</option>
+                                <option value="log">logarithmisch</option>
+                                <option value="symlog">symmetrisch-logarithmisch</option>
+                            </select> </label>
+
+
+
+                        <!-- Z -->
+                        <label class="advanced" data-help="Beschriftung der z-Achse (Farbe)">z-Bezeichnung
+                            <input type="text" name="zl">
+                        </label>
+                        <label class="advanced" data-help="Anzeigebereich der z-Achse, Minimum">z-Wertebereich
+                            <input type="text" name="zr-min">
+                        </label>
+                        <label class="advanced" data-help="Anzeigebereich der z-Achse, Maximum">z-Wertebereich
+                            <input type="text" name="zr-max">
+                        </label>
+                        <input type="hidden" name="zr">
+                        <label class="advanced" data-help="Skalierung der z-Achse (Farb-Achse)">z-Skalierung
+                            <select name="zs">
+                                <option value=""></option>
+                                <option value="linear">linear</option>
+                                <option value="log">logarithmisch</option>
+                                <option value="symlog">symmetrisch-logarithmisch</option>
+                            </select> </label>
+                        <label data-help="legt fest, ob und wo die Legende angezeigt wird. Bei nur einem Diagramm wird keine Legende angezeigt.">Legendenposition
+                            <select name="l">
+                                <option value="">automatisch</option>
+                                <option value="none">keine Legende</option>
+                                <option value="upper left">oben links</option>
+                                <option value="upper center">oben mitte</option>
+                                <option value="upper right">oben rechts</option>
+                                <option value="center left">mitte links</option>
+                                <option value="center">mitte</option>
+                                <option value="center right">mitte rechts</option>
+                                <option value="lower left">unten links</option>
+                                <option value="lower center">unten mitte</option>
+                                <option value="lower right">unten rechts</option>
+                            </select> </label>
+                    </fieldset>
+
                     <div id="symbollegend">
                         <span><span class="symbol">&diams;</span> Pflichtfeld</span>
                         <span class="advanced">, <span class="symbol">&dagger;</span> Forgeschrittenenfeld</span>
@@ -410,14 +438,14 @@
                 </form>
             </div>
             <div id="output">
-                <h2>Diagramm</h2>
+                <h1>Diagramm</h2>
                 <div id="result">
                     Bitte unter <a href="#settings">Einstellungen</a> ein Diagramm konfigurieren und auf "Diagramm erstellen" klicken.
                 </div>
                 <div id="error"></div>
             </div>
             <div id="saved">
-                <h2>gespeicherte Diagramme</h2>
+                <h1>gespeicherte Diagramme</h2>
                 <div id="loadsettings">
                     Zum Laden von gespeicherten Settings, die Settings in dieses Feld kopieren und laden.
                     <br>

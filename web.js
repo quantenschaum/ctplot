@@ -109,10 +109,20 @@ function renumberPlots() {
         });
         // plot.find('.delplot').prop('disabled', ch.length <= 1);
     });
+
+    // hide/show add plot button
     if (ch.length >= 4)
         $('#addplot').hide();
     else
         $('#addplot').show();
+
+    // hide/show twin axis dropdownbox
+    if (ch.length < 2)
+        $('.plot :input[name^="tw"]').parent('label').addClass('hidden');
+    else
+        $('.plot :input[name^="tw"]').parent('label').removeClass('hidden');
+
+    updateHiddenFields();
 }
 
 function hide(s) {
@@ -142,8 +152,8 @@ function updateHiddenFields() {
     }
     console.debug('tohide=' + tohide);
 
-    visible = $('.expert,.advanced');
-    hidden = $(tohide);
+    visible = $('.expert,.advanced,.hidden');
+    hidden = $(tohide+',.hidden');
 
     // twin axes global fields
     $.each(['x', 'y'], function(i, v) {
@@ -337,6 +347,7 @@ function addPlot() {
         newplot = templatePlot.clone()
     else
         newplot = $('.plot:first').clone();
+    newplot.find('*').removeAttr('style');
     newplot.appendTo('#plots');
     $('#addplot').appendTo('#plots');
     renumberPlots();
@@ -487,7 +498,7 @@ function addPlotToSaved(settings) {
     $('<div>').appendTo('#savedplots').append($('<img src="' + settings.url + '" href="' + settings.url + '" title="' + settings.t + '">').addClass('savedplot').data('settings', settings))
     // add delete button
     .append($('<img>').attr('src', 'img/cross.png').attr('title', 'Plot löschen').addClass('delete').click(function() {
-        $(this).parents('.savedplot').remove();
+        $(this).parent().remove();
         bindColorbox();
         savePlots();
     }))
@@ -502,6 +513,26 @@ function addPlotToSaved(settings) {
 
 var xhr;
 
+function transformMinMaxFields() {
+    $('.global input[name$="-min"]').each(function(){
+        input = $(this);
+        target = input.attr('name').match(/(.+)-(.+)/)[1];
+//        console.debug(input.attr('name')+' = '+input.val() + '   ' + target + ' = ' + input.val());
+        target = $(':input[name="'+target+'"]');
+        target.val(input.val());
+    });
+    $('.global input[name$="-max"]').each(function(){
+        input = $(this);
+        target = input.attr('name').match(/(.+)-(.+)/)[1];
+//        console.debug(input.attr('name')+' = '+input.val() + '   ' + target + ' = ' + input.val());
+        target = $(':input[name="'+target+'"]');
+        target.val(target.val()+', '+input.val());
+        if(target.val().match(/^\s*,\s*$/))
+            target.val('');
+        console.debug(target.attr('name')+' = '+target.val());
+    });
+}
+
 function initSubmit() {
     // hand submission of plot request and reception of the plot
     $('form').submit(function() {
@@ -512,6 +543,9 @@ function initSubmit() {
         }
 
         // the form (all input fields) as url query string
+
+        transformMinMaxFields();
+
         query = $('form').serialize();
         settings = getSettings();
         $.cookie('lastsettings', JSON.stringify(settings));
@@ -602,6 +636,7 @@ function initSymbols() {
 $(function() {
     initScroll();
     initHelp('fieldset.global');
+    initHelp('fieldset.global2');
     initExpertMode();
     initPlots();
     initSubmit();
