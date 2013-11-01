@@ -642,5 +642,5 @@ $(function() {
     initSubmit();
     initSettingsLoader();
     initSavedPlots();
-    initSymbols();
+//    initSymbols();
 });
