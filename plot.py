@@ -23,6 +23,7 @@ from collections import OrderedDict, namedtuple
 from itertools import chain
 import numpy as np
 import numpy.ma as ma
+from scipy.optimize import curve_fit
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from utils import get_args_from, isseq, set_defaults, number_mathformat, number_format, hashargs, noop
