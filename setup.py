@@ -18,7 +18,7 @@ from setuptools import setup, find_packages
 #   http://peak.telecommunity.com/DevCenter/PythonEggs#accessing-package-resources
 from pkg_resources import resource_string, resource_filename, require
 
-required_libs = ['matplotlib >=1.1', 'numpy >=0.9', 'scipy >=0.12', 'pytz', 'tables >=2.2', 'numexpr >=1.4', 'pil >=1.1', 'basemap >=1.0']
+required_libs = ['matplotlib >=1.1', 'numpy >=0.9', 'scipy >=0.12', 'pytz', 'tables >=2.2', 'numexpr >=1.4', 'python-dateutil >=1.5', 'pil >=1.1', 'basemap >=1.0']
 
 def libinfo():
     print 'installed libraries\n============================='
@@ -29,27 +29,8 @@ def libinfo():
         except:
             print l, 'not found'
 
-    try:
-        import dateutil
-        print 'dateutil', dateutil.__version__
-    except:
-        print 'dateutil', 'not found'
 
 libinfo()
-
-
-try:
-    import dateutil
-except:
-    print """========================================================================
-              !!! dateutil is not installed !!!
-To install dateutil, follow the instructions at 
-     http://labix.org/python-dateutil
-This has to be done manually, because dateutil is not on the PyPI.
-========================================================================
-"""
-    raise
-
 
 
 def readme(name):
