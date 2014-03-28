@@ -13,8 +13,12 @@
 #    GNU General Public License for more details.
 #
 #    You should have received a copy of the GNU General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>. 
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+
+# This is a TickLocator implementation for matplotlib according to
+# the extended Wilkinson’s Algorithm, see http://vis.stanford.edu/papers/tick-labels
+
 from matplotlib.ticker import Locator
 from matplotlib.axis import XAxis
 from matplotlib import pyplot
@@ -127,11 +131,11 @@ def wilk_ext(dmin, dmax, m, only_inside = 0,
                            ((only_inside <= 0) or ((lmin >= dmin) and (lmax <= dmax))) and \
                            ((only_inside >= 0) or ((lmin <= dmin) and (lmax >= dmax))):
                             best_score = scr
-                            #print "s: %5.2f c: %5.2f d: %5.2f l: %5.2f" % (s,c,d,l)
+                            # print "s: %5.2f c: %5.2f d: %5.2f l: %5.2f" % (s,c,d,l)
                             result = (lmin, lmax, lstep, j, q, k, scr)
 
                     z += 1
-                # end of z-while-loop    
+                # end of z-while-loop
                 k += 1
             # end of k-while-loop
         j += 1
