@@ -52,7 +52,6 @@ def update_version():
         pass
 
 update_version()
-exit()
 
 import ctplot
 
