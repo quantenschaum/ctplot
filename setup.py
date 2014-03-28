@@ -8,6 +8,7 @@ from ez_setup import use_setuptools
 use_setuptools()
 
 import os
+from datetime import datetime
 from subprocess import check_output
 from setuptools import setup, find_packages
 from pkg_resources import resource_string, resource_filename
@@ -42,13 +43,16 @@ def update_version():
         cwd = os.path.dirname(__file__)
         version = check_output('git describe --dirty=*', shell = True, cwd = cwd).strip()[1:]
         version_py = 'ctplot/__version__.py'
+        build_date = '{:%F %T}'.format(datetime.now())
         with open(os.path.join(cwd, version_py), 'w') as f:
             f.write("__version__ = '{}'\n".format(version))
-        print 'updated', version_py, 'to', version
+            f.write("__build_date__ = '{}'\n".format(build_date))
+        print 'updated', version_py, 'to', version, build_date
     except:
         pass
 
 update_version()
+exit()
 
 import ctplot
 

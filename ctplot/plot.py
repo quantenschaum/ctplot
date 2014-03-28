@@ -1,22 +1,6 @@
-#!/bin/env python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#    pyplot - python based data plotting tools
-#    created for DESY Zeuthen
-#    Copyright (C) 2012  Adam Lucke  software@louisenhof2.de
-#
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
-#
-#    You should have received a copy of the GNU General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
+
 import os, sys, re, json, tables, ticks, time, logging
 from tempfile import gettempdir
 from os import path
@@ -1055,23 +1039,21 @@ xr
 xs
 xrtw
 l
-
-
 '''
     exit()
 
 
 def main():
-    import argparse
+    from argparse import ArgumentParser
     import ctplot
 
     def key_value_pair(s):
         k, v = s.split('=', 1)
         return k, v
 
-    parser = argparse.ArgumentParser(description = 'analyse and plot HDF5 table data', epilog = ctplot.__epilog__)
+    parser = ArgumentParser(description = 'analyse and plot HDF5 table data', epilog = ctplot.__epilog__)
     parser.add_argument('-H', '--help-settings', action = 'store_true', help = 'display help for settings')
-    parser.add_argument('-V', '--version', action = 'version', version = '%(prog)s ' + ctplot.__version__)
+    parser.add_argument('-V', '--version', action = 'version', version = '%(prog)s {} build {}'.format(ctplot.__version__, ctplot.__build_date__))
     parser.add_argument('-o', '--output', metavar = 'file', help = 'name of output file, show window if omitted')
     parser.add_argument('-v', '--verbose', action = 'store_true', help = 'set logging level to DEBUG')
     parser.add_argument('-q', '--quiet', action = 'store_true', help = 'set logging level to ERROR')
@@ -1087,11 +1069,11 @@ def main():
                 "yrtw":"", "zl":"", "zr-min":"", "zr-max":"", "zr":"", "zs":"", "l":"lower left", "a":"plot", "plots":1}
 
     ss = ['{}={}'.format(k, v) for k, v in settings.items()]
-#     ss.append('-v')
+    ss.append('-h')
     ss.append('-c..')
 
 
-    args = parser.parse_args(ss)
+    args = parser.parse_args()
 
     if args.help_settings:
         display_settings_help()

@@ -1,22 +1,6 @@
-#!/opt/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#    pyplot - python based data plotting tools
-#    created for DESY Zeuthen
-#    Copyright (C) 2012  Adam Lucke  software@louisenhof2.de
-#
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
-#
-#    You should have received a copy of the GNU General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
+
 import tables as t
 from progressbar import ProgressBar, Bar, ETA, Percentage
 from collections import OrderedDict
@@ -24,8 +8,6 @@ from utils import set_attrs, seconds2datetime
 import dateutil.parser as dp
 import sys, json, os
 
-__version__ = '$Rev$'.replace('$', '').replace('Rev:', '').strip()
-__date__ = '$Date$'.replace('$', '').replace('Date:', '').strip()
 
 def _interpolate(t, w0, w1, idx):
     'interpolate w0 and w1 at t, using tw=w[idx]'
@@ -206,12 +188,12 @@ def merge(primary_file, secondary_file = None, outfile = None, primary_table = N
 
 
 def main():
-    import argparse as ap
+    from argparse import ArgumentParser
+    import ctplot
 
-    parser = ap.ArgumentParser(description = 'merge two tables in a HDF5 file',
-                               epilog = '')
+    parser = ArgumentParser(description = 'merge two tables in a HDF5 file', epilog = ctplot.__epilog__)
 
-    parser.add_argument('--version', action = 'version', version = '%(prog)s {} from {}'.format(__version__, __date__))
+    parser.add_argument('-V', '--version', action = 'version', version = '%(prog)s {} build {}'.format(ctplot.__version__, ctplot.__build_date__))
     parser.add_argument('-m', '--merge', metavar = 'column', default = 'time', help = 'column to merge on (default: time)')
     parser.add_argument('-x', '--maxint', metavar = 'seconds', type = float, default = 4 * 3600, help = 'max. interval length in secondary table (default: 4h)')
     parser.add_argument('-o', '--out', metavar = 'file', help = 'HDF5 output file (default: write to file_1)')
@@ -225,7 +207,6 @@ def main():
 
 
     opts = parser.parse_args()
-    print opts
 
     out = opts.out
     if out:
