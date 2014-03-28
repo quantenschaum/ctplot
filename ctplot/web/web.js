@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /** ajax default settings */
 $.ajaxSetup({
-    url : 'webplot.py',
+    url : 'plot',
     dataType : 'json',
     type : 'post'
 });
@@ -550,7 +550,7 @@ function initSubmit() {
         settings = getSettings();
         $.cookie('lastsettings', JSON.stringify(settings));
 
-        // store current plot settings (all input fields) into
+        // store current plot settings (all input fields) into 
         // settings object
 
         result = $('#result');
@@ -587,7 +587,7 @@ function initSubmit() {
 
                 // plot url
                 result.append('<br>Diesen Plot auf einer Webseite einbinden:<br>');
-                ploturl = $(location).attr('href').replace(/[#?].*/, '') + 'webplot.py?' + query.replace(/a=plot/, 'a=png');
+                ploturl = $(location).attr('href').replace(/[#?].*/, '') + 'plot?' + query.replace(/a=plot/, 'a=png');
                 result.append($('<textarea id="ploturl">').text('<img src="' + ploturl + '" />'));
 
                 // store settings in cookie
