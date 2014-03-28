@@ -30,6 +30,7 @@ import tables as t
 from progressbar import ProgressBar, Bar, Percentage, ETA
 import math
 from utils import set_attrs
+from pkg_resources import resource_stream
 
 __version__ = '$Rev$'.replace('$', '').replace('Rev:', '').strip()
 __date__ = '$Date$'.replace('$', '').replace('Date:', '').strip()
@@ -375,7 +376,7 @@ class ITTEventHandler(LineHandler):
 def stations():
     p = re.compile("(\\d{5})\\s+(\\d{5})\\s+(.+)\\s+(\\d+)\\s+(\\d+)°\\s+(\\d+)'?\\s+(\\d+)°\\s+(\\d+)'?.*")
 
-    f = open(os.path.join(os.path.dirname(__file__), 'stationsliste.txt'))
+    f = resource_stream(__name__, 'stationsliste.txt')
 
     stats = {}
     for line in f:
@@ -878,7 +879,7 @@ def raw_to_h5(filenames, out = "out.h5", handlers = available_handlers,
 
 verbose = 0
 
-if __name__ == '__main__':
+def main():
     import argparse as ap
     formats = ''
     for i, h in enumerate(available_handlers):
@@ -917,3 +918,8 @@ if __name__ == '__main__':
 
 
     raw_to_h5(opts.infiles, out = out, skip_on_assert = not opts.noskip, show_progress = not opts.quiet, t0 = opts.reftime, ignore_errors = opts.keepgoing)
+
+
+if __name__ == '__main__':
+    main()
+

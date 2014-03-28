@@ -76,7 +76,8 @@ def randomChars(n):
     return ''.join(random.choice(_chars) for i in xrange(n))
 
 
-if __name__ == '__main__':
+
+def main():
     fields = cgi.FieldStorage()
     action = fields.getfirst('a')
 
@@ -138,3 +139,5 @@ if __name__ == '__main__':
     else:
         raise ValueError('unknown action {}'.format(action))
 
+if __name__ == '__main__':
+    main()
