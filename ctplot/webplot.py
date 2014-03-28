@@ -1,34 +1,27 @@
-#!/opt/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#    pyplot - python based data plotting tools
-#    created for DESY Zeuthen
-#    Copyright (C) 2012  Adam Lucke  software@louisenhof2.de
-#
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
-#
-#    You should have received a copy of the GNU General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
+
 import matplotlib
-matplotlib.use('Agg')
+matplotlib.use('Agg')  # headless backend
 
 import json, os, cgitb, cgi, sys, subprocess, time, random, string
 from plot import Plot, available_tables
 from utils import hashargs, getCpuLoad, getRunning
 from datetime import datetime
-from config import *
 
 cgitb.enable(context = 1, format = 'html')
 
+# This is our application object. It could have any name,
+# except when using mod_wsgi where it must be "application"
+# see http://webpython.codepoint.net/wsgi_application_interface
+def application(environ, start_response):
+    status = '200 OK'
+    response_headers = [('Content-Type', 'text/plain; charset=utf-8')]
+    start_response(status, response_headers)
 
+    response = []
+    env = ['{}={}\n'.format(k, v).encode('utf-8') for k, v in environ.items()]
+    return response
 
 
 def make_plot(settings):

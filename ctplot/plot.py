@@ -1089,7 +1089,8 @@ def main():
     log.debug(args)
 
 
-    config = {'cachedir':'.', 'usecache':0}
+    config = {'cachedir':'.',
+              'usecache':0}
     if args.cache:
         config['usecache'] = True
         config['cachedir'] = args.cache
