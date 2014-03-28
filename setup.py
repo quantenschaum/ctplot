@@ -16,7 +16,26 @@ from setuptools import setup, find_packages
 
 #   https://pythonhosted.org/setuptools/setuptools.html#non-package-data-files
 #   http://peak.telecommunity.com/DevCenter/PythonEggs#accessing-package-resources
-from pkg_resources import resource_string, resource_filename
+from pkg_resources import resource_string, resource_filename, require
+
+required_libs = ['matplotlib >=1.1', 'numpy >=0.9', 'scipy >=0.12', 'pytz', 'tables >=2.2', 'numexpr >=1.4', 'pil >=1.1', 'basemap >=1.0']
+
+def libinfo():
+    print 'installed libraries\n============================='
+    for l in required_libs:
+        l = l.split()[0]
+        try:
+            print require(l)
+        except:
+            print l, 'not found'
+
+    try:
+        import dateutil
+        print 'dateutil', dateutil.__version__
+    except:
+        print 'dateutil', 'not found'
+
+libinfo()
 
 
 try:
@@ -39,6 +58,7 @@ def readme(name):
        1) we have a top level README file and
        2) it's easier to type in the README file than to put a raw string in below"""
     return resource_string(__name__, name)
+
 
 def update_version():
     try:
@@ -67,7 +87,7 @@ setup(
     url = ctplot.__url__,
     packages = find_packages(),
     long_description = readme('README.md'),
-    install_requires = ['matplotlib >=1.1', 'numpy >=0.9', 'scipy >=0.12', 'pytz', 'tables >=2.2', 'numexpr >=1.4', 'pil >=1.1', 'basemap >=1.0'],
+    install_requires = required_libs,
     entry_points = {'console_scripts':[
                         'rawdata=ctplot.rawdata:main',
                         'mergedata=ctplot.merge:main',
