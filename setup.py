@@ -1,9 +1,11 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # Have a look at https://pythonhosted.org/setuptools
 # http://stackoverflow.com/questions/7522250/how-to-include-package-data-with-setuptools-distribute
 # http://stackoverflow.com/questions/1231688/how-do-i-remove-packages-installed-with-pythons-easy-install
 
+# http://stackoverflow.com/questions/6344076/differences-between-distribute-distutils-setuptools-and-distutils2?answertab=active#tab-top
 from ez_setup import use_setuptools
 use_setuptools()
 
@@ -11,6 +13,9 @@ import os
 from datetime import datetime
 from subprocess import check_output
 from setuptools import setup, find_packages
+
+#   https://pythonhosted.org/setuptools/setuptools.html#non-package-data-files
+#   http://peak.telecommunity.com/DevCenter/PythonEggs#accessing-package-resources
 from pkg_resources import resource_string, resource_filename
 
 
@@ -27,9 +32,6 @@ This has to be done manually, because dateutil is not on the PyPI.
     raise
 
 
-# What is this? See
-#   https://pythonhosted.org/setuptools/setuptools.html#non-package-data-files
-#   http://peak.telecommunity.com/DevCenter/PythonEggs#accessing-package-resources
 
 def readme(name):
     """Utility function to read the README file.
