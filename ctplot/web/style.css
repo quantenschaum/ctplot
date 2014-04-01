@@ -290,7 +290,6 @@ label .help {
 
 .plot label {
     display: block;
-    width: 99%;
 }
 
 .plot label input, .plot label select {

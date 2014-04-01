@@ -43,6 +43,7 @@ var tables_and_vars = null;
 
 /** get available HDF5 from server and return new DOM element */
 function sourcesBox() {
+    console.debug('* sourcesbox');
     var datasetbox, experimentbox;
     $.ajax({
         async : false,
@@ -99,6 +100,7 @@ function sourcesBox() {
 
 /** renumber form field names after add/del of plot */
 function renumberPlots() {
+    console.debug('* renumber plots');
     ch = $('#plots').children('.plot');
     ch.each(function(i) {
         plot = $(this);
@@ -126,6 +128,7 @@ function renumberPlots() {
 }
 
 function hide(s) {
+    console.debug('* hide '+s);
     s = $(s);
     //	console.debug('hide: '+s.html());
     s.hide(speed).find(':input').prop('disabled', true);
@@ -133,6 +136,7 @@ function hide(s) {
 }
 
 function show(s) {
+    console.debug('* show '+s);
     s = $(s);
     //	console.debug('show: '+s.html());
     s.show(speed).find(':input').prop('disabled', false);
@@ -141,6 +145,7 @@ function show(s) {
 
 /** disable/enable fields according to detaillevel and plotmode */
 function updateHiddenFields() {
+    console.debug('* update hidden fields');
     mode = $(':input[name="detaillevel"]').val();
     console.debug('detaillevel=' + mode);
     if (mode == 'expert') {
@@ -202,6 +207,7 @@ function updateHiddenFields() {
 
 /** add interactive handlers */
 function addHandlers(plot) {
+    console.debug('* add handlers');
     // display available vars on certain input fields
     plot.find(':input[name^="x"],:input[name^="y"],:input[name^="z"],:input[name^="c"]').focusin(function() {
         p = $(this).parents('.plot');
@@ -260,6 +266,7 @@ function addHandlers(plot) {
 
 /** Hilfe initialisieren */
 function initHelp(el) {
+    console.debug('* init help');
     $(el).find('label[data-help]').each(function() {
         help = $(this).attr('data-help');
         if (help != '')
@@ -274,6 +281,7 @@ function initHelp(el) {
 }
 
 function getSettings() {
+    console.debug('* get settings');
     s = new Object();
     $('form :input:enabled:not(:button):not(:reset):not(:submit)[name]').each(function() {
         field = $(this);
@@ -290,6 +298,7 @@ function getSettings() {
 }
 
 function setSettings(s) {
+    console.debug('* set settings');
     $('.plot').remove();
     for (var i = 0; i < s.plots; ++i)
         addPlot();
@@ -304,6 +313,7 @@ function setSettings(s) {
 }
 
 function initSettingsLoader() {
+    console.debug('* init settnings loader');
     $(':button[name="load"]').click(function() {
         try {
             s = JSON.parse($(':input[name="settingstoload"]').val());
@@ -317,6 +327,7 @@ function initSettingsLoader() {
 }
 
 function initExpertMode() {
+    console.debug('* init expert mode');
     // add handler to expertmode checkbox
     $('select[name="detaillevel"]').click(updateHiddenFields);
     updateHiddenFields();
@@ -326,6 +337,7 @@ var templatePlot;
 
 
 function initPlots() {
+    console.debug('* init plots');
     // add source dropdown box to plot template, filled with available hdf5 data files
     sourcesBox().prependTo('.plot');
     // detach the plot template (to be added by pressing 'add plot' button)
@@ -347,6 +359,7 @@ function initPlots() {
 }
 
 function addPlot() {
+    console.debug('* add plot');
     if ($('.plot').size() == 0)
         newplot = templatePlot.clone()
     else
@@ -361,6 +374,7 @@ function addPlot() {
 }
 
 function initScroll() {
+    console.debug('* init scroll');
     // let navbar smoothscroll
     $('nav a').smoothScroll({
         offset : -15
@@ -398,6 +412,7 @@ function initScroll() {
 }
 
 function getSessionID() {
+    console.debug('* get session id');
 //    id = $.cookie('session');
     id = simpleStorage.get('session');
     if (id != null)
@@ -408,6 +423,7 @@ function getSessionID() {
 }
 
 function newSessionID() {
+    console.debug('* new session id');
     $.ajax({
         async : false,
         data : {
@@ -423,6 +439,7 @@ function newSessionID() {
 }
 
 function initSavedPlots() {
+    console.debug('* init saved plots');
     getSessionID();
     $('#newid').click(function() {
         newSessionID();
@@ -447,6 +464,7 @@ function initSavedPlots() {
 }
 
 function savePlots() {
+    console.debug('* save plots');
     o = new Object();
     o.savedPlots = [];
     $('.savedplot').each(function() {
@@ -470,6 +488,7 @@ function savePlots() {
 }
 
 function loadPlots() {
+    console.debug('* load plots');
     $('#savedplots').empty();
     $.ajax({
         async : false,
@@ -492,6 +511,7 @@ function loadPlots() {
 }
 
 function bindColorbox() {
+    console.debug('* bind colorbox');
     $('#savedplots .savedplot').unbind().colorbox({
         photo : true,
         maxWidth : '90%',
@@ -502,6 +522,7 @@ function bindColorbox() {
 }
 
 function addPlotToSaved(settings) {
+    console.debug('* add plot to saved');
     $('<div>').appendTo('#savedplots').append($('<img src="' + settings.url + '" href="' + settings.url + '" title="' + settings.t + '">').addClass('savedplot').data('settings', settings))
     // add delete button
     .append($('<img>').attr('src', 'img/cross.png').attr('title', 'Plot löschen').addClass('delete').click(function() {
@@ -521,6 +542,7 @@ function addPlotToSaved(settings) {
 var xhr;
 
 function transformMinMaxFields() {
+    console.debug('* transform min/max');
     $('.global input[name$="-min"]').each(function(){
         input = $(this);
         target = input.attr('name').match(/(.+)-(.+)/)[1];
@@ -541,6 +563,7 @@ function transformMinMaxFields() {
 }
 
 function initSubmit() {
+    console.debug('* init submit');
     // hand submission of plot request and reception of the plot
     $('form').submit(function() {
         try {// abort previous request
@@ -626,6 +649,7 @@ function initSubmit() {
 }
 
 function appendSymbol(selector, symbol) {
+    console.debug('* append symbol');
     $(selector).each(function() {
         var t = $(this).contents().first()
         if (t.get(0).nodeType != 3)// if it's not a text node
@@ -635,6 +659,7 @@ function appendSymbol(selector, symbol) {
 }
 
 function initSymbols() {
+    console.debug('* init symbols');
     appendSymbol('label.required', '&diams;');
     appendSymbol('label.advanced', '&dagger;');
     appendSymbol('label.expert', '&Dagger;');
@@ -642,6 +667,7 @@ function initSymbols() {
 
 /** on page load... */
 $(function() {
+    console.debug('* main');
     initScroll();
     initHelp('fieldset.global');
     initHelp('fieldset.global2');
