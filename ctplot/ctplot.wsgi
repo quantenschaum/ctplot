@@ -11,14 +11,14 @@ import string
 import locale
 from os.path import join, abspath, basename
 from mimetypes import guess_type
-from time import sleep
+from time import sleep, time
 from Queue import Queue
-from pkg_resources import resource_string, resource_exists, resource_stream, resource_isdir, resource_listdir
+from pkg_resources import resource_string, resource_exists, resource_isdir, resource_listdir
 
 import matplotlib
 matplotlib.use('Agg')  # headless backend 
 
-import json, os, cgi, sys, subprocess, time, random, string
+import json, os, cgi, sys, random, string
 import ctplot
 import ctplot.plot
 #from ctplot.plot import Plot, available_tables
@@ -66,13 +66,13 @@ def application(environ, start_response):
 # http://www.mnot.net/cache_docs/  
 # http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html
 cc_nocache = 'Cache-Control', 'no-cache, max-age=0'
-cc_cache = 'Cache-Control', 'max-age=86400'
+cc_cache = 'Cache-Control', 'public, max-age=86400'
+
+
 
    
 def static_content(environ, start_response):
     path = environ['PATH_INFO']
-    
-    print 'static', path
     
     if not path: # redirect
         start_response('301 Redirect', [('Content-Type', 'text/plain'),
@@ -81,17 +81,16 @@ def static_content(environ, start_response):
  
     if path=='/':
         path='web/index.html'   # map / to index.html
+    else:
+        path=('web/'+path).replace('//','/')
         
-    elif path=='/scripts.js': # combined java scripts
+    if path=='web/js': # combined java scripts
         scripts={}
         for s in resource_listdir('ctplot','web/js'):
             scripts[s]='\n// {}\n\n'.format(s)+resource_string('ctplot','web/js/'+s)
         content_type = guess_type(path)[0] or 'text/plain' 
         start_response('200 OK', [('Content-Type', content_type), cc_cache])
         return [scripts[k] for k in sorted(scripts.keys())]
-        
-    else:
-        path='web/'+path
     
     if not resource_exists('ctplot',path): # 404
         start_response('404 Not Found', [('Content-Type', 'text/plain')])
@@ -103,7 +102,7 @@ def static_content(environ, start_response):
     else:  
         content_type = guess_type(path)[0] or 'text/plain' 
         start_response('200 OK', [('Content-Type', content_type), cc_cache])
-        return resource_stream('ctplot',path)
+        return resource_string('ctplot',path)
 
 
 
@@ -159,9 +158,10 @@ def make_plot(settings, config):
 def randomChars(n):
     return ''.join(random.choice(string.ascii_lowercase+string.ascii_uppercase+string.digits) for _ in range(n))
     
-    
+available_tables = None    
 
 def handle_action(environ,start_response, config):
+    global available_tables
     fields =  cgi.FieldStorage(fp=environ['wsgi.input'],  environ=environ)
     action = fields.getfirst('a')
     datadir = config['ctplot_datadir']
@@ -188,7 +188,9 @@ def handle_action(environ,start_response, config):
                 
     elif action == 'list':
         start_response('200 OK',[('Content-Type','text/plain')])
-        return serve_json(ctplot.plot.available_tables(datadir), start_response)
+        if not available_tables or time()-available_tables[0]>86400: 
+            available_tables = time(), ctplot.plot.available_tables(datadir)
+        return serve_json(available_tables[1], start_response)
 
     elif action == 'save':
         id = fields.getfirst('id').strip()
