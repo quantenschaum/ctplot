@@ -11,19 +11,6 @@ from datetime import datetime
 
 cgitb.enable(context = 1, format = 'html')
 
-# This is our application object. It could have any name,
-# except when using mod_wsgi where it must be "application"
-# see http://webpython.codepoint.net/wsgi_application_interface
-def application(environ, start_response):
-    status = '200 OK'
-    response_headers = [('Content-Type', 'text/plain; charset=utf-8')]
-    start_response(status, response_headers)
-
-    response = []
-    env = ['{}={}\n'.format(k, v).encode('utf-8') for k, v in environ.items()]
-    return response
-
-
 def make_plot(settings):
     name = os.path.join(plotdir, 'plot{}'.format(hashargs(settings))).replace('\\', '/')
 

@@ -324,9 +324,9 @@ function initExpertMode() {
 
 var templatePlot;
 
+
 function initPlots() {
-    // add source dropdown box to plot template, filled with available hdf5 data
-    // files
+    // add source dropdown box to plot template, filled with available hdf5 data files
     sourcesBox().prependTo('.plot');
     // detach the plot template (to be added by pressing 'add plot' button)
     templatePlot = $('.plot').detach();
@@ -334,9 +334,13 @@ function initPlots() {
     $('#varsbox').hide();
 
     $('#addplot').click(addPlot);
-
+    
+    $.cookie('lastsettings','', { expires: -1 });
+    $.cookie('session','', { expires: -1 });
+    
     try {
-        setSettings(JSON.parse($.cookie('lastsettings')));
+//        setSettings(JSON.parse($.cookie('lastsettings')));
+        setSettings(simpleStorage.get('settings'));
     } catch (e) {
         addPlot();
     }
@@ -394,7 +398,8 @@ function initScroll() {
 }
 
 function getSessionID() {
-    id = $.cookie('session');
+//    id = $.cookie('session');
+    id = simpleStorage.get('session');
     if (id != null)
         $('#sessionid').val(id);
     else
@@ -411,7 +416,8 @@ function newSessionID() {
         dataType : 'text',
         success : function(data, status, xhr) {
             $('#sessionid').val(data);
-            $.cookie('session', data);
+//            $.cookie('session', data);
+            simpleStorage.set('session', data);
         }
     });
 }
@@ -428,7 +434,8 @@ function initSavedPlots() {
             alert('Die Session-ID muss mindestens 8 Zeichen lang sein.');
             return;
         }
-        $.cookie('session', id);
+//        $.cookie('session', id);
+        simpleStorage.set('session', id);
         loadPlots();
     });
     $('#sessionid').keyup(function(e) {
@@ -548,7 +555,8 @@ function initSubmit() {
 
         query = $('form').serialize();
         settings = getSettings();
-        $.cookie('lastsettings', JSON.stringify(settings));
+//        $.cookie('lastsettings', JSON.stringify(settings));
+        simpleStorage.set('settings', settings);
 
         // store current plot settings (all input fields) into 
         // settings object
@@ -568,7 +576,7 @@ function initSubmit() {
             success : function(data) {
                 result.empty();
                 var img = data.png;
-                $('<img>').attr('src', img + '?' + new Date().getTime())
+                $('<img>').attr('src', img)
                 // add query string to prevent browser
                 // from showing cached image
                 .attr('alt', query).appendTo(result);

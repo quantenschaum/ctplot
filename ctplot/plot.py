@@ -15,7 +15,7 @@ from utils import get_args_from, isseq, set_defaults, number_mathformat, number_
 from itertools import product
 from safeeval import safeeval
 
-logging.basicConfig(level = logging.INFO, format = '%(filename)s:%(funcName)s:%(lineno)d:%(message)s')
+logging.basicConfig(level = logging.ERROR, format = '%(filename)s:%(funcName)s:%(lineno)d:%(message)s')
 
 log = logging.getLogger('plot')
 
@@ -321,13 +321,13 @@ class Plot(object):
 
                 def average():
                     # look if there is data for this source in the cache
-                    cachedir = self.config['cachedir'] if self.config['usecache'] else gettempdir()
+                    cachedir = self.config['ctplot_cachedir'] or gettempdir()
                     cachefile = os.path.join(cachedir, 'avg{}.h5'.format(hashargs(s)))
                     cachefile = os.path.abspath(cachefile)
                     log.debug('cachefile %s', cachefile)
 
                     try:  # use data from cache
-                        if not self.config['usecache']:
+                        if not self.config['ctplot_cachedir']:
                             raise
 
                         with tables.openFile(cachefile) as cacheh5:
@@ -406,7 +406,7 @@ class Plot(object):
                                         wd = filter(lambda x: ta <= x[it] < tb, wd)
                                     append(row)
 
-                        if not self.config['usecache']:
+                        if not self.config['ctplot_cachedir']:
                             log.debug('removing averaged data cachefile')
                             os.remove(cachefile)
 
@@ -448,6 +448,8 @@ class Plot(object):
 
     def _configure_pre(self):
         # configure plotlib
+        plt.clf()
+        plt.close('all')
         self.f = self._get('f', 10, float)
         if 'map' in self.m: self.f *= 0.8  # smaller font if plotting map
         plt.rc('font', **{'family':'sans-serif', 'sans-serif':['Dejavu Sans'], 'size':self.f})
@@ -1078,6 +1080,8 @@ def main():
     if args.help_settings:
         display_settings_help()
 
+    log.setLevel(logging.INFO)
+
     if args.verbose:
         log.setLevel(logging.DEBUG)
 
@@ -1089,11 +1093,9 @@ def main():
     log.debug(args)
 
 
-    config = {'cachedir':'.',
-              'usecache':0}
+    config = {'ctplot_cachedir':''}
     if args.cache:
-        config['usecache'] = True
-        config['cachedir'] = args.cache
+        config['ctplot_cachedir'] = args.cache
 
     p = Plot(config, **args.settings)
 

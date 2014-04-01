@@ -2,18 +2,33 @@
 # -*- coding: utf-8 -*-
 
 # run this using mod_wsgi in a SINGLE process
-#    WSGIDaemonProcess ctplot processes=1 threads=20
+#    WSGIApplicationGroup %{GLOBAL}
+#    WSGIDaemonProcess ctplot processes=2 threads=20
 #    WSGIScriptAlias /ctplot /path/to/ctplot.wsgi process-group=ctplot
 
 import os
-from os.path import join, abspath
-import cgi
+import string
+import locale
+from os.path import join, abspath, basename
 from mimetypes import guess_type
 from time import sleep
 from Queue import Queue
-from pkg_resources import resource_string, resource_filename, resource_exists, resource_stream, resource_isdir
+from pkg_resources import resource_string, resource_exists, resource_stream, resource_isdir, resource_listdir
 
-_plot_queue = None
+import matplotlib
+matplotlib.use('Agg')  # headless backend 
+
+import json, os, cgi, sys, subprocess, time, random, string
+import ctplot
+import ctplot.plot
+#from ctplot.plot import Plot, available_tables
+from ctplot.utils import hashargs, getCpuLoad, getRunning
+from datetime import datetime
+import pytz
+
+
+
+_plot_queue = Queue(1)
 _config=None
 
 def get_config(env):
@@ -28,8 +43,7 @@ def get_config(env):
     _config = {p+'cachedir':join(basedir,'cache'),
                p+'datadir':join(basedir,'data'),
                p+'plotdir':join(basedir,'plots'),
-               p+'sessiondir':join(basedir,'sessions'),
-               p+'parallel':'4'}
+               p+'sessiondir':join(basedir,'sessions')}
               
     for k in _config.keys():
         if k in env:
@@ -42,45 +56,23 @@ def get_config(env):
 # except when using mod_wsgi where it must be "application"
 # see http://webpython.codepoint.net/wsgi_application_interface
 def application(environ, start_response):
-    response = []
-
-    config = get_config(environ)
-    response.append('config={}\n'.format(config))
-
-    query = cgi.FieldStorage(fp=environ['wsgi.input'], environ=environ)
-    response.append(repr(query)+'\n')
     path = environ['PATH_INFO']
-    response.append('path={}\n'.format(path))
-    
-    # create the plot and adjust path
-    if path in ['/webplot.py','/plot']:
-        global _plot_queue
+    if path =='/webplot.py' or path.startswith('/plot'):
+        return dynamic_content(environ, start_response)
+    else:
+        return static_content(environ, start_response)
 
-        if not _plot_queue:
-            _plot_queue=Queue(int(config['ctplot_parallel']))
+# http://www.mobify.com/blog/beginners-guide-to-http-cache-headers/      
+# http://www.mnot.net/cache_docs/  
+# http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html
+cc_nocache = 'Cache-Control', 'no-cache, max-age=0'
+cc_cache = 'Cache-Control', 'max-age=86400'
 
-        try:
-            _plot_queue.put(query)
-            start_response('200', [('Content-Type', 'text/plain')])
-            return ['dummy']
-
-        finally:
-            _plot_queue.get()
-    
-    
-    
-    response.append('\n\n')
-    response += ['{}={}\n'.format(k, v).encode('utf-8') for k, v in environ.items()]
-
-
-#    start_response('200', [('Content-Type', 'text/plain')])
-#    return response
-    
-    return static_content(environ, start_response)
-    
-    
+   
 def static_content(environ, start_response):
     path = environ['PATH_INFO']
+    
+    print 'static', path
     
     if not path: # redirect
         start_response('301 Redirect', [('Content-Type', 'text/plain'),
@@ -89,6 +81,15 @@ def static_content(environ, start_response):
  
     if path=='/':
         path='web/index.html'   # map / to index.html
+        
+    elif path=='/scripts.js': # combined java scripts
+        scripts={}
+        for s in resource_listdir('ctplot','web/js'):
+            scripts[s]='\n// {}\n\n'.format(s)+resource_string('ctplot','web/js/'+s)
+        content_type = guess_type(path)[0] or 'text/plain' 
+        start_response('200 OK', [('Content-Type', content_type), cc_cache])
+        return [scripts[k] for k in sorted(scripts.keys())]
+        
     else:
         path='web/'+path
     
@@ -96,13 +97,134 @@ def static_content(environ, start_response):
         start_response('404 Not Found', [('Content-Type', 'text/plain')])
         return ['404\n','{} not found!'.format(path)]
         
-    if resource_isdir('ctplot',path): # 403
-        content_type = guess_type(path)[0] or 'text/plain' 
+    elif resource_isdir('ctplot',path): # 403
         start_response('403 Forbidden', [('Content-Type', 'text/plain' )])
         return ['403 Forbidden']
+    else:  
+        content_type = guess_type(path)[0] or 'text/plain' 
+        start_response('200 OK', [('Content-Type', content_type), cc_cache])
+        return resource_stream('ctplot',path)
+
+
+
+def dynamic_content(environ, start_response):
+    global _plot_queue
+    config = get_config(environ)
+    path = environ['PATH_INFO']
+    
+    if path.startswith('/plots'):
+        return serve_plot(path, start_response, config)
+
+    try:
+        _plot_queue.put('task') # push to queue to indicate a longer running task
+        return handle_action(environ, start_response, config)
+
+    finally:
+        _plot_queue.get() # mark task as finished
         
-    content_type = guess_type(path)[0] or 'text/plain' 
-    start_response('200 OK', [('Content-Type', content_type)])
-    return resource_stream('ctplot',path)
+
+
+def serve_plot(path, start_response, config):
+    with open(join(config['ctplot_plotdir'],basename(path))) as f:
+        start_response('200 OK', [('Content-Type', guess_type(path)[0]), cc_cache])
+        return [f.read()]
+        
+        
+def serve_json(data, start_response):        
+    start_response('200 OK', [('Content-Type', 'text/plain'), cc_nocache])
+    return [json.dumps(data)]
+    
+
+def serve_plain(data, start_response):        
+    start_response('200 OK', [('Content-Type', 'text/plain'), cc_nocache])
+    return [data]
+
+
+
+
+
+def make_plot(settings, config):
+    basename = 'plot{}'.format(hashargs(settings))
+    name = os.path.join(config['ctplot_plotdir'], basename).replace('\\', '/')
+
+    # try to get plot from cache
+    if config['ctplot_cachedir'] and os.path.isfile(name + '.png'):
+        return dict([(e, name + '.' + e) for e in ['png', 'svg', 'pdf']])
+
+    else:
+        p = ctplot.plot.Plot(config,**settings)
+        return p.save(name)
+
+
+def randomChars(n):
+    return ''.join(random.choice(string.ascii_lowercase+string.ascii_uppercase+string.digits) for _ in range(n))
+    
+    
+
+def handle_action(environ,start_response, config):
+    fields =  cgi.FieldStorage(fp=environ['wsgi.input'],  environ=environ)
+    action = fields.getfirst('a')
+    datadir = config['ctplot_datadir']
+    sessiondir = config['ctplot_sessiondir']
+
+    if action in ['plot', 'png', 'svg', 'pdf']:
+
+        settings = {}
+        for k in fields.keys():
+            if k[0] in 'xyzcmsorntwhfgl':
+                settings[k] = fields.getfirst(k).strip().decode('utf8', errors = 'ignore')
+
+        images = make_plot(settings, config)
+        for k,v in images.items():
+            images[k]='plots/'+basename(v)
+
+        if action == 'plot':
+            return serve_json(images, start_response)
+
+        elif action in ['png', 'svg', 'pdf']:
+            return serve_plot(images[action], start_response, config)
+              
+                
+                
+    elif action == 'list':
+        start_response('200 OK',[('Content-Type','text/plain')])
+        return serve_json(ctplot.plot.available_tables(datadir), start_response)
+
+    elif action == 'save':
+        id = fields.getfirst('id').strip()
+        if len(id) < 8: raise RuntimeError('session id must have at least 8 digits')
+        data = fields.getfirst('data').strip()
+        with open(os.path.join(sessiondir, '{}.session'.format(id)), 'w') as f:
+            f.write(data.replace('},{', '},\n{'))
+        return serve_json('saved {}'.format(id), start_response)
+
+    elif action == 'load':
+        id = fields.getfirst('id').strip()
+        if len(id) < 8: raise RuntimeError('session id must have at least 8 digits')
+        try:
+            with open(os.path.join(sessiondir, '{}.session'.format(id))) as f:
+                return serve_plain(f.read(), start_response)
+        except:
+            return serve_json('no data for {}'.format(id), start_response)
+
+    elif action == 'newid':
+        id = randomChars(16)
+        while os.path.isfile(os.path.join(sessiondir, '{}.session'.format(id))):
+            id = randomChars(16)
+        return serve_plain(id, start_response)
+        
+    else:
+        raise ValueError('unknown action {}'.format(action))
+
+
+
+
+
+
+
+
+
+
+
 
 
