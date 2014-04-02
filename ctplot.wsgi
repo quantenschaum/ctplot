@@ -11,5 +11,5 @@ from ctplot.wsgi import application
 # os.environ['ctplot_plotsdir'] = '/basedir/plots'
 
 if __name__ == '__main__':
-    os.environ['ctplot_basedir'] = '/var/www/html/ctplot2'
+    os.environ['ctplot_basedir'] = '/path/to/basedir'
     wsgiref.handlers.CGIHandler().run(application)
