@@ -1,14 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-# run this using mod_wsgi in a SINGLE process
-#    WSGIApplicationGroup %{GLOBAL}
-#    WSGIDaemonProcess ctplot processes=2 threads=20
-#    WSGIScriptAlias /ctplot /path/to/ctplot.wsgi process-group=ctplot
-
-
-
-
 
 import os, json, random, string
 from os.path import join, abspath, basename
@@ -220,11 +210,6 @@ def handle_action(environ, start_response, config):
 
 
 
-
-
-if __name__ == '__main__':
-    import wsgiref.handlers
-    wsgiref.handlers.CGIHandler().run(application)
 
 
 
