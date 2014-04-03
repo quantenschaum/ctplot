@@ -150,7 +150,7 @@ def make_plot(settings, config):
         # lock long running plot creation
         with plot_lock:
             p = ctplot.plot.Plot(config, **settings)
-        return p.save(name)
+            return p.save(name)
 
 
 def randomChars(n):
