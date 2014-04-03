@@ -740,7 +740,7 @@ def autodetect(filename, handlers = available_handlers):
     if len(matched_handlers) == 1:
         return matched_handlers[0]
     else:  # ...or raise
-        raise RuntimeError(('could not autodetect handler for {0} \nmatching handlers: \n{1}'.format(filename, matched_handlers)))
+        raise RuntimeError(('could not autodetect handler for {} \nmatching handlers: \n{}'.format(filename, matched_handlers)))
 
 
 def starttime(filename, handler):
@@ -754,7 +754,7 @@ def starttime(filename, handler):
     return first_record[time_idx]
 
 
-def detect_and_sort(filenames):
+def detect_and_sort(filenames, skip_unhandled):
     """
     detect files types (handlers) and sort the files 'time' ascending,
     return dict(LineHandler --> tuple(time sorted filenames))
@@ -763,7 +763,14 @@ def detect_and_sort(filenames):
 
     # map files to auto detected handlers
     for filename in filenames:
-        handler = autodetect(filename)
+        try:
+            handler = autodetect(filename)
+        except:
+            if skip_unhandled:
+                continue
+            else:
+                raise
+
         if handler in sorted_files:
             sorted_files[handler].append(filename)
         else:
@@ -778,7 +785,7 @@ def detect_and_sort(filenames):
 
 
 def raw_to_h5(filenames, out = "out.h5", handlers = available_handlers,
-              t0 = dp.parse('2004-01-01 00:00:00 +0000'), skip_on_assert = False, show_progress = True, ignore_errors = False):
+              t0 = dp.parse('2004-01-01 00:00:00 +0000'), skip_on_assert = False, show_progress = True, ignore_errors = False, skip_unhandled = False):
     """
     converts ASCII data to HDF5 tables
         filenames : iterable, filenames of all data files (events, weather, etc.) in any order
@@ -831,7 +838,7 @@ def raw_to_h5(filenames, out = "out.h5", handlers = available_handlers,
                 pb.update(pb.currval + 1)
 
     # autodetect handlers and time sort files
-    files_dict = detect_and_sort(filenames)
+    files_dict = detect_and_sort(filenames, skip_unhandled)
 
     if show_progress:
         print 'detected file types:', ['{} ({})'.format(k.table_name, len(v)) for k, v in files_dict.iteritems()]
@@ -886,22 +893,24 @@ def main():
     parser.add_argument('-q', '--quiet', action = 'store_true', help = 'do not show progressbar, just print error messages')
     parser.add_argument('-v', '--verbose', action = 'count', help = 'show additional processing information')
     parser.add_argument('-k', '--keepgoing', action = 'store_true', help = 'keep going, do not stop on errors')
+    parser.add_argument('-x', '--skip-unhandled', action = 'store_true', help = 'skip files with no handler')
     parser.add_argument('infiles', nargs = '+', help = 'input files, if a directory is given, all files in it and in its subdirectories are used')
 
-    opts = parser.parse_args()
+    args = parser.parse_args()
 
-    verbose = opts.verbose
+    verbose = args.verbose
 
-    if not opts.out.endswith('.h5'):
-        out = opts.out + '.h5'
+    if not args.out.endswith('.h5'):
+        out = args.out + '.h5'
     else:
-        out = opts.out;
+        out = args.out;
 
-    if not opts.force and path.exists(out):
+    if not args.force and path.exists(out):
         raise RuntimeError('file \'{}\' already exists'.format(out))
 
 
-    raw_to_h5(opts.infiles, out = out, skip_on_assert = not opts.noskip, show_progress = not opts.quiet, t0 = opts.reftime, ignore_errors = opts.keepgoing)
+    raw_to_h5(args.infiles, out = out, skip_on_assert = not args.noskip, show_progress = not args.quiet,
+              t0 = args.reftime, ignore_errors = args.keepgoing, skip_unhandled = args.skip_unhandled)
 
 
 if __name__ == '__main__':
