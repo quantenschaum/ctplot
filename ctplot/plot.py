@@ -327,10 +327,10 @@ class Plot(object):
                     cachefile = os.path.abspath(cachefile)
                     log.debug('cachefile %s', cachefile)
 
-                    try:  # use data from cache
-                        if not self.config['cachedir']:
-                            raise
 
+                    def average_cached():
+                        if not self.config['cachedir']:
+                            raise  # always fail it cache is disabled
                         with tables.openFile(cachefile) as cacheh5:
                             cachetable = cacheh5.getNode('/data')
                             progr_factor = 1.0 / cachetable.nrows / len(expr_data)
@@ -339,78 +339,91 @@ class Plot(object):
                                 self.progress = progr_prev + row.nrow * progr_factor
                                 yield row
 
-                    except:  # if data not available/in use/corrupt...
-                        with lock_file(cachefile + '.lock'):
-                            try:
-                                log.debug('creating averaged data cachefile')
-                                cacheh5 = tables.openFile(cachefile, 'w')
-                            except:
-                                log.exception('failed opening %s', cachefile)
-                                raise RuntimeError('cache for {} in use or corrupt, try again in a few seconds'.format(s))
 
-                            with cacheh5:
-                                # use tables col descriptor and append fields rate and count
-                                log.debug('caching averaged data')
-                                coldesc = OrderedDict()  # keep the order
-                                for k in table.colnames:
-                                    d = table.coldescrs[k]
-                                    if isinstance(d, tables.BoolCol):  # make bool to float for averaging
-                                        coldesc[k] = tables.FloatCol(pos = len(coldesc))
-                                    else:
-                                        coldesc[k] = d
-                                coldesc['count'] = tables.IntCol(pos = len(coldesc))
-                                coldesc['weight'] = tables.FloatCol(pos = len(coldesc))
-                                coldesc['rate'] = tables.FloatCol(pos = len(coldesc))
-                                cachetable = cacheh5.createTable('/', 'data', coldesc, 'cached data')
-                                cachetable.attrs.source = s
-                                cacherow = cachetable.row
+                    def average_computed():
+                        try:
+                            log.debug('creating averaged data cachefile')
+                            cacheh5 = tables.openFile(cachefile, 'w')
+                        except:
+                            log.exception('failed opening %s', cachefile)
+                            raise RuntimeError('cache for {} in use or corrupt, try again in a few seconds'.format(s))
 
-                                assert 0 < shift <= 1
-                                it = table.colnames.index('time')  # index of time column
-                                ta = table[0][it]  # window left edge
-                                tb = ta + window  # window right edge
-                                wd = []  # window data
-                                cols = table.colnames
-                                wdlen = len(cols) + 1
-                                fweight = compile_function(weight)
+                        with cacheh5:
+                            # use tables col descriptor and append fields rate and count
+                            log.debug('caching averaged data')
+                            coldesc = OrderedDict()  # keep the order
+                            for k in table.colnames:
+                                d = table.coldescrs[k]
+                                if isinstance(d, tables.BoolCol):  # make bool to float for averaging
+                                    coldesc[k] = tables.FloatCol(pos = len(coldesc))
+                                else:
+                                    coldesc[k] = d
+                            coldesc['count'] = tables.IntCol(pos = len(coldesc))
+                            coldesc['weight'] = tables.FloatCol(pos = len(coldesc))
+                            coldesc['rate'] = tables.FloatCol(pos = len(coldesc))
+                            cachetable = cacheh5.createTable('/', 'data', coldesc, 'cached data')
+                            cachetable.attrs.source = s
+                            cacherow = cachetable.row
 
-                                def append(r):
-                                    wd.append(np.fromiter(chain(r[:], [fweight(r)]), dtype = np.float, count = wdlen))
+                            assert 0 < shift <= 1
+                            it = table.colnames.index('time')  # index of time column
+                            ta = table[0][it]  # window left edge
+                            tb = ta + window  # window right edge
+                            wd = []  # window data
+                            cols = table.colnames
+                            wdlen = len(cols) + 1
+                            fweight = compile_function(weight)
 
-                                progr_factor = 1.0 / table.nrows / len(expr_data)
+                            def append(r):
+                                wd.append(np.fromiter(chain(r[:], [fweight(r)]), dtype = np.float, count = wdlen))
 
-                                for row in table.iterrows():
-                                    if row[it] < tb:  # add row if in window
-                                        append(row)
-                                    else:  # calculate av and shift window
-                                        n = len(wd)
-                                        if n > 0:
-                                            wdsum = reduce(lambda a, b: a + b, wd)
-                                            for i, c in enumerate(cols):
-                                                cacherow[c] = wdsum[i] / n
-                                            cacherow['time'] = (ta + tb) * 0.5  # overwrite with interval center
-                                            cacherow['count'] = n
-                                            cacherow['weight'] = wdsum[-1] / n
-                                            cacherow['rate'] = n / window
-                                            self.progress = progr_prev + row.nrow * progr_factor
-                                            yield cacherow
-                                            cacherow.append()
+                            progr_factor = 1.0 / table.nrows / len(expr_data)
 
-                                        ta += shift * window  # shift window
+                            for row in table.iterrows():
+                                if row[it] < tb:  # add row if in window
+                                    append(row)
+                                else:  # calculate av and shift window
+                                    n = len(wd)
+                                    if n > 0:
+                                        wdsum = reduce(lambda a, b: a + b, wd)
+                                        for i, c in enumerate(cols):
+                                            cacherow[c] = wdsum[i] / n
+                                        cacherow['time'] = (ta + tb) * 0.5  # overwrite with interval center
+                                        cacherow['count'] = n
+                                        cacherow['weight'] = wdsum[-1] / n
+                                        cacherow['rate'] = n / window
+                                        self.progress = progr_prev + row.nrow * progr_factor
+                                        yield cacherow
+                                        cacherow.append()
+
+                                    ta += shift * window  # shift window
+                                    tb = ta + window
+                                    if row[it] >= tb:
+                                        ta = row[it]  # shift window
                                         tb = ta + window
-                                        if row[it] >= tb:
-                                            ta = row[it]  # shift window
-                                            tb = ta + window
 
-                                        if shift == 1:  # windows must be empty
-                                            wd = []
-                                        else:  # remove data outside new window
-                                            wd = filter(lambda x: ta <= x[it] < tb, wd)
-                                        append(row)
+                                    if shift == 1:  # windows must be empty
+                                        wd = []
+                                    else:  # remove data outside new window
+                                        wd = filter(lambda x: ta <= x[it] < tb, wd)
+                                    append(row)
 
-                            if not self.config['cachedir']:
-                                log.debug('removing averaged data cachefile')
-                                os.remove(cachefile)
+                        if not self.config['cachedir']:
+                            log.debug('removing averaged data cachefile')
+                            os.remove(cachefile)
+
+
+
+                    try:  # try using data from cache
+                        for x in average_cached(): yield x
+                    except:  # if cache fails
+                        with lock_file(cachefile + '.lock'):
+                            try:  # try cache again (maybe it was populated while waiting for the lock)
+                                for x in average_cached(): yield x
+                            except:  # if it fails again, compute the data
+                                for x in average_computed(): yield x
+
+
 
                 def prefilter(data, filterexpr):
                     filterexpr = compile_function(filterexpr)
