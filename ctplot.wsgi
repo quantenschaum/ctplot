@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import os
-import wsgiref.handlers
 from ctplot.wsgi import application
 
 # os.environ['ctplot_basedir'] = '/basedir'
@@ -11,4 +10,5 @@ from ctplot.wsgi import application
 # os.environ['ctplot_plotsdir'] = '/basedir/plots'
 
 if __name__ == '__main__':
+    import wsgiref.handlers
     wsgiref.handlers.CGIHandler().run(application)

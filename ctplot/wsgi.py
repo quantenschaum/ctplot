@@ -6,6 +6,7 @@ from mimetypes import guess_type
 from time import  time
 from Queue import Queue
 from cgi import FieldStorage
+from locket import lock_file
 from pkg_resources import resource_string, resource_exists, resource_isdir, resource_listdir
 
 import matplotlib
@@ -16,7 +17,7 @@ from ctplot.utils import hashargs
 
 
 
-_plot_queue = Queue(1)
+
 _config = None
 
 def get_config(env):
@@ -25,17 +26,19 @@ def get_config(env):
     if _config:
         return _config
 
-    p = 'ctplot_'
-    basekey = p + 'basedir'
+    prefix = 'ctplot_'
+    basekey = prefix + 'basedir'
     basedir = abspath(env[basekey] if basekey in env else '.')
-    _config = {p + 'cachedir':join(basedir, 'cache'),
-               p + 'datadir':join(basedir, 'data'),
-               p + 'plotdir':join(basedir, 'plots'),
-               p + 'sessiondir':join(basedir, 'sessions')}
+
+    _config = {'cachedir':join(basedir, 'cache'),
+               'datadir':join(basedir, 'data'),
+               'plotdir':join(basedir, 'plots'),
+               'sessiondir':join(basedir, 'sessions')}
 
     for k in _config.keys():
-        if k in env:
-            _config[k] = env[k]
+        ek = prefix + k
+        if ek in env:
+            _config[k] = env[ek]
 
     return _config
 
@@ -61,13 +64,23 @@ cc_cache = 'Cache-Control', 'public, max-age=86400'
 
 
 
+def content_type(path = ''):
+    mime_type = None
+
+    if path:
+        mime_type = guess_type(path)[0]
+
+    if not mime_type:
+        mime_type = 'text/plain'
+
+    return 'Content-Type', mime_type
+
 
 def static_content(environ, start_response):
     path = getpath(environ)
 
     if not path:  # redirect
-        start_response('301 Redirect', [('Content-Type', 'text/plain'),
-                                        ('Location', environ['REQUEST_URI'] + '/')])
+        start_response('301 Redirect', [content_type(), ('Location', environ['REQUEST_URI'] + '/')])
         return []
 
     if path == '/':
@@ -79,54 +92,46 @@ def static_content(environ, start_response):
         scripts = {}
         for s in resource_listdir('ctplot', 'web/js'):
             scripts[s] = '\n// {}\n\n'.format(s) + resource_string('ctplot', 'web/js/' + s)
-        content_type = guess_type(path)[0] or 'text/plain'
-        start_response('200 OK', [('Content-Type', content_type), cc_cache])
+        start_response('200 OK', [content_type(path), cc_cache])
         return [scripts[k] for k in sorted(scripts.keys())]
 
     if not resource_exists('ctplot', path):  # 404
-        start_response('404 Not Found', [('Content-Type', 'text/plain')])
+        start_response('404 Not Found', [content_type()])
         return ['404\n', '{} not found!'.format(path)]
 
     elif resource_isdir('ctplot', path):  # 403
-        start_response('403 Forbidden', [('Content-Type', 'text/plain')])
+        start_response('403 Forbidden', [content_type()])
         return ['403 Forbidden']
     else:
-        content_type = guess_type(path)[0] or 'text/plain'
-        start_response('200 OK', [('Content-Type', content_type), cc_cache])
+        start_response('200 OK', [content_type(path), cc_cache])
         return resource_string('ctplot', path)
 
 
 
 def dynamic_content(environ, start_response):
-    global _plot_queue
+    path = getpath(environ)
     config = get_config(environ)
-    path = environ['PATH_INFO']
 
     if path.startswith('/plots'):
         return serve_plot(path, start_response, config)
-
-    try:
-        _plot_queue.put('task')  # push to queue to indicate a longer running task
+    else:
         return handle_action(environ, start_response, config)
-
-    finally:
-        _plot_queue.get()  # mark task as finished
 
 
 
 def serve_plot(path, start_response, config):
-    with open(join(config['ctplot_plotdir'], basename(path))) as f:
-        start_response('200 OK', [('Content-Type', guess_type(path)[0]), cc_cache])
+    with open(join(config['plotdir'], basename(path))) as f:
+        start_response('200 OK', [content_type(path), cc_cache])
         return [f.read()]
 
 
 def serve_json(data, start_response):
-    start_response('200 OK', [('Content-Type', 'text/plain'), cc_nocache])
+    start_response('200 OK', [content_type(), cc_nocache])
     return [json.dumps(data)]
 
 
 def serve_plain(data, start_response):
-    start_response('200 OK', [('Content-Type', 'text/plain'), cc_nocache])
+    start_response('200 OK', [content_type(), cc_nocache])
     return [data]
 
 
@@ -135,14 +140,16 @@ def serve_plain(data, start_response):
 
 def make_plot(settings, config):
     basename = 'plot{}'.format(hashargs(settings))
-    name = os.path.join(config['ctplot_plotdir'], basename).replace('\\', '/')
+    name = os.path.join(config['plotdir'], basename).replace('\\', '/')
 
     # try to get plot from cache
-    if config['ctplot_cachedir'] and os.path.isfile(name + '.png'):
+    if config['cachedir'] and os.path.isfile(name + '.png'):
         return dict([(e, name + '.' + e) for e in ['png', 'svg', 'pdf']])
 
     else:
-        p = ctplot.plot.Plot(config, **settings)
+        # lock long running plot creation
+        with lock_file(join(config['cachedir'], 'plot.lock')):
+            p = ctplot.plot.Plot(config, **settings)
         return p.save(name)
 
 
@@ -155,8 +162,8 @@ def handle_action(environ, start_response, config):
     global available_tables
     fields = FieldStorage(fp = environ['wsgi.input'], environ = environ)
     action = fields.getfirst('a')
-    datadir = config['ctplot_datadir']
-    sessiondir = config['ctplot_sessiondir']
+    datadir = config['datadir']
+    sessiondir = config['sessiondir']
 
     if action in ['plot', 'png', 'svg', 'pdf']:
 

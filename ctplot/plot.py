@@ -321,13 +321,13 @@ class Plot(object):
 
                 def average():
                     # look if there is data for this source in the cache
-                    cachedir = self.config['ctplot_cachedir'] or gettempdir()
+                    cachedir = self.config['cachedir'] or gettempdir()
                     cachefile = os.path.join(cachedir, 'avg{}.h5'.format(hashargs(s)))
                     cachefile = os.path.abspath(cachefile)
                     log.debug('cachefile %s', cachefile)
 
                     try:  # use data from cache
-                        if not self.config['ctplot_cachedir']:
+                        if not self.config['cachedir']:
                             raise
 
                         with tables.openFile(cachefile) as cacheh5:
@@ -406,7 +406,7 @@ class Plot(object):
                                         wd = filter(lambda x: ta <= x[it] < tb, wd)
                                     append(row)
 
-                        if not self.config['ctplot_cachedir']:
+                        if not self.config['cachedir']:
                             log.debug('removing averaged data cachefile')
                             os.remove(cachefile)
 
@@ -1093,9 +1093,9 @@ def main():
     log.debug(args)
 
 
-    config = {'ctplot_cachedir':''}
+    config = {'cachedir':''}
     if args.cache:
-        config['ctplot_cachedir'] = args.cache
+        config['cachedir'] = args.cache
 
     p = Plot(config, **args.settings)
 
