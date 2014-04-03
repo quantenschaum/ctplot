@@ -6,7 +6,7 @@ from mimetypes import guess_type
 from time import  time
 from Queue import Queue
 from cgi import FieldStorage
-from locket import lock_file
+from threading import Lock
 from pkg_resources import resource_string, resource_exists, resource_isdir, resource_listdir
 
 import matplotlib
@@ -136,7 +136,7 @@ def serve_plain(data, start_response):
 
 
 
-
+plot_lock = Lock()
 
 def make_plot(settings, config):
     basename = 'plot{}'.format(hashargs(settings))
@@ -148,7 +148,7 @@ def make_plot(settings, config):
 
     else:
         # lock long running plot creation
-        with lock_file(join(config['cachedir'], 'plot.lock')):
+        with plot_lock:
             p = ctplot.plot.Plot(config, **settings)
         return p.save(name)
 
