@@ -9,6 +9,7 @@ from ctplot.wsgi import application
 # os.environ['ctplot_sessionsdir'] = '/basedir/sessions'
 # os.environ['ctplot_plotsdir'] = '/basedir/plots'
 
+# this allows the WSGI app to be run as CGI script
 if __name__ == '__main__':
     import wsgiref.handlers
     wsgiref.handlers.CGIHandler().run(application)

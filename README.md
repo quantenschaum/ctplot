@@ -35,3 +35,7 @@ Set `processes` to the number of plot creating processes that are allowed to run
 
 ### run as cgi-script
 To run ctplot as simple CGI script (bad performance!), rename `ctplot.wsgi` to `ctplot.py` (or what ever you prefer), put it into your server tree and register it with a CGI handler. (see http://httpd.apache.org/docs/current/mod/mod_cgi.html)
+
+### run as stand alone app
+Run `webserver.py` (needs tornado) to run ctplot as standalone webserver, then open http://localhost:8080.
+

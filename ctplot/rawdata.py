@@ -767,6 +767,8 @@ def detect_and_sort(filenames, skip_unhandled):
             handler = autodetect(filename)
         except:
             if skip_unhandled:
+                if verbose > 0:
+                    print 'no handler for', filename, ' skipping'
                 continue
             else:
                 raise
