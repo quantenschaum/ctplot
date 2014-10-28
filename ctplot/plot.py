@@ -950,7 +950,7 @@ class Plot(object):
         stats['mode'] = centers[np.argmax(contents)]
         bc, be = get_density(contents, errors, widths)
         bc, be = get_cumulative(bc, be, 1, widths)
-        median_i = np.searchsorted(bc, 0.5, side = 'right')
+        median_i = np.minimum(len(centers)-1, np.searchsorted(bc, 0.5, side = 'right'))
         stats['median'] = median = centers[median_i]
         if len(centers) % 2 == 0:  # even # of s
             stats['median'] = median = (median + centers[median_i - 1]) / 2
