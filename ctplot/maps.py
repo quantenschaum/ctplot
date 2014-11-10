@@ -102,8 +102,8 @@ def drawmap(lat = None, lon = None, margin = 0.05, width = 1e6, height = None, b
     if drawspecgrid:
         ecl = 23.44 # ecliptic
         m.drawparallels([-90 + ecl, -ecl, ecl, 90 - ecl], dashes = [2, 2], linewidth = 0.5, color = pmc)
-        m.drawparallels([0], dashes = [1, 0], linewidth = 0.5, color = pmc)
-        m.drawmeridians([0], dashes = [1, 0], linewidth = 0.5, color = pmc)
+        m.drawparallels([0], dashes = [4,4], linewidth = 0.5, color = pmc)
+        m.drawmeridians([0], dashes = [4,4], linewidth = 0.5, color = pmc)
 
 
     m.drawmapboundary(linewidth = 1.5, fill_color = 'white')
