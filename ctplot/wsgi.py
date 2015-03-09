@@ -4,7 +4,6 @@ import os, json, random, string
 from os.path import join, abspath, basename
 from mimetypes import guess_type
 from time import  time
-from Queue import Queue
 from cgi import FieldStorage
 from threading import Lock
 from pkg_resources import resource_string, resource_exists, resource_isdir, resource_listdir
@@ -20,12 +19,13 @@ from ctplot.utils import hashargs
 
 _config = None
 
-def get_config(env):
+def get_config():
     global _config
 
     if _config:
         return _config
 
+    env = os.environ
     prefix = 'ctplot_'
     basekey = prefix + 'basedir'
     basedir = abspath(env[basekey] if basekey in env else '.')
@@ -110,7 +110,7 @@ def static_content(environ, start_response):
 
 def dynamic_content(environ, start_response):
     path = getpath(environ)
-    config = get_config(environ)
+    config = get_config()
 
     if path.startswith('/plots'):
         return serve_plot(path, start_response, config)
