@@ -27,8 +27,9 @@ def get_config():
 
     env = os.environ
     prefix = 'ctplot_'
-    basekey = prefix + 'basedir'
+    basekey = (prefix + 'basedir').upper()
     basedir = abspath(env[basekey] if basekey in env else '.')
+    print basedir
 
     _config = {'cachedir':join(basedir, 'cache'),
                'datadir':join(basedir, 'data'),
@@ -36,10 +37,11 @@ def get_config():
                'sessiondir':join(basedir, 'sessions')}
 
     for k in _config.keys():
-        ek = prefix + k
+        ek = prefix + k.upper()
         if ek in env:
             _config[k] = env[ek]
 
+    print _config
     return _config
 
 def getpath(environ):
