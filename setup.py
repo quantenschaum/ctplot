@@ -31,7 +31,7 @@ def libinfo():
             print l, 'not found'
 
 
-libinfo()
+#libinfo()
 
 
 def readme(name):
@@ -43,17 +43,18 @@ def readme(name):
 
 
 def update_version():
+    cwd = os.path.dirname(__file__)
+    version = 'unknown'
     try:
-        cwd = os.path.dirname(__file__)
-        version = check_output('git describe --dirty=*', shell = True, cwd = cwd).strip()[1:]
-        version_py = 'ctplot/__version__.py'
-        build_date = '{:%F %T}'.format(datetime.now())
-        with open(os.path.join(cwd, version_py), 'w') as f:
-            f.write("__version__ = '{}'\n".format(version))
-            f.write("__build_date__ = '{}'\n".format(build_date))
-        print 'updated', version_py, 'to', version, build_date
+        version = check_output('git describe --dirty=+', shell = True, cwd = cwd).strip()[1:]
     except:
         pass
+    version_py = 'ctplot/__version__.py'
+    build_date = '{:%F %T}'.format(datetime.now())
+    with open(os.path.join(cwd, version_py), 'w') as f:
+        f.write("__version__ = '{}'\n".format(version))
+        f.write("__build_date__ = '{}'\n".format(build_date))
+    print 'updated', version_py, 'to', version, build_date
 
 update_version()
 
