@@ -44,17 +44,19 @@ def readme(name):
 
 def update_version():
     cwd = os.path.dirname(__file__)
-    version = '1.3b?'
+    version = '1.3b0' # see PEP 440
+    revision = 'unknown'
     try:
-        version = check_output('git describe --dirty=+', shell = True, cwd = cwd).strip()[1:]
+        revision = check_output('git describe --dirty=+', shell = True, cwd = cwd).strip()
     except:
         pass
     version_py = 'ctplot/__version__.py'
     build_date = '{:%F %T}'.format(datetime.now())
     with open(os.path.join(cwd, version_py), 'w') as f:
         f.write("__version__ = '{}'\n".format(version))
+        f.write("__revision__ = '{}'\n".format(revision))
         f.write("__build_date__ = '{}'\n".format(build_date))
-    print 'updated', version_py, 'to', version, build_date
+    print 'updated', version_py, 'to', version, revision, build_date
 
 update_version()
 

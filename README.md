@@ -7,9 +7,9 @@ are created from the command line or via an interactive web interface.
 Included is an extensible tool to convert raw data into HDF5 tables.
 
 ## installation
-To install ctplot, download the ZIP, extract it and run `setup.py` or
+To install ctplot, download the ZIP, extract it and run `setup.py` or just do
 
-    # easy_install https://github.com/quantenschaum/ctplot/archive/master.zip
+    # pip install https://github.com/quantenschaum/ctplot/archive/master.zip
   
   
 ## use with apache
