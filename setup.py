@@ -44,7 +44,7 @@ def readme(name):
 
 def update_version():
     cwd = os.path.dirname(__file__)
-    version = 'unknown'
+    version = '1.3b?'
     try:
         version = check_output('git describe --dirty=+', shell = True, cwd = cwd).strip()[1:]
     except:
