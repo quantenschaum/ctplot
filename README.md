@@ -35,7 +35,7 @@ Set the following environment variables to configure the directories
 It's only neccessary to set `CTPLOT_BASEDIR`. The other paths are subdirectories of basedir, which can be overridden by setting them explicitly.
 
 ### run with mod_wsgi
-Enable mod_wsgi and in your apache config set a WSGIScriptAlias like
+Enable [mod_wsgi](https://code.google.com/p/modwsgi) and in your apache config set a `WSGIScriptAlias` like
 
     WSGIApplicationGroup %{GLOBAL}
     WSGIDaemonProcess ctplot processes=2 threads=20
@@ -44,7 +44,7 @@ Enable mod_wsgi and in your apache config set a WSGIScriptAlias like
 Set `processes` to the number of plot creating processes that are allowed to run in parallel (number of cores).
 
 ### run as cgi-script
-To run ctplot as simple CGI script (bad performance!), rename `ctplot.wsgi` to `ctplot.py` (or what ever you prefer), put it into your server tree and register it with a CGI handler. (see http://httpd.apache.org/docs/current/mod/mod_cgi.html)
+To run ctplot as simple CGI script with [mod_wsgi](http://httpd.apache.org/docs/current/mod/mod_cgi.html), rename `ctplot.wsgi` to `ctplot.py` (or what ever you prefer), put it into your server tree and register it with a CGI handler. 
 
 ### run as stand alone app
 Run `ctserver` (needs tornado) to run ctplot as standalone webserver, then open http://localhost:8080.
