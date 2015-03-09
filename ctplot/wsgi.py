@@ -94,7 +94,7 @@ def static_content(environ, start_response):
         scripts = {}
         for s in resource_listdir('ctplot', 'web/js'):
             scripts[s] = '\n// {}\n\n'.format(s) + resource_string('ctplot', 'web/js/' + s)
-        start_response('200 OK', [content_type(path), cc_cache])
+        start_response('200 OK', [content_type('combined.js'), cc_cache])
         return [scripts[k] for k in sorted(scripts.keys())]
 
     if not resource_exists('ctplot', path):  # 404
