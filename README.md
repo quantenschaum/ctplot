@@ -14,15 +14,16 @@ To install ctplot, download the ZIP, extract it and run `setup.py` or just do
   
 ## use with apache
 To use ctplot with an Apache webserver, copy `ctplot.wsgi` somewhere on your server.
-Edit `ctplot.wsgi` and set the paths to something like
+Set the following environment variables to configure the directories
 
-    os.environ['ctplot_basedir'] = '/basedir'
-    # os.environ['ctplot_datadir'] = '/basedir/data'
-    # os.environ['ctplot_cachedir'] = '/basedir/cache'
-    # os.environ['ctplot_sessionsdir'] = '/basedir/sessions'
-    # os.environ['ctplot_plotsdir'] = '/basedir/plots'
+    CTPLOT_BASEDIR=/ctplot
+    CTPLOT_DATADIR=/ctplot/data
+    CTPLOT_CACHEDIR=/ctplot/cache
+    CTPLOT_PLOTDIR=/ctplot/plots
+    CTPLOT_SESSIONDIR=/ctplot/sessions
+    CTPLOT_BASEDIR defaults to CWD.
 
-It's only neccessary to set `ctplot_basedir`. The other paths are subdirectories of basedir, which can be overridden by setting them explicitly.
+It's only neccessary to set `CTPLOT_BASEDIR`. The other paths are subdirectories of basedir, which can be overridden by setting them explicitly.
 
 ### run with mod_wsgi
 Enable mod_wsgi and in your apache config set a WSGIScriptAlias like
@@ -38,4 +39,6 @@ To run ctplot as simple CGI script (bad performance!), rename `ctplot.wsgi` to `
 
 ### run as stand alone app
 Run `webserver.py` (needs tornado) to run ctplot as standalone webserver, then open http://localhost:8080.
+
+You may set `CTPLOT_PORT` to set a port different from 8080.
 

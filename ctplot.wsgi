@@ -1,13 +1,15 @@
 #!/usr/bin/env python
 
-import os
 from ctplot.wsgi import application
 
-# os.environ['ctplot_basedir'] = '/basedir'
-# os.environ['ctplot_datadir'] = '/basedir/data'
-# os.environ['ctplot_cachedir'] = '/basedir/cache'
-# os.environ['ctplot_sessionsdir'] = '/basedir/sessions'
-# os.environ['ctplot_plotsdir'] = '/basedir/plots'
+# environment variables
+# CTPLOT_BASEDIR=/ctplot
+# CTPLOT_DATADIR=/ctplot/data
+# CTPLOT_CACHEDIR=/ctplot/cache
+# CTPLOT_PLOTDIR=/ctplot/plots
+# CTPLOT_SESSIONDIR=/ctplot/sessions
+# CTPLOT_BASEDIR defaults to CWD.
+# It's only neccessary to set `CTPLOT_BASEDIR`. The other paths are subdirectories of basedir, which can be overridden by setting them explicitly.
 
 # this allows the WSGI app to be run as CGI script
 if __name__ == '__main__':
