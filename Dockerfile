@@ -4,7 +4,7 @@ MAINTAINER software@louisenhof2.de
 ENV DEBIAN_FRONTEND noninteractive
 
 # adjust the next line, replace nas by you local mirror or comment it out
-RUN sed -i.save "s/archive.ubuntu.com/nas/g" /etc/apt/sources.list 
+#RUN sed -i.save "s/archive.ubuntu.com/nas/g" /etc/apt/sources.list 
 
 RUN apt-get update && apt-get -y install wget && apt-get clean 
 RUN wget http://repo.continuum.io/archive/Anaconda-2.1.0-Linux-x86_64.sh -O /anaconda
