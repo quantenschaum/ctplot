@@ -15,8 +15,6 @@ RUN conda update --yes --all && conda clean --yes --tarballs
 RUN conda install --yes seaborn basemap && conda clean --yes --tarballs
 RUN pip install https://github.com/quantenschaum/ctplot/archive/master.zip
 
-ENV CTPLOT_BASEDIR /ctplot
-
 RUN adduser --disabled-password --gecos '' ctplot 
 USER ctplot 
 

@@ -26,11 +26,11 @@ To use ctplot with an Apache webserver, put a `ctplot.wsgi` somewhere on your se
 
 Set the following environment variables to configure the directories
 
-    CTPLOT_BASEDIR=/ctplot        # defaults to .
-    CTPLOT_DATADIR=/ctplot/data
-    CTPLOT_CACHEDIR=/ctplot/cache
-    CTPLOT_PLOTDIR=/ctplot/plots
-    CTPLOT_SESSIONDIR=/ctplot/sessions
+    CTPLOT_BASEDIR=/data
+    CTPLOT_DATADIR=/data/data
+    CTPLOT_CACHEDIR=/data/cache
+    CTPLOT_PLOTDIR=/data/plots
+    CTPLOT_SESSIONDIR=/data/sessions
 
 It's only neccessary to set `CTPLOT_BASEDIR`. The other paths are subdirectories of basedir, which can be overridden by setting them explicitly.
 

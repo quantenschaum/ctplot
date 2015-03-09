@@ -28,7 +28,7 @@ def get_config():
     env = os.environ
     prefix = 'ctplot_'
     basekey = (prefix + 'basedir').upper()
-    basedir = abspath(env[basekey] if basekey in env else '.')
+    basedir = abspath(env[basekey] if basekey in env else 'data')
 
     _config = {'cachedir':join(basedir, 'cache'),
                'datadir':join(basedir, 'data'),
